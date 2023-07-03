@@ -1,0 +1,15 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: priorityclass
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: sys-utils
+  source:
+    repoURL: 'https://github.com/vladoz77/k8s.git'
+    path: argocd/sys_utils_project/priority_class
+    targetRevision: HEAD
+  destination:
+    server: 'https://kubernetes.default.svc'
