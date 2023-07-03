@@ -105,13 +105,13 @@ spec:
             - name: PROVISIONER_NAME
               value: cluster.local/nfs-subdir-external-provisioner
             - name: NFS_SERVER
-              value: 172.16.10.50
+              value: 192.168.59.1
             - name: NFS_PATH
               value: /data
       volumes:
         - name: nfs-client-root
           nfs:
-            server: 172.16.10.50
+            server: 192.168.59.1
             path: /data
 
 ---
