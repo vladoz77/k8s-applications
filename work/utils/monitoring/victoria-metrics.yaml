@@ -22,9 +22,9 @@ spec:
     spec:
       containers:
       - name: victoria-metrics
-        image: vgictoriametrics/victoria-metrics:stable
+        image: victoriametrics/victoria-metrics:latest
         args:
-          - -retentionPeriod=5h
+          - -retentionPeriod=1d
           - -loggerFormat=json
         ports:
         - containerPort: 8428
@@ -64,7 +64,7 @@ metadata:
 spec:
   selector:
     app: victoria-metrics-app
-    statefulset.kubernetes.io/pod-name: victoria-metrics-app-0
+    statefulset.kubernetes.io/pod-name: victoria-metrics-sts-0
   ports:
   - port: 8428
     name: victoria
