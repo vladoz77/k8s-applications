@@ -1,0 +1,66 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: victoria-metrics-sts
+  namespace: monitoring
+spec:
+  selector:
+    matchLabels:
+      app: victoria-metrics-app
+  serviceName: victoria-metrics-service
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: victoria-metrics-app
+    spec:
+      containers:
+      - name: victoria-metrics
+        image: vgictoriametrics/victoria-metrics:stable
+        args:
+          - -retentionPeriod=5h
+          - -loggerFormat=json
+        ports:
+        - containerPort: 8428
+          name: victoria
+        volumeMounts:
+        - name: metrics
+          mountPath: /victoria-metrics-data
+  volumeClaimTemplates:
+  - metadata:
+      name: metrics
+    spec:
+      storageClassName: nfs-client
+      accessModes: [ "ReadWriteOnce" ]
+      resources:
+        requests:
+          storage: 2Gi
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: victoria-metrics-service
+  namespace: monitoring
+spec:
+  clusterIP: None
+  selector:
+    app: victoria-metrics-app
+  ports:
+  - port: 8428
+    name: victoria
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: victoria-metrics-service-sys
+spec:
+  selector:
+    app: victoria-metrics-app
+    statefulset.kubernetes.io/pod-name: victoria-metrics-app-0
+  ports:
+  - port: 8428
+    name: victoria
+  
+
