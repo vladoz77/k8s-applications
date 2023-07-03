@@ -2,7 +2,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: nfs-client-provisioner-config
-  namespace: nfs-provision
+  namespace: nfs-provisioner
 data:
   PROVISIONER_NAME: cluster.local/nfs-subdir-external-provisioner
   NFS_SERVER: 192.168.59.1
@@ -16,7 +16,7 @@ metadata:
   labels:
     app: nfs-client-provisioner
   # replace with namespace where provisioner is deployed
-  namespace: nfs-provision
+  namespace: nfs-provisioner
 spec:
   replicas: 1
   strategy:
