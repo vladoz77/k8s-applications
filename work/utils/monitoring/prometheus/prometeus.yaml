@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: prometheus-sts
+spec:
+  selector:
+    matchLabels:
+      app: prometeus-app
+  serviceName: <ServiceName>
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: prometeus-app
+    spec:
+      volumes:
+        - name: prometheus-config-v
+          configMap:
+            name: prometheus-config
+      containers:
+      - name: prometeus
+        image: prom/prometheus:v2.45.0
+        ports:
+        - containerPort: 9090
+          name: prometeus
+        volumeMounts:
+        - name: data
+          mountPath: /prometeheus
+        
+  volumeClaimTemplates:
+  - metadata:
+      name: data
+    spec:
+      storageClassName: nfs-client
+      accessModes: [ "ReadWriteOnce" ]
+      resources:
+        requests:
+          storage: 10Gi
