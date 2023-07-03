@@ -6,7 +6,7 @@ metadata:
   namespace: argocd
 spec:
   sourceRepos:
-    - https://github.com/vladoz77/k8s.git
+    - https://github.com/vladoz77/argocd.git
   destinations:
     - name: in-cluster
       namespace: '*'

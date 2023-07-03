@@ -7,10 +7,10 @@ metadata:
     nginx.ingress.kubernetes.io/ssl-redirect: "false"
     cert-manager.io/issuer: argocd-issure
 spec:
-  tls:
-  - hosts:
-    - argocd.home.local
-    secretName: argocd-cert-secret
+  # tls:
+  # - hosts:
+  #   - argocd.home.local
+  #   secretName: argocd-cert-secret
 
   ingressClassName: nginx
   rules:
