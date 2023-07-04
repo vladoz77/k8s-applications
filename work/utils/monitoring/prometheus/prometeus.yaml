@@ -2,11 +2,12 @@ apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   name: prometheus-sts
+  namespace: monitoring
 spec:
   selector:
     matchLabels:
       app: prometeus-app
-  serviceName: <ServiceName>
+  serviceName: prometeus-app-service
   replicas: 1
   template:
     metadata:
@@ -20,12 +21,19 @@ spec:
       containers:
       - name: prometeus
         image: prom/prometheus:v2.45.0
+        args: 
+          - '--config.file=/etc/prometheus/prometheus.yaml'
+          - '--storage.tsdb.path=/prometheus'
+          - '--web.external-url=http://mon.kryukov.local:80/prometheus/'
         ports:
         - containerPort: 9090
           name: prometeus
         volumeMounts:
         - name: data
           mountPath: /prometeheus
+        - name: prometheus-config-v
+          mountPath: /etc/prometheus/prometheus.yaml
+          subPath: prometheus.yaml
         
   volumeClaimTemplates:
   - metadata:
@@ -36,3 +44,31 @@ spec:
       resources:
         requests:
           storage: 10Gi
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: prometeus-app-service
+  namespace: monitoring
+spec:
+  clusterIP: None
+  selector:
+    app: prometeus-app
+  ports:
+  - port: 9090
+    name: prometeus
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: prometeus-app-service-sys
+  namespace: monitoring
+spec:
+  selector:
+    app: prometeus-app
+    statefulset.kubernetes.io/pod-name: prometheus-sts-0
+  ports:
+  - port: 9090
+    name: prometheus
