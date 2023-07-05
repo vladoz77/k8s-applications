@@ -27,7 +27,7 @@ spec:
         args: 
           - '--config.file=/etc/prometheus/prometheus.yaml'
           - '--storage.tsdb.path=/prometheus'
-          - '--web.external-url=http://mon.kryukov.local:80/prometheus/'
+          - '--web.external-url=http://mon.home.local:80/prometheus/'
         ports:
         - containerPort: 9090
           name: prometeus
