@@ -19,3 +19,13 @@ spec:
             port: 
               number: 9090
         pathType: Prefix
+  - host: mon.home.local
+    http:
+      paths:
+      - path: "/grafana"
+        backend:
+          service:
+            name: grafana-st-svc 
+            port: 
+              number: 3000
+        pathType: Prefix
