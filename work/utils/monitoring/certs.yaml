@@ -1,0 +1,26 @@
+apiVersion: cert-manager.io/v1
+kind: Issuer
+metadata:
+  name: my-issuer-monitoting
+  namespace: monitoring
+spec:
+  ca:
+    secretName: kube-ca-secret
+
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: monitoring-cert
+  namespace: monitoring
+spec:
+  duration: 9125h # 1y
+  renewBefore: 360h # 15d
+  subject:
+    organizations:
+    - k8s
+  secretName: monitoring-cert-secret
+  issuerRef:
+    name: my-issuer-monitoting
+    kind: Issuer
+  commonName: "mon.home.local"
