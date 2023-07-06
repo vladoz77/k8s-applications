@@ -17,6 +17,7 @@ spec:
       labels:
         app: prometeus-app
     spec:
+      priorityClassName: low-priority
       serviceAccountName: prometheus
       volumes:
         - name: prometheus-config-v
@@ -26,9 +27,12 @@ spec:
       - name: prometeus
         image: prom/prometheus:v2.45.0
         args: 
+          - '--web.listen-address=0.0.0.0:9090'
           - '--config.file=/etc/prometheus/prometheus.yaml'
           - '--storage.tsdb.path=/prometheus'
           - '--web.external-url=http://mon.home.local:80/prometheus/'
+          - '--web.console.libraries=/usr/share/prometheus/console_libraries'
+          - '--web.console.templates=/usr/share/prometheus/consoles'
         ports:
         - containerPort: 9090
           name: prometeus
