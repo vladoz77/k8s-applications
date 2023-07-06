@@ -38,7 +38,7 @@ spec:
           name: prometeus
         volumeMounts:
         - name: data
-          mountPath: /prometeheusk
+          mountPath: /prometeheus
         - name: prometheus-config-v
           mountPath: /etc/prometheus/prometheus.yaml
           subPath: prometheus.yaml
