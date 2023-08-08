@@ -25,7 +25,7 @@ testFramework:
 
 imagePullSecrets: []
 nameOverride: ""
-fullnameOverride: ""
+fullnameOverride: fluent-bit
 
 serviceAccount:
   create: true
@@ -192,23 +192,23 @@ readinessProbe:
     path: /api/v1/health
     port: http
 
-resources: {}
-#   limits:
-#     cpu: 100m
-#     memory: 128Mi
-#   requests:
-#     cpu: 100m
-#     memory: 128Mi
+resources: 
+  limits:
+    cpu: 100m
+    memory: 128Mi
+  requests:
+    cpu: 100m
+    memory: 128Mi
 
 ## only available if kind is Deployment
 ingress:
-  enabled: false
-  ingressClassName: ""
+  enabled: true
+  ingressClassName: nginx
   annotations: {}
   #  kubernetes.io/ingress.class: nginx
   #  kubernetes.io/tls-acme: "true"
-  hosts: []
-  # - host: fluent-bit.example.tld
+  hosts: 
+   - host: fluent-bit.home.local
   extraHosts: []
   # - host: fluent-bit-extra.example.tld
   ## specify extraPort number
