@@ -1,13 +1,9 @@
 apiVersion: v1
 name: fluent-bit
-description: Fast and lightweight log processor and forwarder or Linux, OSX and BSD family operating systems.
-keywords:
-  - logging
-  - fluent-bit
-  - fluentd
+type: application
 version: 0.37.0
-appVersion: 2.1.8
-icon: https://raw.githubusercontent.com/cncf/artwork/master/projects/fluentd/fluentbit/icon/fluentbit-icon-color.svg
-home: https://fluentbit.io/
-sources:
-  - https://github.com/fluent/fluent-bit/
+description: Fast and lightweight log processor and forwarder or Linux, OSX and BSD family operating systems.
+dependencies:
+  - name: fluent-bit
+    version: 0.37.0
+    repository: https://fluent.github.io/helm-charts
