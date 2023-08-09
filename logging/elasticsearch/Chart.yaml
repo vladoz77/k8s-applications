@@ -5,6 +5,6 @@ version: 8.5.1
 appVersion: 8.5.1
 description: Official Elastic helm chart for Elasticsearch
 dependencies:
-  - name: elastic/elasticsearch
+  - name: elasticsearch
     version: 8.5.1
-    repository: https://github.com/elastic/elasticsearch
+    repository: https://helm.elastic.co 
