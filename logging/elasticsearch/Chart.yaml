@@ -1,9 +1,9 @@
 apiVersion: v1
-name: fluent-bit
+name: elasticsearch
 type: application
 version: 8.5.1
 appVersion: 8.5.1
-description: Fast and lightweight log processor and forwarder or Linux, OSX and BSD family operating systems.
+description: Official Elastic helm chart for Elasticsearch
 dependencies:
   - name: elastic/elasticsearch
     version: 8.5.1
