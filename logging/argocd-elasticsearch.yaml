@@ -1,0 +1,23 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: elasticsearch
+  namespace: argocd
+spec:
+  destination:
+    name: ''
+    namespace: logging
+    server: 'https://kubernetes.default.svc'
+  source:
+    path: logging/elasticsearch
+    repoURL: 'https://github.com/vladoz77/argocd'
+    targetRevision: HEAD
+    helm:
+      valueFiles:
+        - values.yaml
+  sources: []
+  project: logging
+  syncPolicy:
+    syncOptions:
+      - CreateNamespace=true
+      - PruneLast=true

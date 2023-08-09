@@ -107,8 +107,8 @@ networkHost: "0.0.0.0"
 
 volumeClaimTemplate:
   accessModes: ["ReadWriteOnce"]
-  storageClassName: nfs
   resources:
+    storageClassName: nfs
     requests:
       storage: 30Gi
 
