@@ -5,14 +5,14 @@ kind: DaemonSet
 
 # replicaCount -- Only applicable if kind=Deployment
 replicaCount: 1
-
+namespace: logging
 image:
-  repository: cr.fluentbit.io/fluent/fluent-bit
+  repository: fluent/fluent-bit
   # Overrides the image tag whose default is {{ .Chart.AppVersion }}
   # Set to "-" to not use the default value
-  tag:
+  tag: 1.9.0
   digest:
-  pullPolicy: Always
+  pullPolicy: IfNotPresent
 
 testFramework:
   enabled: true
