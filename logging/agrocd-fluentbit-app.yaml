@@ -4,18 +4,18 @@ metadata:
   name: fluent-bit
   namespace: argocd
 spec:
-  project: logging
-  source:
-    repoURL: 'https://github.com/vladoz77/argocd'
-    path: logging/fluentbit
-    targetRevision: HEAD
-    helm:
-      valueFiles:
-        - values.yaml
   destination:
-    server: 'https://kubernetes.default.svc'
+    name: ''
     namespace: logging
+    server: 'https://kubernetes.default.svc'
+  source:
+    path: logging/fluent-bit-mainfest
+    repoURL: 'https://github.com/vladoz77/argocd'
+    targetRevision: HEAD
+    directory:
+      recurse: false
+  sources: []
+  project: logging
   syncPolicy:
     syncOptions:
       - CreateNamespace=true
-      - PruneLast=true
