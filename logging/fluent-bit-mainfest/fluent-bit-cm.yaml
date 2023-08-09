@@ -21,13 +21,14 @@ data:
     @INCLUDE input-kubernetes.conf
     @INCLUDE filter-kubernetes.conf
     @INCLUDE output-elasticsearch.conf
+  
   input-kubernetes.conf: |
     [INPUT]
         Name              tail
         Tag               kube.*
         Path              /var/log/containers/*.log
         Parser            docker
-        DB                /var/log/flb-example-app.db
+        DB                /var/log/containers.db
         Mem_Buf_Limit     5MB
         Skip_Long_Lines   On
         Refresh_Interval  10
@@ -49,6 +50,7 @@ data:
         Merge_Log_Key       log_processed
         K8S-Logging.Parser  Off
         K8S-Logging.Exclude Off
+  
   output-elasticsearch.conf: |
     [OUTPUT]
         Name            es
@@ -58,7 +60,6 @@ data:
         HTTP_User       ${FLUENT_ELASTICSEARCH_USER}
         HTTP_Passwd     ${FLUENT_ELASTICSEARCH_PASSWORD}
         Logstash_Format On
-        Logstash_Prefix example-app
         Replace_Dots    On
         Retry_Limit     False
     [OUTPUT]
@@ -69,9 +70,9 @@ data:
         HTTP_User       ${FLUENT_ELASTICSEARCH_USER}
         HTTP_Passwd     ${FLUENT_ELASTICSEARCH_PASSWORD}
         Logstash_Format On
-        Logstash_Prefix sysapp-gen-log
         Replace_Dots    On
         Retry_Limit     False
+  
   parsers.conf: |
     [PARSER]
         Name   apache
