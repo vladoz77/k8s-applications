@@ -2,7 +2,7 @@ apiVersion: v1
 name: fluent-bit
 type: application
 version: 0.37.0
-appVersion: 2.1.8 
+appVersion: 1.9.0
 description: Fast and lightweight log processor and forwarder or Linux, OSX and BSD family operating systems.
 dependencies:
   - name: fluent-bit
