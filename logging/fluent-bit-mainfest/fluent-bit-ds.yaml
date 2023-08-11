@@ -32,9 +32,9 @@ spec:
           imagePullPolicy: IfNotPresent
           env:
             - name: FLUENT_ELASTICSEARCH_HOST
-              values: elasticsearch-master
+              value: elasticsearch-master
             - name: FLUENT_ELASTICSEARCH_PORT
-              values: 9300
+              value: "9300"
             - name: FLUENT_ELASTICSEARCH_USER
               valueFrom:
                 secretKeyRef:
