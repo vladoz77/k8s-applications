@@ -62,6 +62,8 @@ data:
         Logstash_Format On
         Replace_Dots    On
         Retry_Limit     False
+        tls             On
+        tls.verify      Off
     [OUTPUT]
         Name            es
         Match           host.*
@@ -72,6 +74,8 @@ data:
         Logstash_Format On
         Replace_Dots    On
         Retry_Limit     False
+        tls             On
+        tls.verify      Off
   
   parsers.conf: |
     [PARSER]
