@@ -30,6 +30,23 @@ spec:
         - name: fluent-bit
           image: fluent/fluent-bit:1.9.0
           imagePullPolicy: IfNotPresent
+          env:
+            - name: FLUENT_ELASTICSEARCH_HOST
+              values: elasticsearch-master
+            - name: FLUENT_ELASTICSEARCH_PORT
+              values: 9300
+            - name: FLUENT_ELASTICSEARCH_USER
+              valueFrom:
+                secretKeyRef:
+                  name: elasticsearch-master-credentials
+                  key: username
+            - name: FLUENT_ELASTICSEARCH_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: elasticsearch-master-credentials
+                  key: password
+            
+                
           ports:
             - name: http
               containerPort: 2020
