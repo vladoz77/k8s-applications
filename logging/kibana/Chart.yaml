@@ -1,0 +1,10 @@
+apiVersion: v1
+name: kibana
+type: application
+version: 8.5.1
+appVersion: 8.5.1
+description:  Official Elastic helm chart for Kibana
+dependencies:
+  - name: kibana 
+    version: 8.5.1
+    repository: https://helm.elastic.co 
