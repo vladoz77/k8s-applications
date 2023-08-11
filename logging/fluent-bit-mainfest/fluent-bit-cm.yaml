@@ -64,6 +64,8 @@ data:
         Retry_Limit     False
         tls             On
         tls.verify      Off
+        Suppress_Type_Name On
+        
     [OUTPUT]
         Name            es
         Match           host.*
@@ -76,6 +78,7 @@ data:
         Retry_Limit     False
         tls             On
         tls.verify      Off
+        Suppress_Type_Name On
   
   parsers.conf: |
     [PARSER]
