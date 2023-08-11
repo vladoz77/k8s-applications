@@ -21,8 +21,8 @@ roles:
   - remote_cluster_client
   - transform
 
-replicas: 3
-minimumMasterNodes: 2
+replicas: 1
+minimumMasterNodes: 1
 
 esMajorVersion: ""
 
@@ -110,7 +110,7 @@ volumeClaimTemplate:
   storageClassName: nfs
   resources:
     requests:
-      storage: 30Gi
+      storage: 1Gi
 
 rbac:
   create: false
