@@ -9,7 +9,7 @@ spec:
     namespace: logging
     server: 'https://kubernetes.default.svc'
   source:
-    path: logging/fluent-bit-mainfest
+    path: logging/fluent-bit-manifest
     repoURL: 'https://github.com/vladoz77/argocd'
     targetRevision: HEAD
     directory:

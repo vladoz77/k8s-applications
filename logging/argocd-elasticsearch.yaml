@@ -9,12 +9,11 @@ spec:
     namespace: logging
     server: 'https://kubernetes.default.svc'
   source:
-    path: logging/elasticsearch
+    path: logging/elasticsearch-manifest
     repoURL: 'https://github.com/vladoz77/argocd'
     targetRevision: HEAD
-    helm:
-      valueFiles:
-        - values.yaml
+    directory:
+      recurse: false
   sources: []
   project: logging
   syncPolicy:
