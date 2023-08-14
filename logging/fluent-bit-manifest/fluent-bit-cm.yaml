@@ -38,6 +38,30 @@ data:
         Systemd_Filter _SYSTEMD_UNIT=kubelet.service
         Read_From_Tail On
         db /var/log/systemd.db
+    [INPUT]
+        Name tail
+        Tag sysapp.gen.log.mail
+        Parser sys_log_file
+        Path /var/log/mail
+        db /var/log/mail.db
+    [INPUT]
+        Name tail
+        Tag sysapp.gen.log.secure
+        Parser sys_log_file
+        Path /var/log/secure
+        db /var/log/secure.db
+    [INPUT]
+        Name tail
+        Tag sysapp.gen.log.messages
+        Parser sys_log_file
+        Path /var/log/messages
+        db /var/log/messages.db
+    [INPUT]
+        Name tail
+        Tag sysapp.gen.log.cron
+        Parser sys_log_file
+        Path /var/log/cron
+        db /var/log/cron.db
 
   filter-kubernetes.conf: |
     [FILTER]
@@ -50,6 +74,26 @@ data:
         Merge_Log_Key       log_processed
         K8S-Logging.Parser  Off
         K8S-Logging.Exclude Off
+    [FILTER]
+        Name modify
+        Match sysapp.gen.log.mail
+        Set app syslog
+        Set file /var/log/mail
+    [FILTER]
+        Name modify
+        Match sysapp.gen.log.secure
+        Set app syslog
+        Set file /var/log/secure
+    [FILTER]
+        Name modify
+        Match sysapp.gen.log.messages
+        Set app syslog
+        Set file /var/log/messages
+    [FILTER]
+        Name modify
+        Match sysapp.gen.log.cron
+        Set app syslog
+        Set file /var/log/cron
 
   output-elasticsearch.conf: |
     [OUTPUT]
