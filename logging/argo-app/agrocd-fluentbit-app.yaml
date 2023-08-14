@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: elasticsearch
+  name: fluent-bit
   namespace: argocd
   labels:
     app: logging
@@ -11,7 +11,7 @@ spec:
     namespace: logging
     server: 'https://kubernetes.default.svc'
   source:
-    path: logging/kibana
+    path: logging/fluent-bit-manifest
     repoURL: 'https://github.com/vladoz77/argocd'
     targetRevision: HEAD
     directory:
@@ -21,4 +21,3 @@ spec:
   syncPolicy:
     syncOptions:
       - CreateNamespace=true
-      - PruneLast=true
