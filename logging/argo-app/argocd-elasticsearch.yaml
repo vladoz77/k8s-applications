@@ -11,7 +11,7 @@ spec:
     namespace: logging
     server: 'https://kubernetes.default.svc'
   source:
-    path: logging/elasticsearch-manifest
+    path: logging/elasticsearch
     repoURL: 'https://github.com/vladoz77/argocd'
     targetRevision: HEAD
     directory:
@@ -20,5 +20,5 @@ spec:
   project: logging
   syncPolicy:
     syncOptions:
-      - CreateNamespace=true
-      - PruneLast=true
+    - CreateNamespace=true
+    - PruneLast=true

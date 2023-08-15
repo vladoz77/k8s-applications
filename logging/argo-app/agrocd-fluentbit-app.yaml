@@ -11,7 +11,7 @@ spec:
     namespace: logging
     server: 'https://kubernetes.default.svc'
   source:
-    path: logging/fluent-bit-manifest
+    path: logging/fluent-bit
     repoURL: 'https://github.com/vladoz77/argocd'
     targetRevision: HEAD
     directory:
@@ -20,4 +20,4 @@ spec:
   project: logging
   syncPolicy:
     syncOptions:
-      - CreateNamespace=true
+    - CreateNamespace=true
