@@ -2,38 +2,38 @@ apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   namespace: logging
-  name: elasticsearch-master
+  name: es-master
   labels:
-    app: elasticsearch
+    app: es
     role: master
 spec:
-  serviceName: elasticsearch-master
+  serviceName: es-master
   podManagementPolicy: Parallel
   replicas: 3
   selector:
     matchLabels:
-      app: elasticsearch
+      app: es
       role: master
   template:
     metadata:
       labels:
-        app: elasticsearch
+        app: es
         role: master
     spec:
       containers:
-      - name: elasticsearch-master
+      - name: es-master
         image: elasticsearch:7.17.5
         env:
         - name: cluster.name
-          value: elasticsearch
+          value: es-cluster
         - name: MY_POD_NAME
           valueFrom:
             fieldRef:
               fieldPath: metadata.name
         - name: discovery.seed_hosts
-          value: elasticsearch-master.logging,elasticsearch-data.logging,elasticsearch-client.logging
+          value: es-master.logging,es-data.logging,es-client.logging
         - name: cluster.initial_master_nodes
-          value: elasticsearch-master-0 elasticsearch-master-1
+          value: es-master-0,es-master-1
         - name: node.roles
           value: master
         - name: "ES_JAVA_OPTS"

@@ -2,34 +2,34 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   namespace: logging
-  name: elasticsearch-client
+  name: es-client
   labels:
-    app: elasticsearch
+    app: es
     role: client
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: elasticsearch
+      app: es
       role: client
   template:
     metadata:
       labels:
-        app: elasticsearch
+        app: es
         role: client
     spec:
       containers:
-      - name: elasticsearch-client
+      - name: es-client
         image: elasticsearch:7.17.5
         env:
         - name: cluster.name
-          value: elasticsearch
+          value: es-cluster
         - name: node.name
-          value: elasticsearch-client
+          value: es-client
         - name: discovery.seed_hosts
-          value: elasticsearch-master.logging,elasticsearch-data.logging,elasticsearch-client.logging
+          value: es-master.logging,es-data.logging,es-client.logging
         - name: cluster.initial_master_nodes
-          value: elasticsearch-master-0 elasticsearch-master-1
+          value: es-master-0,es-master-1
         - name: node.roles
           value: ingest
         - name: "ES_JAVA_OPTS"

@@ -32,7 +32,7 @@ spec:
         imagePullPolicy: IfNotPresent
         env:
         - name: FLUENT_ELASTICSEARCH_HOST
-          value: elasticsearch-client
+          value: es-client
         - name: FLUENT_ELASTICSEARCH_PORT
           value: "9200"
         # - name: FLUENT_ELASTICSEARCH_SCHEME

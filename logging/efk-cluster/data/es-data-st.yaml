@@ -2,39 +2,39 @@ apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   namespace: logging
-  name: elasticsearch-data
+  name: es-data
   labels:
-    app: elasticsearch
+    app: es
     role: data
 spec:
-  serviceName: elasticsearch-data
+  serviceName: es-data
   replicas: 2
   podManagementPolicy: Parallel
   selector:
     matchLabels:
-      app: elasticsearch-data
+      app: es-data
   template:
     metadata:
       labels:
-        app: elasticsearch-data
+        app: es-data
         role: data
     spec:
       containers:
-      - name: elasticsearch-data
+      - name: es-data
         image: elasticsearch:7.17.5
         env:
         - name: cluster.name
-          value: elasticsearch
+          value: es-cluster
         - name: node.name
           valueFrom:
             fieldRef:
               fieldPath: metadata.name
         - name: discovery.seed_hosts
-          value: elasticsearch-master.logging,elasticsearch-data.logging,elasticsearch-client.logging
+          value: es-master.logging,es-data.logging,es-client.logging
         - name: cluster.initial_master_nodes
-          value: elasticsearch-master-0 elasticsearch-master-1
+          value: es-master-0,es-master-1
         - name: node.roles
-          value: data
+          value: data,master,voting_only
         - name: "ES_JAVA_OPTS"
           value: "-Xms256m -Xmx256m"
         - name: network.host
@@ -47,10 +47,10 @@ spec:
           privileged: true
   volumeClaimTemplates:
   - metadata:
-      name: elasticsearch-data-persistent-storage
+      name: es-data-persistent-storage
     spec:
       accessModes: ["ReadWriteOnce"]
-      storageClassName: standard
+      storageClassName: nfs
       resources:
         requests:
           storage: 5Gi

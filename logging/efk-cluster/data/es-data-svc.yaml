@@ -2,9 +2,9 @@ apiVersion: v1
 kind: Service
 metadata:
   namespace: logging
-  name: elasticsearch-data
+  name: es-data
   labels:
-    app: elasticsearch
+    app: es
     role: data
 spec:
   clusterIP: None
@@ -12,5 +12,5 @@ spec:
   - port: 9300
     name: transport
   selector:
-    app: elasticsearch
+    app: es
     role: data

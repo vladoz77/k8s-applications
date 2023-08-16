@@ -20,7 +20,7 @@ spec:
         image: kibana:7.17.5
         env:
         - name: ELASTICSEARCH_URL
-          value: "http://elasticsearch-client:9200"
+          value: "http://es-client:9200"
         resources: {}
         ports:
         - containerPort: 5601

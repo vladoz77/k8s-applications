@@ -9,5 +9,5 @@ data:
   kibana.yml: |-
     server.host: "::"
     server.port: 5601
-    elasticsearch.hosts: [http://elasticsearch-client:9200]
+    elasticsearch.hosts: [http://es-client:9200]
     server.rewriteBasePath: false
