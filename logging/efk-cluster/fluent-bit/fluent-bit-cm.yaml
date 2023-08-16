@@ -102,8 +102,6 @@ data:
         Match           *
         Host            ${FLUENT_ELASTICSEARCH_HOST}
         Port            ${FLUENT_ELASTICSEARCH_PORT}
-        HTTP_User       ${FLUENT_ELASTICSEARCH_USER}
-        HTTP_Passwd     ${FLUENT_ELASTICSEARCH_PASSWD}
         Logstash_Format On
         Replace_Dots    On
         Retry_Limit     False

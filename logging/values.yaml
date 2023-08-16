@@ -26,7 +26,7 @@ global:
       name: elasticsearch
       ports:
         restAPI: 9200
-  kibanaEnabled: false
+  kibanaEnabled: true
 
 ## @section Common parameters
 
@@ -465,7 +465,7 @@ master:
   masterOnly: true
   ## @param master.replicaCount Number of master-elegible replicas to deploy
   ##
-  replicaCount: 3
+  replicaCount: 2
 
   ## @param master.extraRoles Append extra roles to the node role
   ##
@@ -786,7 +786,7 @@ master:
 data:
   ## @param data.replicaCount Number of data-only replicas to deploy
   ##
-  replicaCount: 3
+  replicaCount: 2
 
   ## @param data.extraRoles Append extra roles to the node role
   ##
@@ -825,11 +825,11 @@ data:
   ## @param data.resources.limits The resources limits for the data containers
   ## @param data.resources.requests [object] The requested resources for the data containers
   ##
-  resources:
-    limits: {}
-    requests:
-      cpu: 25m
-      memory: 2048Mi
+  resources: {}
+  # limits: {}
+  # requests:
+  #   cpu: 25m
+  #   memory: 2048Mi
   ## @param data.heapSize Elasticsearch data node heap size.
   ## Note: The recommended heapSize is half of the container's memory.
   ## If omitted, it will be automatically set.
@@ -1097,7 +1097,7 @@ data:
 coordinating:
   ## @param coordinating.replicaCount Number of coordinating-only replicas to deploy
   ##
-  replicaCount: 2
+  replicaCount: 1
 
   ## @param coordinating.extraRoles Append extra roles to the node role
   ## NOTE: In Elasticsearch, all nodes act as coordinators, coordinating-only nodes do not have any other role by default.
@@ -1139,9 +1139,9 @@ coordinating:
   ##
   resources:
     limits: {}
-    requests:
-      cpu: 25m
-      memory: 256Mi
+    requests: {}
+    # cpu: 25m
+    # memory: 256Mi
   ## @param coordinating.heapSize Elasticsearch coordinating node heap size.
   ## Note: The recommended heapSize is half of the container's memory.
   ## If omitted, it will be automatically set.
@@ -1370,7 +1370,7 @@ coordinating:
 ingest:
   ## @param ingest.enabled Enable ingest nodes
   ##
-  enabled: true
+  enabled: false
   ## @param ingest.replicaCount Number of ingest-only replicas to deploy
   ##
   replicaCount: 2

@@ -1,0 +1,639 @@
+# Source: elasticsearch/charts/kibana/templates/serviceaccount.yaml
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: es-cluster-kibana
+  namespace: "default"
+  labels:
+    app.kubernetes.io/name: kibana
+automountServiceAccountToken: true
+---
+# Source: elasticsearch/charts/kibana/templates/configmap.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: es-cluster-kibana-conf
+  namespace: "default"
+  labels:
+    app.kubernetes.io/name: kibana
+data:
+  kibana.yml: |
+    pid.file: /opt/bitnami/kibana/tmp/kibana.pid
+    server.host: "::"
+    server.port: 5601
+    elasticsearch.hosts: [http://es-cluster-elasticsearch:9200]
+    server.rewriteBasePath: false
+---
+# Source: elasticsearch/charts/kibana/templates/pvc.yaml
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: es-cluster-kibana
+  namespace: "default"
+  labels:
+    app.kubernetes.io/name: kibana
+spec:
+  storageClassName: standard
+  accessModes:
+  - "ReadWriteOnce"
+  resources:
+    requests:
+      storage: "10Gi"
+---
+# Source: elasticsearch/charts/kibana/templates/service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: es-cluster-kibana
+  namespace: "default"
+  labels:
+    app.kubernetes.io/name: kibana
+  annotations:
+spec:
+  type: ClusterIP
+  sessionAffinity: None
+  ports:
+  - name: http
+    port: 5601
+    targetPort: http
+    nodePort: null
+  selector:
+    app.kubernetes.io/name: kibana
+    app.kubernetes.io/instance: es-cluster
+---
+# Source: elasticsearch/templates/coordinating/svc-headless.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: es-coordinator
+  namespace: "default"
+  labels:
+    app.kubernetes.io/name: es
+    app.kubernetes.io/component: coordinating-only
+spec:
+  type: ClusterIP
+  clusterIP: None
+  publishNotReadyAddresses: true
+  ports:
+  - name: tcp-rest-api
+    port: 9200
+    targetPort: rest-api
+  - name: tcp-transport
+    port: 9300
+    targetPort: transport
+  selector:
+    app.kubernetes.io/name: es
+    app.kubernetes.io/component: coordinating-only
+---
+# Source: elasticsearch/templates/data/svc-headless.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: es-data
+  namespace: "default"
+  labels:
+    app.kubernetes.io/name: es
+    app.kubernetes.io/component: data
+spec:
+  type: ClusterIP
+  clusterIP: None
+  publishNotReadyAddresses: true
+  ports:
+  - name: tcp-rest-api
+    port: 9200
+    targetPort: rest-api
+  - name: tcp-transport
+    port: 9300
+    targetPort: transport
+  selector:
+    app.kubernetes.io/name: es
+    app.kubernetes.io/instance: es-cluster
+    app.kubernetes.io/component: data
+---
+# Source: elasticsearch/templates/master/svc-headless.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: es-master
+  namespace: "default"
+  labels:
+    app.kubernetes.io/name: es
+    app.kubernetes.io/component: master
+spec:
+  type: ClusterIP
+  clusterIP: None
+  publishNotReadyAddresses: true
+  ports:
+  - name: tcp-rest-api
+    port: 9200
+    targetPort: rest-api
+  - name: tcp-transport
+    port: 9300
+    targetPort: transport
+  selector:
+    app.kubernetes.io/name: es
+    app.kubernetes.io/instance: es-cluster
+    app.kubernetes.io/component: master
+---
+# Source: elasticsearch/templates/service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: es-cluster-elasticsearch
+  namespace: "default"
+  labels:
+    app.kubernetes.io/name: es
+    app.kubernetes.io/component: coordinating-only
+spec:
+  type: ClusterIP
+  sessionAffinity: None
+  ports:
+  - name: tcp-rest-api
+    port: 9200
+    targetPort: rest-api
+    nodePort: null
+  - name: tcp-transport
+    port: 9300
+    nodePort: null
+  selector:
+    app.kubernetes.io/name: es
+    app.kubernetes.io/component: coordinating-only
+---
+# Source: elasticsearch/charts/kibana/templates/deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: es-cluster-kibana
+  namespace: "default"
+  labels:
+    app.kubernetes.io/name: kibana
+spec:
+  replicas: 1
+  strategy:
+    type: RollingUpdate
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: kibana
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: kibana
+    spec:
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - podAffinityTerm:
+              labelSelector:
+                matchLabels:
+                  app.kubernetes.io/name: kibana
+              topologyKey: kubernetes.io/hostname
+            weight: 1
+      securityContext:
+        fsGroup: 1001
+      serviceAccountName: es-cluster-kibana
+      containers:
+      - name: kibana
+        image: docker.io/bitnami/kibana:8.8.2-debian-11-r23
+        imagePullPolicy: IfNotPresent
+        securityContext:
+          runAsNonRoot: true
+          runAsUser: 1001
+        env:
+        - name: BITNAMI_DEBUG
+          value: "false"
+        - name: KIBANA_PORT_NUMBER
+          value: "5601"
+        - name: KIBANA_ELASTICSEARCH_URL
+          value: "http://es-cluster-elasticsearch:9200"
+        - name: KIBANA_ELASTICSEARCH_PORT_NUMBER
+          value: "9200"
+        - name: KIBANA_FORCE_INITSCRIPTS
+          value: "false"
+        - name: KIBANA_SERVER_ENABLE_TLS
+          value: "false"
+        - name: KIBANA_ELASTICSEARCH_ENABLE_TLS
+          value: "false"
+        - name: KIBANA_ELASTICSEARCH_TLS_USE_PEM
+          value: "false"
+        - name: KIBANA_ELASTICSEARCH_TLS_VERIFICATION_MODE
+          value: "full"
+        ports:
+        - name: http
+          containerPort: 5601
+          protocol: TCP
+        livenessProbe:
+          failureThreshold: 6
+          initialDelaySeconds: 120
+          periodSeconds: 10
+          successThreshold: 1
+          timeoutSeconds: 5
+          httpGet:
+            path: /login
+            port: http
+            scheme: HTTP
+        readinessProbe:
+          failureThreshold: 6
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          successThreshold: 1
+          timeoutSeconds: 5
+          httpGet:
+            path: /status
+            port: http
+            scheme: HTTP
+        resources:
+          limits: {}
+          requests: {}
+        volumeMounts:
+        - name: kibana-data
+          mountPath: /bitnami/kibana
+        - name: kibana-config
+          mountPath: /bitnami/kibana/conf
+      volumes:
+      - name: kibana-data
+        persistentVolumeClaim:
+          claimName: es-cluster-kibana
+      - name: kibana-config
+        configMap:
+          name: es-cluster-kibana-conf
+---
+# Source: elasticsearch/templates/coordinating/statefulset.yaml
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: es-coordinator
+  namespace: "default"
+  labels:
+    app.kubernetes.io/name: es
+    app.kubernetes.io/component: coordinating-only
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: es
+      app.kubernetes.io/component: coordinating-only
+  updateStrategy:
+    type: RollingUpdate
+  serviceName: es-coordinator
+  podManagementPolicy: Parallel
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: es
+        app.kubernetes.io/component: coordinating-only
+    spec:
+      serviceAccountName: default
+      securityContext:
+        fsGroup: 1001
+      initContainers:
+      ## Image that performs the sysctl operation to modify Kernel settings (needed sometimes to avoid boot errors)
+      - name: sysctl
+        image: docker.io/bitnami/os-shell:11-debian-11-r16
+        imagePullPolicy: "IfNotPresent"
+        command:
+        - /bin/bash
+        - -ec
+        - |
+          CURRENT=`sysctl -n vm.max_map_count`;
+          DESIRED="262144";
+          if [ "$DESIRED" -gt "$CURRENT" ]; then
+              sysctl -w vm.max_map_count=262144;
+          fi;
+          CURRENT=`sysctl -n fs.file-max`;
+          DESIRED="65536";
+          if [ "$DESIRED" -gt "$CURRENT" ]; then
+              sysctl -w fs.file-max=65536;
+          fi;
+        securityContext:
+          privileged: true
+          runAsUser: 0
+        resources:
+          limits: {}
+          requests: {}
+      containers:
+      - name: elasticsearch
+        image: docker.io/bitnami/elasticsearch:8.9.0-debian-11-r0
+        imagePullPolicy: "IfNotPresent"
+        securityContext:
+          runAsNonRoot: true
+          runAsUser: 1001
+        env:
+        - name: MY_POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+        - name: ELASTICSEARCH_CLUSTER_NAME
+          value: "elastic"
+        - name: ELASTICSEARCH_IS_DEDICATED_NODE
+          value: "yes"
+        - name: ELASTICSEARCH_NODE_ROLES
+          value: ""
+        - name: ELASTICSEARCH_TRANSPORT_PORT_NUMBER
+          value: "9300"
+        - name: ELASTICSEARCH_HTTP_PORT_NUMBER
+          value: "9200"
+        - name: ELASTICSEARCH_CLUSTER_HOSTS
+          value: "es-master.default.svc.cluster.local,es-coordinator.default.svc.cluster.local,es-data.default.svc.cluster.local,"
+        - name: ELASTICSEARCH_TOTAL_NODES
+          value: "4"
+        - name: ELASTICSEARCH_CLUSTER_MASTER_HOSTS
+          value: es-master-0 es-master-1
+        - name: ELASTICSEARCH_MINIMUM_MASTER_NODES
+          value: "2"
+        - name: ELASTICSEARCH_ADVERTISED_HOSTNAME
+          value: "$(MY_POD_NAME).es-coordinator.default.svc.cluster.local"
+        - name: ELASTICSEARCH_HEAP_SIZE
+          value: "128m"
+        ports:
+        - name: rest-api
+          containerPort: 9200
+        - name: transport
+          containerPort: 9300
+        livenessProbe:
+          failureThreshold: 5
+          initialDelaySeconds: 90
+          periodSeconds: 10
+          successThreshold: 1
+          timeoutSeconds: 5
+          exec:
+            command:
+            - /opt/bitnami/scripts/elasticsearch/healthcheck.sh
+        readinessProbe:
+          failureThreshold: 5
+          initialDelaySeconds: 90
+          periodSeconds: 10
+          successThreshold: 1
+          timeoutSeconds: 5
+          exec:
+            command:
+            - /opt/bitnami/scripts/elasticsearch/healthcheck.sh
+        resources:
+          limits: {}
+          requests:
+            cpu: 25m
+            memory: 256Mi
+        volumeMounts:
+        - name: data
+          mountPath: /bitnami/elasticsearch/data
+      volumes:
+      - name: "data"
+        emptyDir: {}
+---
+# Source: elasticsearch/templates/data/statefulset.yaml
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: es-data
+  namespace: "default"
+  labels:
+    app.kubernetes.io/name: es
+    app.kubernetes.io/component: data
+spec:
+  replicas: 2
+  podManagementPolicy: Parallel
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: es
+      app.kubernetes.io/component: data
+  serviceName: es-data
+  updateStrategy:
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: es
+        app.kubernetes.io/component: data
+    spec:
+      serviceAccountName: default
+      securityContext:
+        fsGroup: 1001
+      initContainers:
+      - name: sysctl
+        image: docker.io/bitnami/os-shell:11-debian-11-r16
+        imagePullPolicy: "IfNotPresent"
+        command:
+        - /bin/bash
+        - -ec
+        - |
+          CURRENT=`sysctl -n vm.max_map_count`;
+          DESIRED="262144";
+          if [ "$DESIRED" -gt "$CURRENT" ]; then
+              sysctl -w vm.max_map_count=262144;
+          fi;
+          CURRENT=`sysctl -n fs.file-max`;
+          DESIRED="65536";
+          if [ "$DESIRED" -gt "$CURRENT" ]; then
+              sysctl -w fs.file-max=65536;
+          fi;
+        securityContext:
+          privileged: true
+          runAsUser: 0
+        resources:
+          limits: {}
+          requests: {}
+      containers:
+      - name: elasticsearch
+        image: docker.io/bitnami/elasticsearch:8.9.0-debian-11-r0
+        imagePullPolicy: "IfNotPresent"
+        securityContext:
+          runAsNonRoot: true
+          runAsUser: 1001
+        env:
+        - name: BITNAMI_DEBUG
+          value: "false"
+        - name: MY_POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+        - name: ELASTICSEARCH_IS_DEDICATED_NODE
+          value: "yes"
+        - name: ELASTICSEARCH_NODE_ROLES
+          value: "data"
+        - name: ELASTICSEARCH_TRANSPORT_PORT_NUMBER
+          value: "9300"
+        - name: ELASTICSEARCH_HTTP_PORT_NUMBER
+          value: "9200"
+        - name: ELASTICSEARCH_CLUSTER_NAME
+          value: "elastic"
+        - name: ELASTICSEARCH_CLUSTER_HOSTS
+          value: "es-master.default.svc.cluster.local,es-coordinator.default.svc.cluster.local,es-data.default.svc.cluster.local,"
+        - name: ELASTICSEARCH_TOTAL_NODES
+          value: "4"
+        - name: ELASTICSEARCH_CLUSTER_MASTER_HOSTS
+          value: es-master-0 es-master-1
+        - name: ELASTICSEARCH_MINIMUM_MASTER_NODES
+          value: "2"
+        - name: ELASTICSEARCH_ADVERTISED_HOSTNAME
+          value: "$(MY_POD_NAME).es-data.default.svc.cluster.local"
+        - name: ELASTICSEARCH_HEAP_SIZE
+          value: "1024m"
+        ports:
+        - name: rest-api
+          containerPort: 9200
+        - name: transport
+          containerPort: 9300
+        livenessProbe:
+          failureThreshold: 5
+          initialDelaySeconds: 90
+          periodSeconds: 10
+          successThreshold: 1
+          timeoutSeconds: 5
+          exec:
+            command:
+            - /opt/bitnami/scripts/elasticsearch/healthcheck.sh
+        readinessProbe:
+          failureThreshold: 5
+          initialDelaySeconds: 90
+          periodSeconds: 10
+          successThreshold: 1
+          timeoutSeconds: 5
+          exec:
+            command:
+            - /opt/bitnami/scripts/elasticsearch/healthcheck.sh
+        resources:
+          limits: {}
+          requests:
+            cpu: 25m
+            memory: 2048Mi
+        volumeMounts:
+        - name: data
+          mountPath: /bitnami/elasticsearch/data
+  volumeClaimTemplates:
+  - metadata:
+      name: "data"
+    spec:
+      storageClassName: standard
+      accessModes:
+      - "ReadWriteOnce"
+      resources:
+        requests:
+          storage: "1Gi"
+---
+# Source: elasticsearch/templates/master/statefulset.yaml
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: es-master
+  namespace: "default"
+  labels:
+    app.kubernetes.io/name: es
+    app.kubernetes.io/component: master
+spec:
+  replicas: 2
+  podManagementPolicy: Parallel
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: es
+      app.kubernetes.io/component: master
+  serviceName: es-master
+  updateStrategy:
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: es
+        app.kubernetes.io/component: master
+    spec:
+      serviceAccountName: default
+      securityContext:
+        fsGroup: 1001
+      initContainers:
+      ## Image that performs the sysctl operation to modify Kernel settings (needed sometimes to avoid boot errors)
+      - name: sysctl
+        image: docker.io/bitnami/os-shell:11-debian-11-r16
+        imagePullPolicy: "IfNotPresent"
+        command:
+        - /bin/bash
+        - -ec
+        - |
+          CURRENT=`sysctl -n vm.max_map_count`;
+          DESIRED="262144";
+          if [ "$DESIRED" -gt "$CURRENT" ]; then
+              sysctl -w vm.max_map_count=262144;
+          fi;
+          CURRENT=`sysctl -n fs.file-max`;
+          DESIRED="65536";
+          if [ "$DESIRED" -gt "$CURRENT" ]; then
+              sysctl -w fs.file-max=65536;
+          fi;
+        securityContext:
+          privileged: true
+          runAsUser: 0
+        resources:
+          limits: {}
+          requests: {}
+      containers:
+      - name: elasticsearch
+        image: docker.io/bitnami/elasticsearch:8.9.0-debian-11-r0
+        imagePullPolicy: "IfNotPresent"
+        securityContext:
+          runAsNonRoot: true
+          runAsUser: 1001
+        env:
+        - name: BITNAMI_DEBUG
+          value: "false"
+        - name: MY_POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+        - name: ELASTICSEARCH_IS_DEDICATED_NODE
+          value: "yes"
+        - name: ELASTICSEARCH_NODE_ROLES
+          value: "master"
+        - name: ELASTICSEARCH_TRANSPORT_PORT_NUMBER
+          value: "9300"
+        - name: ELASTICSEARCH_HTTP_PORT_NUMBER
+          value: "9200"
+        - name: ELASTICSEARCH_CLUSTER_NAME
+          value: "elastic"
+        - name: ELASTICSEARCH_CLUSTER_HOSTS
+          value: "es-master.default.svc.cluster.local,es-coordinator.default.svc.cluster.local,es-data.default.svc.cluster.local,"
+        - name: ELASTICSEARCH_TOTAL_NODES
+          value: "4"
+        - name: ELASTICSEARCH_CLUSTER_MASTER_HOSTS
+          value: es-master-0 es-master-1
+        - name: ELASTICSEARCH_MINIMUM_MASTER_NODES
+          value: "2"
+        - name: ELASTICSEARCH_ADVERTISED_HOSTNAME
+          value: "$(MY_POD_NAME).es-master.default.svc.cluster.local"
+        - name: ELASTICSEARCH_HEAP_SIZE
+          value: "128m"
+        ports:
+        - name: rest-api
+          containerPort: 9200
+        - name: transport
+          containerPort: 9300
+        livenessProbe:
+          failureThreshold: 5
+          initialDelaySeconds: 90
+          periodSeconds: 10
+          successThreshold: 1
+          timeoutSeconds: 5
+          exec:
+            command:
+            - /opt/bitnami/scripts/elasticsearch/healthcheck.sh
+        readinessProbe:
+          failureThreshold: 5
+          initialDelaySeconds: 90
+          periodSeconds: 10
+          successThreshold: 1
+          timeoutSeconds: 5
+          exec:
+            command:
+            - /opt/bitnami/scripts/elasticsearch/healthcheck.sh
+        resources:
+          limits: {}
+          requests: {}
+        volumeMounts:
+        - name: data
+          mountPath: /bitnami/elasticsearch/data
+  volumeClaimTemplates:
+  - metadata:
+      name: "data"
+    spec:
+      storageClassName: standard
+      accessModes:
+      - "ReadWriteOnce"
+      resources:
+        requests:
+          storage: "1Gi"

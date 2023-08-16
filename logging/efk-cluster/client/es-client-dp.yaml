@@ -22,14 +22,16 @@ spec:
       - name: elasticsearch-client
         image: elasticsearch:7.17.5
         env:
-        - name: CLUSTER_NAME
+        - name: cluster.name
           value: elasticsearch
-        - name: NODE_NAME
+        - name: node.name
           value: elasticsearch-client
-        - name: NODE_LIST
+        - name: discovery.seed_hosts
           value: elasticsearch-master,elasticsearch-data,elasticsearch-client
-        - name: MASTER_NODES
+        - name: cluster.initial_master_nodes
           value: elasticsearch-master-0
+        - name: node.roles
+          value: ingest
         - name: "ES_JAVA_OPTS"
           value: "-Xms256m -Xmx256m"
         resources: {}
@@ -39,16 +41,9 @@ spec:
         - containerPort: 9300
           name: transport
         volumeMounts:
-        - name: config
-          mountPath: /usr/share/elasticsearch/config/elasticsearch.yml
-          readOnly: true
-          subPath: elasticsearch.yml
         - name: storage
           mountPath: /data
       volumes:
-      - name: config
-        configMap:
-          name: elasticsearch-client-config
       - name: "storage"
         emptyDir:
           medium: ""
