@@ -26,18 +26,20 @@ spec:
         env:
         - name: cluster.name
           value: elasticsearch
-        - name: node.name
+        - name: MY_POD_NAME
           valueFrom:
             fieldRef:
               fieldPath: metadata.name
         - name: discovery.seed_hosts
-          value: elasticsearch-master,elasticsearch-data,elasticsearch-client
+          value: elasticsearch-master.logging,elasticsearch-data.logging,elasticsearch-client.logging
         - name: cluster.initial_master_nodes
           value: elasticsearch-master-0
         - name: node.roles
           value: master
         - name: "ES_JAVA_OPTS"
           value: "-Xms256m -Xmx256m"
+        - name: network.host
+          value: "_site_"
         ports:
         - containerPort: 9300
           name: transport

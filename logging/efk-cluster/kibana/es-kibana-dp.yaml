@@ -19,16 +19,19 @@ spec:
       - name: kibana
         image: kibana:7.17.5
         env:
-        - name: ELASTICSEARCH_HOSTS
+        - name: ELASTICSEARCH_URL
           value: "http://elasticsearch-client:9200"
-        resources:
-          limits:
-            cpu: 2
-            memory: 1.5Gi
-          requests:
-            cpu: 0.5
-            memory: 1Gi
+        resources: {}
         ports:
         - containerPort: 5601
           name: kibana
           protocol: TCP
+        volumeMounts:
+        - name: config
+          mountPath: /usr/share/kibana/config/kibana.yml
+          readOnly: true
+          subPath: kibana.yml
+      volumes:
+      - name: config
+        configMap:
+          name: kibana-config

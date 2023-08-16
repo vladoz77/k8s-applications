@@ -27,13 +27,15 @@ spec:
         - name: node.name
           value: elasticsearch-client
         - name: discovery.seed_hosts
-          value: elasticsearch-master,elasticsearch-data,elasticsearch-client
+          value: elasticsearch-master.logging,elasticsearch-data.logging,elasticsearch-client.logging
         - name: cluster.initial_master_nodes
           value: elasticsearch-master-0
         - name: node.roles
           value: ingest
         - name: "ES_JAVA_OPTS"
           value: "-Xms256m -Xmx256m"
+        - name: network.host
+          value: "_site_"
         resources: {}
         ports:
         - containerPort: 9200
