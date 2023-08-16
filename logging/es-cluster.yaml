@@ -56,7 +56,6 @@ spec:
   - name: http
     port: 5601
     targetPort: http
-    nodePort: null
   selector:
     app.kubernetes.io/name: kibana
     app.kubernetes.io/instance: es-cluster
@@ -107,7 +106,6 @@ spec:
     targetPort: transport
   selector:
     app.kubernetes.io/name: es
-    app.kubernetes.io/instance: es-cluster
     app.kubernetes.io/component: data
 ---
 # Source: elasticsearch/templates/master/svc-headless.yaml
@@ -132,7 +130,6 @@ spec:
     targetPort: transport
   selector:
     app.kubernetes.io/name: es
-    app.kubernetes.io/instance: es-cluster
     app.kubernetes.io/component: master
 ---
 # Source: elasticsearch/templates/service.yaml
@@ -151,10 +148,8 @@ spec:
   - name: tcp-rest-api
     port: 9200
     targetPort: rest-api
-    nodePort: null
   - name: tcp-transport
     port: 9300
-    nodePort: null
   selector:
     app.kubernetes.io/name: es
     app.kubernetes.io/component: coordinating-only
@@ -221,26 +216,6 @@ spec:
         - name: http
           containerPort: 5601
           protocol: TCP
-        livenessProbe:
-          failureThreshold: 6
-          initialDelaySeconds: 120
-          periodSeconds: 10
-          successThreshold: 1
-          timeoutSeconds: 5
-          httpGet:
-            path: /login
-            port: http
-            scheme: HTTP
-        readinessProbe:
-          failureThreshold: 6
-          initialDelaySeconds: 30
-          periodSeconds: 10
-          successThreshold: 1
-          timeoutSeconds: 5
-          httpGet:
-            path: /status
-            port: http
-            scheme: HTTP
         resources:
           limits: {}
           requests: {}
@@ -349,24 +324,6 @@ spec:
           containerPort: 9200
         - name: transport
           containerPort: 9300
-        livenessProbe:
-          failureThreshold: 5
-          initialDelaySeconds: 90
-          periodSeconds: 10
-          successThreshold: 1
-          timeoutSeconds: 5
-          exec:
-            command:
-            - /opt/bitnami/scripts/elasticsearch/healthcheck.sh
-        readinessProbe:
-          failureThreshold: 5
-          initialDelaySeconds: 90
-          periodSeconds: 10
-          successThreshold: 1
-          timeoutSeconds: 5
-          exec:
-            command:
-            - /opt/bitnami/scripts/elasticsearch/healthcheck.sh
         resources:
           limits: {}
           requests:
@@ -389,7 +346,7 @@ metadata:
     app.kubernetes.io/name: es
     app.kubernetes.io/component: data
 spec:
-  replicas: 2
+  replicas: 1
   podManagementPolicy: Parallel
   selector:
     matchLabels:
@@ -472,29 +429,9 @@ spec:
           containerPort: 9200
         - name: transport
           containerPort: 9300
-        livenessProbe:
-          failureThreshold: 5
-          initialDelaySeconds: 90
-          periodSeconds: 10
-          successThreshold: 1
-          timeoutSeconds: 5
-          exec:
-            command:
-            - /opt/bitnami/scripts/elasticsearch/healthcheck.sh
-        readinessProbe:
-          failureThreshold: 5
-          initialDelaySeconds: 90
-          periodSeconds: 10
-          successThreshold: 1
-          timeoutSeconds: 5
-          exec:
-            command:
-            - /opt/bitnami/scripts/elasticsearch/healthcheck.sh
         resources:
           limits: {}
-          requests:
-            cpu: 25m
-            memory: 2048Mi
+          requests: {}
         volumeMounts:
         - name: data
           mountPath: /bitnami/elasticsearch/data
@@ -603,24 +540,6 @@ spec:
           containerPort: 9200
         - name: transport
           containerPort: 9300
-        livenessProbe:
-          failureThreshold: 5
-          initialDelaySeconds: 90
-          periodSeconds: 10
-          successThreshold: 1
-          timeoutSeconds: 5
-          exec:
-            command:
-            - /opt/bitnami/scripts/elasticsearch/healthcheck.sh
-        readinessProbe:
-          failureThreshold: 5
-          initialDelaySeconds: 90
-          periodSeconds: 10
-          successThreshold: 1
-          timeoutSeconds: 5
-          exec:
-            command:
-            - /opt/bitnami/scripts/elasticsearch/healthcheck.sh
         resources:
           limits: {}
           requests: {}
@@ -636,4 +555,4 @@ spec:
       - "ReadWriteOnce"
       resources:
         requests:
-          storage: "1Gi"
+          storage: "100Mi"

@@ -32,7 +32,7 @@ spec:
         - name: discovery.seed_hosts
           value: elasticsearch-master.logging,elasticsearch-data.logging,elasticsearch-client.logging
         - name: cluster.initial_master_nodes
-          value: elasticsearch-master-0
+          value: elasticsearch-master-0 elasticsearch-master-1
         - name: node.roles
           value: data
         - name: "ES_JAVA_OPTS"
