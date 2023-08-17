@@ -19,6 +19,12 @@ spec:
         app: es-data
         role: data
     spec:
+      initContainers:
+      - name: increase-vm-max-map
+        image: busybox
+        command: ["sysctl", "-w", "vm.max_map_count=262144"]
+        securityContext:
+          privileged: true
       containers:
       - name: es-data
         image: elasticsearch:7.17.5
@@ -39,18 +45,18 @@ spec:
           value: "-Xms256m -Xmx256m"
         - name: network.host
           value: "_site_"
-      initContainers:
-      - name: increase-vm-max-map
-        image: busybox
-        command: ["sysctl", "-w", "vm.max_map_count=262144"]
-        securityContext:
-          privileged: true
+        ports:
+        - containerPort: 9300
+          name: transport
+        volumeMounts:
+        - name: es-data
+          mountPath: /usr/share/elasticsearch/data
   volumeClaimTemplates:
   - metadata:
-      name: es-data-persistent-storage
+      name: es-data
     spec:
       accessModes: ["ReadWriteOnce"]
-      storageClassName: nfs
+      storageClassName: standard
       resources:
         requests:
           storage: 5Gi
