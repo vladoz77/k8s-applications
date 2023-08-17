@@ -11,3 +11,5 @@ data:
     server.port: 5601
     elasticsearch.hosts: [http://es-client:9200]
     server.rewriteBasePath: false
+    elasticsearch.username: elastic
+    elasticsearch.password: changeme
