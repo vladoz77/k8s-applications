@@ -36,8 +36,6 @@ spec:
           value: "-Xms256m -Xmx256m"
         - name: network.host
           value: "_site_"
-        - name: ELASTIC_PASSWORD
-          value: "changeme"
         resources: {}
         ports:
         - containerPort: 9200
