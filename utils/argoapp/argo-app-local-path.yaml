@@ -1,0 +1,24 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: local-path-provisioner
+  namespace: argocd
+  labels:
+    app: utilits
+spec:
+  destination:
+    name: ''
+    namespace: local-path-storage
+    server: 'https://kubernetes.default.svc'
+  source:
+    path: utils\localpathprovsioner
+    repoURL: 'https://github.com/vladoz77/argocd'
+    targetRevision: HEAD
+    directory:
+      recurse: false
+  sources: []
+  project: logging
+  syncPolicy:
+    syncOptions:
+      - CreateNamespace=true
+      - PruneLast=true
