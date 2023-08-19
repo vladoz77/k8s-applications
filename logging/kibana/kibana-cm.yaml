@@ -12,4 +12,7 @@ data:
           hosts: ${ELASTICSEARCH_URL}
           username: ${ELASTICSEARCH_USERNAME}
           password: ${ELASTICSEARCH_PASSWORD}
-        logging.root.level: error
+        logging:
+          events:
+            request: "!"
+            response: "!"
