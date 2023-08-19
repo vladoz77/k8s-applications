@@ -19,6 +19,7 @@ rules:
     resources:
       - namespaces
       - pods
+      - pods/logs
       - nodes
       - nodes/proxy
     verbs:

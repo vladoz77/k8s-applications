@@ -33,6 +33,7 @@ data:
         Mem_Buf_Limit     50MB
         Skip_Long_Lines   On
         Refresh_Interval  10
+        Inotify_Watcher   false
     [INPUT]
         Name tail
         Tag sysapp.gen.log.mail
@@ -51,25 +52,29 @@ data:
         Parser sys_log_file
         Path /var/log/messages
         db /var/log/messages.db
+        Inotify_Watcher   false
     [INPUT]
         Name tail
         Tag sysapp.gen.log.cron
         Parser sys_log_file
         Path /var/log/cron
         db /var/log/cron.db
+        Inotify_Watcher   false
 
   filter-kubernetes.conf: |
     [FILTER]
-        Name                kubernetes
-        Match               kube.*
-        Kube_URL            https://kubernetes.default.svc.cluster.local:443
-        Kube_CA_File        /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
-        Kube_Token_File     /var/run/secrets/kubernetes.io/serviceaccount/token
-        Kube_Tag_Prefix     kube.var.log.containers.
-        Merge_Log           On
-        Merge_Log_Key       log_processed
-        Use_Kubelet         true
-        Kubelet_Port        10250
+        Name             kubernetes
+        Match            kube.*
+        Kube_URL         https://kubernetes.default.svc:443
+        Kube_CA_File     /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+        Kube_Token_File  /var/run/secrets/kubernetes.io/serviceaccount/token
+        Kube_Tag_Prefix  kube.var.log.containers.
+        Merge_Log        On
+        Buffer_Size      0
+        Use_Kubelet      On
+        Kubelet_Host     ${NODE_IP}
+        Kubelet_Port     10250
+        tls.verify       Off
     [FILTER]
         Name modify
         Match sysapp.gen.log.mail

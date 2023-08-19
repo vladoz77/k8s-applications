@@ -25,12 +25,16 @@ spec:
         effect: "NoExecute"
       - operator: "Exists"
         effect: "NoSchedule"
-
       containers:
       - name: fluent-bit
-        image: fluent/fluent-bit:1.9.0
+        image: fluent/fluent-bit:2.1.8
         imagePullPolicy: IfNotPresent
         env:
+        - name: NODE_IP
+          valueFrom:
+            fieldRef:
+              apiVersion: v1
+              fieldPath: status.hostIP
         - name: FLUENT_ELASTICSEARCH_HOST
           value: elasticsearch
         - name: FLUENT_ELASTICSEARCH_PORT
