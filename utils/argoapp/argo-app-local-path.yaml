@@ -11,7 +11,7 @@ spec:
     namespace: local-path-storage
     server: 'https://kubernetes.default.svc'
   source:
-    path: utils\localpathprovsioner
+    path: utils/localpathprovsioner
     repoURL: 'https://github.com/vladoz77/argocd'
     targetRevision: HEAD
     directory:
