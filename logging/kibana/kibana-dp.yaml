@@ -15,6 +15,10 @@ spec:
       labels:
         app: kibana
     spec:
+      volumes:
+      - name: kibana-config
+        configMap:
+          name: kibana-config
       containers:
       - name: kibana
         image: kibana:7.17.5
@@ -35,6 +39,11 @@ spec:
               secretKeyRef:
                 name: es-password
                 key: password
+        volumeMounts:
+          - name: kibana-config
+            mountPath: /usr/share/kibana/config/kibana.yml
+            readOnly: true
+            subPath: kibana.yml
         ports:
         - containerPort: 5601
           name: kibana
