@@ -40,7 +40,7 @@ spec:
         - name: cluster.initial_master_nodes
           value: es-master-0,es-master-1
         - name: node.roles
-          value: data,master,voting_only
+          value: data
         - name: "ES_JAVA_OPTS"
           value: "-Xms256m -Xmx256m"
         - name: network.host
