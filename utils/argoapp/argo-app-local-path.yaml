@@ -17,7 +17,7 @@ spec:
     directory:
       recurse: false
   sources: []
-  project: logging
+  project: utilits
   syncPolicy:
     syncOptions:
       - CreateNamespace=true
