@@ -1,5 +1,0 @@
-clusterName: "es-cluster"
-nodeGroup: "master"
-
-roles:
-- master
