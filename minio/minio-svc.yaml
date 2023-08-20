@@ -5,7 +5,6 @@ metadata:
   namespace: minio
   labels:
     app.kubernetes.io/name: minio-headless
-    
 spec:
   type: ClusterIP
   clusterIP: None
@@ -13,9 +12,6 @@ spec:
     - name: minio-api
       port: 9000
       targetPort: minio-api
-    - name: minio-console
-      port: 9001
-      targetPort: minio-console
   publishNotReadyAddresses: true
   selector:
     app.kubernetes.io/name: minio
@@ -33,5 +29,8 @@ spec:
     - name: minio-api
       port: 9000
       targetPort: minio-api
+    - name: minio-console
+      port: 9001
+      targetPort: minio-console
   selector:
     app.kubernetes.io/name: minio
