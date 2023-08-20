@@ -1,17 +1,7 @@
 loki:
+  commonConfig:
+    replication_factor: 1
   storage:
-    bucketNames:
-      chunks: chunks
-      ruler: ruler
-      admin: admin
-    type: s3
-    s3:
-      s3: null
-      endpoint: minio-svc.minio.svc:9000
-      region: null
-      secretAccessKey: SAZTH61REvaHUWfVliJ5UD2Cu07L68ehFtWYfFMm
-      accessKeyId: O4XYiXXAhwMm3hQuIF8W
-      signatureVersion: null
-      s3ForcePathStyle: true
-      insecure: true
-      http_config: {}
+    type: 'filesystem'
+singleBinary:
+  replicas: 1
