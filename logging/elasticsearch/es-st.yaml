@@ -79,10 +79,6 @@ spec:
             value: "es-cluster-0,es-cluster-1,es-cluster-2"
           - name: network.host
             value: "0.0.0.0"
-          - name: xpack.security.enabled
-            value: "true"
-          - name: xpack.monitoring.collection.enabled
-            value: "true"   
           - name: ES_JAVA_OPTS
             value: "-Xms512m -Xmx512m"   
           - name: ELASTIC_PASSWORD
