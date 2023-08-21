@@ -1,0 +1,27 @@
+apiVersion: operator.victoriametrics.com/v1beta1
+kind: VMServiceScrape
+metadata:
+  labels:
+    app.kubernetes.io/name: loki
+  name: loki-monitoring
+  namespace: monitoring
+spec:
+  endpoints:
+    - port: http
+      scheme: http
+  selector:
+    matchExpressions:
+      - key: app.kubernetes.io/component
+        operator: In
+        values:
+          - distributor
+          - ingester
+          - querier
+          - query-frontend
+    matchLabels:
+      app.kubernetes.io/instance: loki
+      app.kubernetes.io/name: loki
+  namespaceSelector:
+    matchNames:
+      - loki
+
