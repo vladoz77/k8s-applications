@@ -1,45 +1,33 @@
 ---
-# Source: loki-distributed/templates/distributor/poddisruptionbudget-distributor.yaml
 apiVersion: policy/v1
 kind: PodDisruptionBudget
 metadata:
   name: loki-distributor
   namespace: loki
   labels:
-    helm.sh/chart: loki-distributed-0.71.1
     app.kubernetes.io/name: loki
-    app.kubernetes.io/instance: loki
-    app.kubernetes.io/version: "2.8.3"
-    app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/component: distributor
 spec:
   selector:
     matchLabels:
       app.kubernetes.io/name: loki
-      app.kubernetes.io/instance: loki
       app.kubernetes.io/component: distributor
-  maxUnavailable: 2
+  maxUnavailable: 1
 ---
-# Source: loki-distributed/templates/ingester/poddisruptionbudget-ingester.yaml
 apiVersion: policy/v1
 kind: PodDisruptionBudget
 metadata:
   name: loki-ingester
   namespace: loki
   labels:
-    helm.sh/chart: loki-distributed-0.71.1
     app.kubernetes.io/name: loki
-    app.kubernetes.io/instance: loki
-    app.kubernetes.io/version: "2.8.3"
-    app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/component: ingester
 spec:
   selector:
     matchLabels:
       app.kubernetes.io/name: loki
-      app.kubernetes.io/instance: loki
       app.kubernetes.io/component: ingester
-  maxUnavailable: 2
+  maxUnavailable: 1
 ---
 # Source: loki-distributed/templates/querier/poddisruptionbudget-querier.yaml
 apiVersion: policy/v1
@@ -48,19 +36,14 @@ metadata:
   name: loki-querier
   namespace: loki
   labels:
-    helm.sh/chart: loki-distributed-0.71.1
     app.kubernetes.io/name: loki
-    app.kubernetes.io/instance: loki
-    app.kubernetes.io/version: "2.8.3"
-    app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/component: querier
 spec:
   selector:
     matchLabels:
       app.kubernetes.io/name: loki
-      app.kubernetes.io/instance: loki
       app.kubernetes.io/component: querier
-  maxUnavailable: 2
+  maxUnavailable: 1
 ---
 # Source: loki-distributed/templates/serviceaccount.yaml
 apiVersion: v1
