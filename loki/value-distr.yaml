@@ -1,0 +1,37 @@
+nameOverride: loki
+fullnameOverride: loki
+
+serviceAccount:
+  create: false
+serviceMonitor:
+  enabled: false
+prometheusRule:
+  enabled: false
+
+ingester:
+  replicas: 1
+
+distributor:
+  replicas: 1
+
+querier:
+  replicas: 1
+
+queryFrontend:
+  replicas: 1
+
+gateway:
+  enabled: true
+  replicas: 1
+
+compactor:
+  enabled: true
+
+ruler:
+  enabled: true
+
+
+
+
+
+
