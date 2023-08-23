@@ -72,7 +72,7 @@ loki:
     readOnlyRootFilesystem: true
     capabilities:
       drop:
-      - ALL
+        - ALL
     allowPrivilegeEscalation: false
   # -- Specify an existing secret containing loki configuration. If non-empty, overrides `loki.config`
   existingSecretForConfig: ""
@@ -95,6 +95,17 @@ loki:
 
     common:
       compactor_address: http://{{ include "loki.compactorFullname" . }}:3100
+      path_prefix: /var/loki
+      replication_factor: 1
+      storage:
+        s3:
+          bucketnames: chunks
+          endpoint: minio-svc.minio.svc:9000
+          access_key_id: admin
+          secret_access_key: password
+          insecure: true
+          s3forcepathstyle: true
+          
 
     distributor:
       ring:
@@ -201,13 +212,14 @@ loki:
       tail_proxy_url: http://{{ include "loki.querierFullname" . }}:3100
 
     compactor:
-      shared_store: filesystem
+      shared_store: s3
+      working_directory: /tmp/loki/boltdb-shipper-compactor
 
     ruler:
       storage:
-        type: local
-        local:
-          directory: /etc/loki/rules
+        type: s3
+        s3:
+          bucketnames: ruler
       ring:
         kvstore:
           store: memberlist
@@ -220,7 +232,7 @@ loki:
     configs:
     - from: 2020-09-07
       store: boltdb-shipper
-      object_store: filesystem
+      object_store: s3
       schema: v11
       index:
         prefix: loki_index_
@@ -229,17 +241,15 @@ loki:
   # -- Check https://grafana.com/docs/loki/latest/configuration/#storage_config for more info on how to configure storages
   storageConfig:
     boltdb_shipper:
-      shared_store: filesystem
+      shared_store: s3
       active_index_directory: /var/loki/index
       cache_location: /var/loki/cache
       cache_ttl: 168h
-    filesystem:
-      directory: /var/loki/chunks
-      # -- Uncomment to configure each storage individually
-      #   azure: {}
-      #   gcs: {}
-      #   s3: {}
-      #   boltdb: {}
+# -- Uncomment to configure each storage individually
+#   azure: {}
+#   gcs: {}
+#   s3: {}
+#   boltdb: {}
 
   # -- Structured loki configuration, takes precedence over `loki.config`, `loki.schemaConfig`, `loki.storageConfig`
   structuredConfig: {}
@@ -272,9 +282,9 @@ rbac:
 # ServiceMonitor configuration
 serviceMonitor:
   # -- If enabled, ServiceMonitor resources for Prometheus Operator are created
-  enabled: true
+  enabled: false
   # -- Alternative namespace for ServiceMonitor resources
-  namespace: monitoring
+  namespace: null
   # -- Namespace selector for ServiceMonitor resources
   namespaceSelector: {}
   # -- ServiceMonitor annotations
@@ -302,74 +312,74 @@ serviceMonitor:
 # Rules for the Prometheus Operator
 prometheusRule:
   # -- If enabled, a PrometheusRule resource for Prometheus Operator is created
-  enabled: true
+  enabled: false
   # -- Alternative namespace for the PrometheusRule resource
-  namespace: monitoring
+  namespace: null
   # -- PrometheusRule annotations
   annotations: {}
   # -- Additional PrometheusRule labels
   labels: {}
   # -- Contents of Prometheus rules file
-  groups: 
-   - name: loki_rules
-     rules:
-       - expr: histogram_quantile(0.99, sum(rate(loki_request_duration_seconds_bucket[1m]))
-           by (le, cluster, job))
-         record: cluster_job:loki_request_duration_seconds:99quantile
-       - expr: histogram_quantile(0.50, sum(rate(loki_request_duration_seconds_bucket[1m]))
-           by (le, cluster, job))
-         record: cluster_job:loki_request_duration_seconds:50quantile
-       - expr: sum(rate(loki_request_duration_seconds_sum[1m])) by (cluster, job) / sum(rate(loki_request_duration_seconds_count[1m]))
-           by (cluster, job)
-         record: cluster_job:loki_request_duration_seconds:avg
-       - expr: sum(rate(loki_request_duration_seconds_bucket[1m])) by (le, cluster, job)
-         record: cluster_job:loki_request_duration_seconds_bucket:sum_rate
-       - expr: sum(rate(loki_request_duration_seconds_sum[1m])) by (cluster, job)
-         record: cluster_job:loki_request_duration_seconds_sum:sum_rate
-       - expr: sum(rate(loki_request_duration_seconds_count[1m])) by (cluster, job)
-         record: cluster_job:loki_request_duration_seconds_count:sum_rate
-       - expr: histogram_quantile(0.99, sum(rate(loki_request_duration_seconds_bucket[1m]))
-           by (le, cluster, job, route))
-         record: cluster_job_route:loki_request_duration_seconds:99quantile
-       - expr: histogram_quantile(0.50, sum(rate(loki_request_duration_seconds_bucket[1m]))
-           by (le, cluster, job, route))
-         record: cluster_job_route:loki_request_duration_seconds:50quantile
-       - expr: sum(rate(loki_request_duration_seconds_sum[1m])) by (cluster, job, route)
-           / sum(rate(loki_request_duration_seconds_count[1m])) by (cluster, job, route)
-         record: cluster_job_route:loki_request_duration_seconds:avg
-       - expr: sum(rate(loki_request_duration_seconds_bucket[1m])) by (le, cluster, job,
-           route)
-         record: cluster_job_route:loki_request_duration_seconds_bucket:sum_rate
-       - expr: sum(rate(loki_request_duration_seconds_sum[1m])) by (cluster, job, route)
-         record: cluster_job_route:loki_request_duration_seconds_sum:sum_rate
-       - expr: sum(rate(loki_request_duration_seconds_count[1m])) by (cluster, job, route)
-         record: cluster_job_route:loki_request_duration_seconds_count:sum_rate
-       - expr: histogram_quantile(0.99, sum(rate(loki_request_duration_seconds_bucket[1m]))
-           by (le, cluster, namespace, job, route))
-         record: cluster_namespace_job_route:loki_request_duration_seconds:99quantile
-       - expr: histogram_quantile(0.50, sum(rate(loki_request_duration_seconds_bucket[1m]))
-           by (le, cluster, namespace, job, route))
-         record: cluster_namespace_job_route:loki_request_duration_seconds:50quantile
-       - expr: sum(rate(loki_request_duration_seconds_sum[1m])) by (cluster, namespace,
-           job, route) / sum(rate(loki_request_duration_seconds_count[1m])) by (cluster,
-           namespace, job, route)
-         record: cluster_namespace_job_route:loki_request_duration_seconds:avg
-       - expr: sum(rate(loki_request_duration_seconds_bucket[1m])) by (le, cluster, namespace,
-           job, route)
-         record: cluster_namespace_job_route:loki_request_duration_seconds_bucket:sum_rate
-       - expr: sum(rate(loki_request_duration_seconds_sum[1m])) by (cluster, namespace,
-           job, route)
-         record: cluster_namespace_job_route:loki_request_duration_seconds_sum:sum_rate
-       - expr: sum(rate(loki_request_duration_seconds_count[1m])) by (cluster, namespace,
-           job, route)
-         record: cluster_namespace_job_route:loki_request_duration_seconds_count:sum_rate
+  groups: []
+  #  - name: loki_rules
+  #    rules:
+  #      - expr: histogram_quantile(0.99, sum(rate(loki_request_duration_seconds_bucket[1m]))
+  #          by (le, cluster, job))
+  #        record: cluster_job:loki_request_duration_seconds:99quantile
+  #      - expr: histogram_quantile(0.50, sum(rate(loki_request_duration_seconds_bucket[1m]))
+  #          by (le, cluster, job))
+  #        record: cluster_job:loki_request_duration_seconds:50quantile
+  #      - expr: sum(rate(loki_request_duration_seconds_sum[1m])) by (cluster, job) / sum(rate(loki_request_duration_seconds_count[1m]))
+  #          by (cluster, job)
+  #        record: cluster_job:loki_request_duration_seconds:avg
+  #      - expr: sum(rate(loki_request_duration_seconds_bucket[1m])) by (le, cluster, job)
+  #        record: cluster_job:loki_request_duration_seconds_bucket:sum_rate
+  #      - expr: sum(rate(loki_request_duration_seconds_sum[1m])) by (cluster, job)
+  #        record: cluster_job:loki_request_duration_seconds_sum:sum_rate
+  #      - expr: sum(rate(loki_request_duration_seconds_count[1m])) by (cluster, job)
+  #        record: cluster_job:loki_request_duration_seconds_count:sum_rate
+  #      - expr: histogram_quantile(0.99, sum(rate(loki_request_duration_seconds_bucket[1m]))
+  #          by (le, cluster, job, route))
+  #        record: cluster_job_route:loki_request_duration_seconds:99quantile
+  #      - expr: histogram_quantile(0.50, sum(rate(loki_request_duration_seconds_bucket[1m]))
+  #          by (le, cluster, job, route))
+  #        record: cluster_job_route:loki_request_duration_seconds:50quantile
+  #      - expr: sum(rate(loki_request_duration_seconds_sum[1m])) by (cluster, job, route)
+  #          / sum(rate(loki_request_duration_seconds_count[1m])) by (cluster, job, route)
+  #        record: cluster_job_route:loki_request_duration_seconds:avg
+  #      - expr: sum(rate(loki_request_duration_seconds_bucket[1m])) by (le, cluster, job,
+  #          route)
+  #        record: cluster_job_route:loki_request_duration_seconds_bucket:sum_rate
+  #      - expr: sum(rate(loki_request_duration_seconds_sum[1m])) by (cluster, job, route)
+  #        record: cluster_job_route:loki_request_duration_seconds_sum:sum_rate
+  #      - expr: sum(rate(loki_request_duration_seconds_count[1m])) by (cluster, job, route)
+  #        record: cluster_job_route:loki_request_duration_seconds_count:sum_rate
+  #      - expr: histogram_quantile(0.99, sum(rate(loki_request_duration_seconds_bucket[1m]))
+  #          by (le, cluster, namespace, job, route))
+  #        record: cluster_namespace_job_route:loki_request_duration_seconds:99quantile
+  #      - expr: histogram_quantile(0.50, sum(rate(loki_request_duration_seconds_bucket[1m]))
+  #          by (le, cluster, namespace, job, route))
+  #        record: cluster_namespace_job_route:loki_request_duration_seconds:50quantile
+  #      - expr: sum(rate(loki_request_duration_seconds_sum[1m])) by (cluster, namespace,
+  #          job, route) / sum(rate(loki_request_duration_seconds_count[1m])) by (cluster,
+  #          namespace, job, route)
+  #        record: cluster_namespace_job_route:loki_request_duration_seconds:avg
+  #      - expr: sum(rate(loki_request_duration_seconds_bucket[1m])) by (le, cluster, namespace,
+  #          job, route)
+  #        record: cluster_namespace_job_route:loki_request_duration_seconds_bucket:sum_rate
+  #      - expr: sum(rate(loki_request_duration_seconds_sum[1m])) by (cluster, namespace,
+  #          job, route)
+  #        record: cluster_namespace_job_route:loki_request_duration_seconds_sum:sum_rate
+  #      - expr: sum(rate(loki_request_duration_seconds_count[1m])) by (cluster, namespace,
+  #          job, route)
+  #        record: cluster_namespace_job_route:loki_request_duration_seconds_count:sum_rate
 
 # Configuration for the ingester
 ingester:
   # -- Kind of deployment [StatefulSet/Deployment]
   kind: StatefulSet
   # -- Number of replicas for the ingester
-  replicas: 3
+  replicas: 1
   # -- hostAliases to add
   hostAliases: []
   #  - ip: 1.2.3.4
@@ -458,7 +468,7 @@ ingester:
                 {{- include "loki.ingesterSelectorLabels" . | nindent 12 }}
             topologyKey: failure-domain.beta.kubernetes.io/zone
   # -- Pod Disruption Budget maxUnavailable
-  maxUnavailable: 2
+  maxUnavailable: null
   # -- Max Surge for ingester pods
   maxSurge: 0
   # -- Node selector for ingester pods
@@ -474,17 +484,17 @@ ingester:
     enabled: false
     # -- Use emptyDir with ramdisk for storage. **Please note that all data in ingester will be lost on pod restart**
     inMemory: false
-    # -- List of the ingester PVCs
-    # @notationType -- list
+      # -- List of the ingester PVCs
+      # @notationType -- list
     claims:
-    - name: data
-      size: 10Gi
-      #   -- Storage class to be used.
-      #   If defined, storageClassName: <storageClass>.
-      #   If set to "-", storageClassName: "", which disables dynamic provisioning.
-      #   If empty or set to null, no storageClassName spec is
-      #   set, choosing the default provisioner (gp2 on AWS, standard on GKE, AWS, and OpenStack).
-      storageClass: null
+      - name: data
+        size: 10Gi
+        #   -- Storage class to be used.
+        #   If defined, storageClassName: <storageClass>.
+        #   If set to "-", storageClassName: "", which disables dynamic provisioning.
+        #   If empty or set to null, no storageClassName spec is
+        #   set, choosing the default provisioner (gp2 on AWS, standard on GKE, AWS, and OpenStack).
+        storageClass: null
       # - name: wal
       #   size: 150Gi
 
@@ -496,7 +506,7 @@ ingester:
 # Configuration for the distributor
 distributor:
   # -- Number of replicas for the distributor
-  replicas: 3
+  replicas: 1
   # -- hostAliases to add
   hostAliases: []
   #  - ip: 1.2.3.4
@@ -570,14 +580,14 @@ distributor:
                 {{- include "loki.distributorSelectorLabels" . | nindent 12 }}
             topologyKey: failure-domain.beta.kubernetes.io/zone
   # -- Pod Disruption Budget maxUnavailable
-  maxUnavailable: 2
+  maxUnavailable: null
   # -- Max Surge for distributor pods
   maxSurge: 0
   # -- Node selector for distributor pods
   nodeSelector: {}
   # -- Tolerations for distributor pods
   tolerations: []
-  # -- Adds the appProtocol field to the distributor service. This allows distributor to work with istio protocol selection.
+    # -- Adds the appProtocol field to the distributor service. This allows distributor to work with istio protocol selection.
   appProtocol:
     # -- Set the optional grpc service protocol. Ex: "grpc", "http2" or "https"
     grpc: ""
@@ -585,7 +595,7 @@ distributor:
 # Configuration for the querier
 querier:
   # -- Number of replicas for the querier
-  replicas: 3
+  replicas: 1
   # -- hostAliases to add
   hostAliases: []
   #  - ip: 1.2.3.4
@@ -670,7 +680,7 @@ querier:
                 {{- include "loki.querierSelectorLabels" . | nindent 12 }}
             topologyKey: failure-domain.beta.kubernetes.io/zone
   # -- Pod Disruption Budget maxUnavailable
-  maxUnavailable: 2
+  maxUnavailable: null
   # -- Max Surge for querier pods
   maxSurge: 0
   # -- Node selector for querier pods
@@ -845,7 +855,7 @@ queryScheduler:
                 {{- include "loki.querySchedulerSelectorLabels" . | nindent 12 }}
             topologyKey: failure-domain.beta.kubernetes.io/zone
   # -- Pod Disruption Budget maxUnavailable
-  maxUnavailable: null
+  maxUnavailable: 1
   # -- Node selector for query-scheduler pods
   nodeSelector: {}
   # -- Tolerations for query-scheduler pods
@@ -919,29 +929,29 @@ tableManager:
 # You'll need to supply authn configuration for your ingress controller.
 ingress:
   enabled: false
-  #  ingressClassName: nginx
+#  ingressClassName: nginx
   annotations: {}
-  #    nginx.ingress.kubernetes.io/auth-type: basic
-  #    nginx.ingress.kubernetes.io/auth-secret: loki-distributed-basic-auth
-  #    nginx.ingress.kubernetes.io/auth-secret-type: auth-map
-  #    nginx.ingress.kubernetes.io/configuration-snippet: |
-  #      proxy_set_header X-Scope-OrgID $remote_user;
+#    nginx.ingress.kubernetes.io/auth-type: basic
+#    nginx.ingress.kubernetes.io/auth-secret: loki-distributed-basic-auth
+#    nginx.ingress.kubernetes.io/auth-secret-type: auth-map
+#    nginx.ingress.kubernetes.io/configuration-snippet: |
+#      proxy_set_header X-Scope-OrgID $remote_user;
   paths:
     distributor:
-    - /api/prom/push
-    - /loki/api/v1/push
+      - /api/prom/push
+      - /loki/api/v1/push
     querier:
-    - /api/prom/tail
-    - /loki/api/v1/tail
+      - /api/prom/tail
+      - /loki/api/v1/tail
     query-frontend:
-    - /loki/api
+      - /loki/api
     ruler:
-    - /api/prom/rules
-    - /loki/api/v1/rules
-    - /prometheus/api/v1/rules
-    - /prometheus/api/v1/alerts
+      - /api/prom/rules
+      - /loki/api/v1/rules
+      - /prometheus/api/v1/rules
+      - /prometheus/api/v1/alerts
   hosts:
-  - loki.example.com
+    - loki.example.com
   # tls:
   #   - secretName: loki-distributed-tls
   #     hosts:
@@ -1018,7 +1028,7 @@ gateway:
     readOnlyRootFilesystem: true
     capabilities:
       drop:
-      - ALL
+        - ALL
     allowPrivilegeEscalation: false
   # -- Resource requests and limits for the gateway
   resources: {}
@@ -1082,11 +1092,11 @@ gateway:
     annotations: {}
     # -- Hosts configuration for the gateway ingress
     hosts:
-    - host: gateway.loki.example.com
-      paths:
-      - path: /
-        # -- pathType (e.g. ImplementationSpecific, Prefix, .. etc.) might also be required by some Ingress Controllers
-        # pathType: Prefix
+      - host: gateway.loki.example.com
+        paths:
+          - path: /
+            # -- pathType (e.g. ImplementationSpecific, Prefix, .. etc.) might also be required by some Ingress Controllers
+            # pathType: Prefix
     # -- TLS configuration for the gateway ingress
     tls: []
     # tls:
@@ -1259,7 +1269,7 @@ gateway:
 # Configuration for the compactor
 compactor:
   # -- Specifies whether compactor should be enabled
-  enabled: false
+  enabled: true
   # -- hostAliases to add
   hostAliases: []
   #  - ip: 1.2.3.4
@@ -1436,70 +1446,70 @@ ruler:
     annotations: {}
   # -- Directories containing rules files
   directories: {}
-  # tenant_foo:
-  #   rules1.txt: |
-  #     groups:
-  #       - name: should_fire
-  #         rules:
-  #           - alert: HighPercentageError
-  #             expr: |
-  #               sum(rate({app="foo", env="production"} |= "error" [5m])) by (job)
-  #                 /
-  #               sum(rate({app="foo", env="production"}[5m])) by (job)
-  #                 > 0.05
-  #             for: 10m
-  #             labels:
-  #               severity: warning
-  #             annotations:
-  #               summary: High error rate
-  #       - name: credentials_leak
-  #         rules:
-  #           - alert: http-credentials-leaked
-  #             annotations:
-  #               message: "{{ $labels.job }} is leaking http basic auth credentials."
-  #             expr: 'sum by (cluster, job, pod) (count_over_time({namespace="prod"} |~ "http(s?)://(\\w+):(\\w+)@" [5m]) > 0)'
-  #             for: 10m
-  #             labels:
-  #               severity: critical
-  #   rules2.txt: |
-  #     groups:
-  #       - name: example
-  #         rules:
-  #         - alert: HighThroughputLogStreams
-  #           expr: sum by(container) (rate({job=~"loki-dev/.*"}[1m])) > 1000
-  #           for: 2m
-  # tenant_bar:
-  #   rules1.txt: |
-  #     groups:
-  #       - name: should_fire
-  #         rules:
-  #           - alert: HighPercentageError
-  #             expr: |
-  #               sum(rate({app="foo", env="production"} |= "error" [5m])) by (job)
-  #                 /
-  #               sum(rate({app="foo", env="production"}[5m])) by (job)
-  #                 > 0.05
-  #             for: 10m
-  #             labels:
-  #               severity: warning
-  #             annotations:
-  #               summary: High error rate
-  #       - name: credentials_leak
-  #         rules:
-  #           - alert: http-credentials-leaked
-  #             annotations:
-  #               message: "{{ $labels.job }} is leaking http basic auth credentials."
-  #             expr: 'sum by (cluster, job, pod) (count_over_time({namespace="prod"} |~ "http(s?)://(\\w+):(\\w+)@" [5m]) > 0)'
-  #             for: 10m
-  #             labels:
-  #               severity: critical
-  #   rules2.txt: |
-  #     groups:
-  #       - name: example
-  #         rules:
-  #         - alert: HighThroughputLogStreams
-  #           expr: sum by(container) (rate({job=~"loki-dev/.*"}[1m])) > 1000
-  #           for: 2m
+    # tenant_foo:
+    #   rules1.txt: |
+    #     groups:
+    #       - name: should_fire
+    #         rules:
+    #           - alert: HighPercentageError
+    #             expr: |
+    #               sum(rate({app="foo", env="production"} |= "error" [5m])) by (job)
+    #                 /
+    #               sum(rate({app="foo", env="production"}[5m])) by (job)
+    #                 > 0.05
+    #             for: 10m
+    #             labels:
+    #               severity: warning
+    #             annotations:
+    #               summary: High error rate
+    #       - name: credentials_leak
+    #         rules:
+    #           - alert: http-credentials-leaked
+    #             annotations:
+    #               message: "{{ $labels.job }} is leaking http basic auth credentials."
+    #             expr: 'sum by (cluster, job, pod) (count_over_time({namespace="prod"} |~ "http(s?)://(\\w+):(\\w+)@" [5m]) > 0)'
+    #             for: 10m
+    #             labels:
+    #               severity: critical
+    #   rules2.txt: |
+    #     groups:
+    #       - name: example
+    #         rules:
+    #         - alert: HighThroughputLogStreams
+    #           expr: sum by(container) (rate({job=~"loki-dev/.*"}[1m])) > 1000
+    #           for: 2m
+    # tenant_bar:
+    #   rules1.txt: |
+    #     groups:
+    #       - name: should_fire
+    #         rules:
+    #           - alert: HighPercentageError
+    #             expr: |
+    #               sum(rate({app="foo", env="production"} |= "error" [5m])) by (job)
+    #                 /
+    #               sum(rate({app="foo", env="production"}[5m])) by (job)
+    #                 > 0.05
+    #             for: 10m
+    #             labels:
+    #               severity: warning
+    #             annotations:
+    #               summary: High error rate
+    #       - name: credentials_leak
+    #         rules:
+    #           - alert: http-credentials-leaked
+    #             annotations:
+    #               message: "{{ $labels.job }} is leaking http basic auth credentials."
+    #             expr: 'sum by (cluster, job, pod) (count_over_time({namespace="prod"} |~ "http(s?)://(\\w+):(\\w+)@" [5m]) > 0)'
+    #             for: 10m
+    #             labels:
+    #               severity: critical
+    #   rules2.txt: |
+    #     groups:
+    #       - name: example
+    #         rules:
+    #         - alert: HighThroughputLogStreams
+    #           expr: sum by(container) (rate({job=~"loki-dev/.*"}[1m])) > 1000
+    #           for: 2m
 
 # Configuration for the index-gateway
 indexGateway:
@@ -1615,7 +1625,7 @@ memcached:
     readOnlyRootFilesystem: true
     capabilities:
       drop:
-      - ALL
+        - ALL
     allowPrivilegeEscalation: false
   # -- Common annotations for all memcached services
   serviceAnnotations: {}
@@ -1643,7 +1653,7 @@ memcachedExporter:
     readOnlyRootFilesystem: true
     capabilities:
       drop:
-      - ALL
+        - ALL
     allowPrivilegeEscalation: false
 
 memcachedChunks:
@@ -1666,7 +1676,7 @@ memcachedChunks:
   serviceLabels: {}
   # -- Additional CLI args for memcached-chunks
   extraArgs:
-  - -I 32m
+    - -I 32m
   # -- Environment variables to add to memcached-chunks pods
   extraEnv: []
   # -- Environment variables from secrets or configmaps to add to memcached-chunks pods
@@ -1731,7 +1741,7 @@ memcachedFrontend:
   serviceLabels: {}
   # -- Additional CLI args for memcached-frontend
   extraArgs:
-  - -I 32m
+    - -I 32m
   # -- Environment variables to add to memcached-frontend pods
   extraEnv: []
   # -- Environment variables from secrets or configmaps to add to memcached-frontend pods
@@ -1796,7 +1806,7 @@ memcachedIndexQueries:
   serviceLabels: {}
   # -- Additional CLI args for memcached-index-queries
   extraArgs:
-  - -I 32m
+    - -I 32m
   # -- Environment variables to add to memcached-index-queries pods
   extraEnv: []
   # -- Environment variables from secrets or configmaps to add to memcached-index-queries pods
@@ -1861,7 +1871,7 @@ memcachedIndexWrites:
   serviceLabels: {}
   # -- Additional CLI args for memcached-index-writes
   extraArgs:
-  - -I 32m
+    - -I 32m
   # -- Environment variables to add to memcached-index-writes pods
   extraEnv: []
   # -- Environment variables from secrets or configmaps to add to memcached-index-writes pods
@@ -1946,3 +1956,4 @@ networkPolicy:
     podSelector: {}
     # -- Specifies the namespace the discovery Pods are running in
     namespaceSelector: {}
+
