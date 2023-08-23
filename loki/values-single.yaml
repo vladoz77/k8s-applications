@@ -2,6 +2,7 @@ loki:
   auth_enabled: false
   commonConfig:
     replication_factor: 1
+
 backend:
   replicas: 1
 write:
