@@ -1,0 +1,144 @@
+# Source: loki-distributed/templates/prometheusrule.yaml
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: loki
+  namespace: monitoring
+  labels:
+    app.kubernetes.io/name: loki
+spec:
+  groups:
+    - name: loki_rules
+      rules:
+      - expr: histogram_quantile(0.99, sum(rate(loki_request_duration_seconds_bucket[1m]))
+          by (le, cluster, job))
+        record: cluster_job:loki_request_duration_seconds:99quantile
+      - expr: histogram_quantile(0.50, sum(rate(loki_request_duration_seconds_bucket[1m]))
+          by (le, cluster, job))
+        record: cluster_job:loki_request_duration_seconds:50quantile
+      - expr: sum(rate(loki_request_duration_seconds_sum[1m])) by (cluster, job) / sum(rate(loki_request_duration_seconds_count[1m]))
+          by (cluster, job)
+        record: cluster_job:loki_request_duration_seconds:avg
+      - expr: sum(rate(loki_request_duration_seconds_bucket[1m])) by (le, cluster, job)
+        record: cluster_job:loki_request_duration_seconds_bucket:sum_rate
+      - expr: sum(rate(loki_request_duration_seconds_sum[1m])) by (cluster, job)
+        record: cluster_job:loki_request_duration_seconds_sum:sum_rate
+      - expr: sum(rate(loki_request_duration_seconds_count[1m])) by (cluster, job)
+        record: cluster_job:loki_request_duration_seconds_count:sum_rate
+      - expr: histogram_quantile(0.99, sum(rate(loki_request_duration_seconds_bucket[1m]))
+          by (le, cluster, job, route))
+        record: cluster_job_route:loki_request_duration_seconds:99quantile
+      - expr: histogram_quantile(0.50, sum(rate(loki_request_duration_seconds_bucket[1m]))
+          by (le, cluster, job, route))
+        record: cluster_job_route:loki_request_duration_seconds:50quantile
+      - expr: sum(rate(loki_request_duration_seconds_sum[1m])) by (cluster, job, route)
+          / sum(rate(loki_request_duration_seconds_count[1m])) by (cluster, job, route)
+        record: cluster_job_route:loki_request_duration_seconds:avg
+      - expr: sum(rate(loki_request_duration_seconds_bucket[1m])) by (le, cluster, job,
+          route)
+        record: cluster_job_route:loki_request_duration_seconds_bucket:sum_rate
+      - expr: sum(rate(loki_request_duration_seconds_sum[1m])) by (cluster, job, route)
+        record: cluster_job_route:loki_request_duration_seconds_sum:sum_rate
+      - expr: sum(rate(loki_request_duration_seconds_count[1m])) by (cluster, job, route)
+        record: cluster_job_route:loki_request_duration_seconds_count:sum_rate
+      - expr: histogram_quantile(0.99, sum(rate(loki_request_duration_seconds_bucket[1m]))
+          by (le, cluster, namespace, job, route))
+        record: cluster_namespace_job_route:loki_request_duration_seconds:99quantile
+      - expr: histogram_quantile(0.50, sum(rate(loki_request_duration_seconds_bucket[1m]))
+          by (le, cluster, namespace, job, route))
+        record: cluster_namespace_job_route:loki_request_duration_seconds:50quantile
+      - expr: sum(rate(loki_request_duration_seconds_sum[1m])) by (cluster, namespace,
+          job, route) / sum(rate(loki_request_duration_seconds_count[1m])) by (cluster,
+          namespace, job, route)
+        record: cluster_namespace_job_route:loki_request_duration_seconds:avg
+      - expr: sum(rate(loki_request_duration_seconds_bucket[1m])) by (le, cluster, namespace,
+          job, route)
+        record: cluster_namespace_job_route:loki_request_duration_seconds_bucket:sum_rate
+      - expr: sum(rate(loki_request_duration_seconds_sum[1m])) by (cluster, namespace,
+          job, route)
+        record: cluster_namespace_job_route:loki_request_duration_seconds_sum:sum_rate
+      - expr: sum(rate(loki_request_duration_seconds_count[1m])) by (cluster, namespace,
+          job, route)
+        record: cluster_namespace_job_route:loki_request_duration_seconds_count:sum_rate
+---
+# Source: loki-distributed/templates/distributor/servicemonitor-distributor.yaml
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: loki-distributor
+  namespace: monitoring
+  labels:
+    app.kubernetes.io/name: loki
+    app.kubernetes.io/component: distributor
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: loki
+      app.kubernetes.io/component: distributor
+  endpoints:
+    - port: http
+      scheme: http
+---
+# Source: loki-distributed/templates/ingester/servicemonitor-ingester.yaml
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: loki-ingester
+  namespace: monitoring
+  labels:
+    app.kubernetes.io/name: loki
+    app.kubernetes.io/component: ingester
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: loki
+      app.kubernetes.io/component: ingester
+    matchExpressions:
+      - key: prometheus.io/service-monitor
+        operator: NotIn
+        values:
+          - "false"
+  endpoints:
+    - port: http
+      scheme: http
+---
+# Source: loki-distributed/templates/querier/servicemonitor-querier.yaml
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: loki-querier
+  namespace: monitoring
+  labels:
+    app.kubernetes.io/name: loki
+    app.kubernetes.io/component: querier
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: loki
+      app.kubernetes.io/component: querier
+    matchExpressions:
+      - key: prometheus.io/service-monitor
+        operator: NotIn
+        values:
+          - "false"
+  endpoints:
+    - port: http
+      scheme: http
+---
+# Source: loki-distributed/templates/query-frontend/servicemonitor-query-frontend.yaml
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: loki-query-frontend
+  namespace: monitoring
+  labels:
+    app.kubernetes.io/name: loki
+    app.kubernetes.io/component: query-frontend
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: loki
+      app.kubernetes.io/component: query-frontend
+  endpoints:
+    - port: http
+      scheme: http
