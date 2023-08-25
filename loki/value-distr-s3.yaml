@@ -81,7 +81,6 @@ loki:
 
         
     query_range:
-      parallelise_shardable_queries: false
       align_queries_with_step: true
       cache_results: true
       max_retries: 5

@@ -1,68 +1,68 @@
----
-# Source: loki-distributed/templates/distributor/poddisruptionbudget-distributor.yaml
-apiVersion: policy/v1
-kind: PodDisruptionBudget
-metadata:
-  name: loki-distributor
-  namespace: loki
-  labels:
-    app.kubernetes.io/name: loki
-    app.kubernetes.io/component: distributor
-spec:
-  selector:
-    matchLabels:
-      app.kubernetes.io/name: loki
-      app.kubernetes.io/component: distributor
-  maxUnavailable: 1
----
-# Source: loki-distributed/templates/ingester/poddisruptionbudget-ingester.yaml
-apiVersion: policy/v1
-kind: PodDisruptionBudget
-metadata:
-  name: loki-ingester
-  namespace: loki
-  labels:
-    app.kubernetes.io/name: loki
-    app.kubernetes.io/component: ingester
-spec:
-  selector:
-    matchLabels:
-      app.kubernetes.io/name: loki
-      app.kubernetes.io/component: ingester
-  maxUnavailable: 1
----
-# Source: loki-distributed/templates/querier/poddisruptionbudget-querier.yaml
-apiVersion: policy/v1
-kind: PodDisruptionBudget
-metadata:
-  name: loki-querier
-  namespace: loki
-  labels:
-    app.kubernetes.io/name: loki
-    app.kubernetes.io/component: querier
-spec:
-  selector:
-    matchLabels:
-      app.kubernetes.io/name: loki
-      app.kubernetes.io/component: querier
-  maxUnavailable: 1
----
-# Source: loki-distributed/templates/query-frontend/poddisruptionbudget-query-frontent.yaml
-apiVersion: policy/v1
-kind: PodDisruptionBudget
-metadata:
-  name: loki-query-frontend
-  namespace: loki
-  labels:
-    app.kubernetes.io/name: loki
-    app.kubernetes.io/component: query-frontend
-spec:
-  selector:
-    matchLabels:
-      app.kubernetes.io/name: loki
-      app.kubernetes.io/component: query-frontend
-  maxUnavailable: 1
----
+# ---
+# # Source: loki-distributed/templates/distributor/poddisruptionbudget-distributor.yaml
+# apiVersion: policy/v1
+# kind: PodDisruptionBudget
+# metadata:
+#   name: loki-distributor
+#   namespace: loki
+#   labels:
+#     app.kubernetes.io/name: loki
+#     app.kubernetes.io/component: distributor
+# spec:
+#   selector:
+#     matchLabels:
+#       app.kubernetes.io/name: loki
+#       app.kubernetes.io/component: distributor
+#   maxUnavailable: 1
+# ---
+# # Source: loki-distributed/templates/ingester/poddisruptionbudget-ingester.yaml
+# apiVersion: policy/v1
+# kind: PodDisruptionBudget
+# metadata:
+#   name: loki-ingester
+#   namespace: loki
+#   labels:
+#     app.kubernetes.io/name: loki
+#     app.kubernetes.io/component: ingester
+# spec:
+#   selector:
+#     matchLabels:
+#       app.kubernetes.io/name: loki
+#       app.kubernetes.io/component: ingester
+#   maxUnavailable: 1
+# ---
+# # Source: loki-distributed/templates/querier/poddisruptionbudget-querier.yaml
+# apiVersion: policy/v1
+# kind: PodDisruptionBudget
+# metadata:
+#   name: loki-querier
+#   namespace: loki
+#   labels:
+#     app.kubernetes.io/name: loki
+#     app.kubernetes.io/component: querier
+# spec:
+#   selector:
+#     matchLabels:
+#       app.kubernetes.io/name: loki
+#       app.kubernetes.io/component: querier
+#   maxUnavailable: 1
+# ---
+# # Source: loki-distributed/templates/query-frontend/poddisruptionbudget-query-frontent.yaml
+# apiVersion: policy/v1
+# kind: PodDisruptionBudget
+# metadata:
+#   name: loki-query-frontend
+#   namespace: loki
+#   labels:
+#     app.kubernetes.io/name: loki
+#     app.kubernetes.io/component: query-frontend
+# spec:
+#   selector:
+#     matchLabels:
+#       app.kubernetes.io/name: loki
+#       app.kubernetes.io/component: query-frontend
+#   maxUnavailable: 1
+# ---
 # Source: loki-distributed/templates/configmap.yaml
 apiVersion: v1
 kind: ConfigMap
@@ -71,9 +71,6 @@ metadata:
   namespace: loki
   labels:
     app.kubernetes.io/name: loki
-    
-    
-    
 data:
   config.yaml: |
     auth_enabled: false
@@ -183,6 +180,7 @@ metadata:
   labels:
     app.kubernetes.io/name: loki
     app.kubernetes.io/component: gateway
+  namespace: loki
 data:
   nginx.conf: |
     worker_processes  5;  ## Default: 1
@@ -352,6 +350,7 @@ metadata:
   labels:
     app.kubernetes.io/name: loki
     app.kubernetes.io/component: gateway
+  namespace: loki
 spec:
   type: ClusterIP
   ports:
@@ -685,7 +684,7 @@ metadata:
     app.kubernetes.io/component: distributor
     app.kubernetes.io/part-of: memberlist
 spec:
-  replicas: 3
+  replicas: 1
   strategy:
     rollingUpdate:
       maxSurge: 0
@@ -787,6 +786,7 @@ metadata:
   labels:
     app.kubernetes.io/name: loki
     app.kubernetes.io/component: gateway
+  namespace: loki
 spec:
   replicas: 1
   strategy:
@@ -884,7 +884,7 @@ metadata:
     app.kubernetes.io/name: loki
     app.kubernetes.io/component: query-frontend
 spec:
-  replicas: 3
+  replicas: 1
   strategy:
     rollingUpdate:
       maxSurge: 0
@@ -1100,7 +1100,7 @@ metadata:
     app.kubernetes.io/component: ingester
     app.kubernetes.io/part-of: memberlist
 spec:
-  replicas: 3
+  replicas: 1
   podManagementPolicy: Parallel
   updateStrategy:
     rollingUpdate:
@@ -1219,7 +1219,7 @@ metadata:
     app.kubernetes.io/component: querier
     app.kubernetes.io/part-of: memberlist
 spec:
-  replicas: 3
+  replicas: 1
   podManagementPolicy: Parallel
   updateStrategy:
     rollingUpdate:
