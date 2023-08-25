@@ -113,7 +113,7 @@ data:
       wal:
         dir: /var/loki/wal
     limits_config:
-      max_query_parallelism: 24
+      max_query_parallelism: 8
       enforce_metric_name: false
       ingestion_burst_size_mb: 30
       ingestion_rate_mb: 30
@@ -137,9 +137,10 @@ data:
       max_retries: 5
       results_cache:
         cache:
-          embedded_cache:
-            enabled: true
-            ttl: 24h
+          enable_fifocache: true
+          fifocache:
+            size: 1024 
+            validity: 24h
     ruler:
       alertmanager_url: https://alertmanager.xx
       rule_path: /tmp/loki/scratch
