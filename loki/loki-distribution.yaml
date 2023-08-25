@@ -6,17 +6,12 @@ metadata:
   name: loki-distributor
   namespace: loki
   labels:
-    helm.sh/chart: loki-distributed-0.71.1
     app.kubernetes.io/name: loki
-    app.kubernetes.io/instance: loki
-    app.kubernetes.io/version: "2.8.3"
-    app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/component: distributor
 spec:
   selector:
     matchLabels:
       app.kubernetes.io/name: loki
-      app.kubernetes.io/instance: loki
       app.kubernetes.io/component: distributor
   maxUnavailable: 1
 ---
@@ -27,17 +22,12 @@ metadata:
   name: loki-ingester
   namespace: loki
   labels:
-    helm.sh/chart: loki-distributed-0.71.1
     app.kubernetes.io/name: loki
-    app.kubernetes.io/instance: loki
-    app.kubernetes.io/version: "2.8.3"
-    app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/component: ingester
 spec:
   selector:
     matchLabels:
       app.kubernetes.io/name: loki
-      app.kubernetes.io/instance: loki
       app.kubernetes.io/component: ingester
   maxUnavailable: 1
 ---
@@ -48,17 +38,12 @@ metadata:
   name: loki-querier
   namespace: loki
   labels:
-    helm.sh/chart: loki-distributed-0.71.1
     app.kubernetes.io/name: loki
-    app.kubernetes.io/instance: loki
-    app.kubernetes.io/version: "2.8.3"
-    app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/component: querier
 spec:
   selector:
     matchLabels:
       app.kubernetes.io/name: loki
-      app.kubernetes.io/instance: loki
       app.kubernetes.io/component: querier
   maxUnavailable: 1
 ---
@@ -69,17 +54,12 @@ metadata:
   name: loki-query-frontend
   namespace: loki
   labels:
-    helm.sh/chart: loki-distributed-0.71.1
     app.kubernetes.io/name: loki
-    app.kubernetes.io/instance: loki
-    app.kubernetes.io/version: "2.8.3"
-    app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/component: query-frontend
 spec:
   selector:
     matchLabels:
       app.kubernetes.io/name: loki
-      app.kubernetes.io/instance: loki
       app.kubernetes.io/component: query-frontend
   maxUnavailable: 1
 ---
@@ -90,11 +70,10 @@ metadata:
   name: loki
   namespace: loki
   labels:
-    helm.sh/chart: loki-distributed-0.71.1
     app.kubernetes.io/name: loki
-    app.kubernetes.io/instance: loki
-    app.kubernetes.io/version: "2.8.3"
-    app.kubernetes.io/managed-by: Helm
+    
+    
+    
 data:
   config.yaml: |
     auth_enabled: false
@@ -121,6 +100,7 @@ data:
       log_queries_longer_than: 5s
       tail_proxy_url: http://loki-querier.loki.svc:3100
     frontend_worker:
+      match_max_concurrent: true
       frontend_address: loki-query-frontend-headless.loki.svc:9095
     ingester:
       chunk_block_size: 262144
@@ -136,6 +116,7 @@ data:
       wal:
         dir: /var/loki/wal
     limits_config:
+      max_query_parallelism: 24
       enforce_metric_name: false
       ingestion_burst_size_mb: 30
       ingestion_rate_mb: 30
@@ -148,11 +129,15 @@ data:
     memberlist:
       join_members:
       - loki-memberlist:7946
+    querier:
+      max_concurrent: 8
+      query_timeout: 300s
+      engine:
+        timeout: 300s
     query_range:
       align_queries_with_step: true
       cache_results: true
       max_retries: 5
-      parallelise_shardable_queries: false
       results_cache:
         cache:
           embedded_cache:
@@ -196,11 +181,7 @@ kind: ConfigMap
 metadata:
   name: loki-gateway
   labels:
-    helm.sh/chart: loki-distributed-0.71.1
     app.kubernetes.io/name: loki
-    app.kubernetes.io/instance: loki
-    app.kubernetes.io/version: "2.8.3"
-    app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/component: gateway
 data:
   nginx.conf: |
@@ -308,11 +289,7 @@ metadata:
   name: loki-runtime
   namespace: loki
   labels:
-    helm.sh/chart: loki-distributed-0.71.1
     app.kubernetes.io/name: loki
-    app.kubernetes.io/instance: loki
-    app.kubernetes.io/version: "2.8.3"
-    app.kubernetes.io/managed-by: Helm
 data:
   runtime.yaml: |
     
@@ -325,11 +302,7 @@ metadata:
   name: loki-compactor
   namespace: loki
   labels:
-    helm.sh/chart: loki-distributed-0.71.1
     app.kubernetes.io/name: loki
-    app.kubernetes.io/instance: loki
-    app.kubernetes.io/version: "2.8.3"
-    app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/component: compactor
 spec:
   type: ClusterIP
@@ -344,7 +317,7 @@ spec:
       protocol: TCP
   selector:
     app.kubernetes.io/name: loki
-    app.kubernetes.io/instance: loki
+    
     app.kubernetes.io/component: compactor
 ---
 # Source: loki-distributed/templates/distributor/service-distributor.yaml
@@ -354,11 +327,7 @@ metadata:
   name: loki-distributor
   namespace: loki
   labels:
-    helm.sh/chart: loki-distributed-0.71.1
     app.kubernetes.io/name: loki
-    app.kubernetes.io/instance: loki
-    app.kubernetes.io/version: "2.8.3"
-    app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/component: distributor
 spec:
   type: ClusterIP
@@ -373,7 +342,6 @@ spec:
       protocol: TCP
   selector:
     app.kubernetes.io/name: loki
-    app.kubernetes.io/instance: loki
     app.kubernetes.io/component: distributor
 ---
 # Source: loki-distributed/templates/gateway/service-gateway.yaml
@@ -382,11 +350,7 @@ kind: Service
 metadata:
   name: loki-gateway
   labels:
-    helm.sh/chart: loki-distributed-0.71.1
     app.kubernetes.io/name: loki
-    app.kubernetes.io/instance: loki
-    app.kubernetes.io/version: "2.8.3"
-    app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/component: gateway
 spec:
   type: ClusterIP
@@ -397,7 +361,6 @@ spec:
       protocol: TCP
   selector:
     app.kubernetes.io/name: loki
-    app.kubernetes.io/instance: loki
     app.kubernetes.io/component: gateway
 ---
 # Source: loki-distributed/templates/ingester/service-ingester-headless.yaml
@@ -408,9 +371,7 @@ metadata:
   namespace: loki
   labels:
     app.kubernetes.io/name: loki
-    app.kubernetes.io/instance: loki
     app.kubernetes.io/component: ingester
-    prometheus.io/service-monitor: "false"
 spec:
   type: ClusterIP
   clusterIP: None
@@ -425,7 +386,6 @@ spec:
       protocol: TCP
   selector:
     app.kubernetes.io/name: loki
-    app.kubernetes.io/instance: loki
     app.kubernetes.io/component: ingester
 ---
 # Source: loki-distributed/templates/ingester/service-ingester.yaml
@@ -435,11 +395,7 @@ metadata:
   name: loki-ingester
   namespace: loki
   labels:
-    helm.sh/chart: loki-distributed-0.71.1
     app.kubernetes.io/name: loki
-    app.kubernetes.io/instance: loki
-    app.kubernetes.io/version: "2.8.3"
-    app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/component: ingester
 spec:
   type: ClusterIP
@@ -454,7 +410,6 @@ spec:
       protocol: TCP
   selector:
     app.kubernetes.io/name: loki
-    app.kubernetes.io/instance: loki
     app.kubernetes.io/component: ingester
 ---
 # Source: loki-distributed/templates/querier/service-querier-headless.yaml
@@ -465,9 +420,7 @@ metadata:
   namespace: loki
   labels:
     app.kubernetes.io/name: loki
-    app.kubernetes.io/instance: loki
     app.kubernetes.io/component: querier
-    prometheus.io/service-monitor: "false"
 spec:
   type: ClusterIP
   clusterIP: None
@@ -482,7 +435,6 @@ spec:
       protocol: TCP
   selector:
     app.kubernetes.io/name: loki
-    app.kubernetes.io/instance: loki
     app.kubernetes.io/component: querier
 ---
 # Source: loki-distributed/templates/querier/service-querier.yaml
@@ -492,11 +444,7 @@ metadata:
   name: loki-querier
   namespace: loki
   labels:
-    helm.sh/chart: loki-distributed-0.71.1
     app.kubernetes.io/name: loki
-    app.kubernetes.io/instance: loki
-    app.kubernetes.io/version: "2.8.3"
-    app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/component: querier
 spec:
   type: ClusterIP
@@ -511,7 +459,6 @@ spec:
       protocol: TCP
   selector:
     app.kubernetes.io/name: loki
-    app.kubernetes.io/instance: loki
     app.kubernetes.io/component: querier
 ---
 # Source: loki-distributed/templates/query-frontend/service-query-frontend-headless.yaml
@@ -521,13 +468,8 @@ metadata:
   name: loki-query-frontend-headless
   namespace: loki
   labels:
-    helm.sh/chart: loki-distributed-0.71.1
     app.kubernetes.io/name: loki
-    app.kubernetes.io/instance: loki
-    app.kubernetes.io/version: "2.8.3"
-    app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/component: query-frontend
-    prometheus.io/service-monitor: "false"
 spec:
   clusterIP: None
   type: ClusterIP
@@ -547,7 +489,6 @@ spec:
       protocol: TCP
   selector:
     app.kubernetes.io/name: loki
-    app.kubernetes.io/instance: loki
     app.kubernetes.io/component: query-frontend
 ---
 # Source: loki-distributed/templates/query-frontend/service-query-frontend.yaml
@@ -557,11 +498,7 @@ metadata:
   name: loki-query-frontend
   namespace: loki
   labels:
-    helm.sh/chart: loki-distributed-0.71.1
     app.kubernetes.io/name: loki
-    app.kubernetes.io/instance: loki
-    app.kubernetes.io/version: "2.8.3"
-    app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/component: query-frontend
 spec:
   type: ClusterIP
@@ -581,7 +518,6 @@ spec:
       protocol: TCP
   selector:
     app.kubernetes.io/name: loki
-    app.kubernetes.io/instance: loki
     app.kubernetes.io/component: query-frontend
 ---
 # Source: loki-distributed/templates/ruler/service-ruler.yaml
@@ -591,7 +527,6 @@ metadata:
   name: loki-ruler
   labels:
     app.kubernetes.io/name: loki
-    app.kubernetes.io/instance: loki
     app.kubernetes.io/component: ruler
 spec:
   type: ClusterIP
@@ -607,7 +542,6 @@ spec:
       protocol: TCP
   selector:
     app.kubernetes.io/name: loki
-    app.kubernetes.io/instance: loki
     app.kubernetes.io/component: ruler
 ---
 # Source: loki-distributed/templates/service-memberlist.yaml
@@ -617,11 +551,7 @@ metadata:
   name: loki-memberlist
   namespace: loki
   labels:
-    helm.sh/chart: loki-distributed-0.71.1
     app.kubernetes.io/name: loki
-    app.kubernetes.io/instance: loki
-    app.kubernetes.io/version: "2.8.3"
-    app.kubernetes.io/managed-by: Helm
 spec:
   type: ClusterIP
   clusterIP: None
@@ -632,7 +562,6 @@ spec:
       protocol: TCP
   selector:
     app.kubernetes.io/name: loki
-    app.kubernetes.io/instance: loki
     app.kubernetes.io/part-of: memberlist
 ---
 # Source: loki-distributed/templates/compactor/deployment-compactor.yaml
@@ -642,11 +571,7 @@ metadata:
   name: loki-compactor
   namespace: loki
   labels:
-    helm.sh/chart: loki-distributed-0.71.1
     app.kubernetes.io/name: loki
-    app.kubernetes.io/instance: loki
-    app.kubernetes.io/version: "2.8.3"
-    app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/component: compactor
 spec:
   replicas: 1
@@ -656,15 +581,11 @@ spec:
   selector:
     matchLabels:
       app.kubernetes.io/name: loki
-      app.kubernetes.io/instance: loki
       app.kubernetes.io/component: compactor
   template:
     metadata:
-      annotations:
-        checksum/config: 992d5475b76e512ade123ae6feb4df894dff01356bb20b17d53c779f6c731934
       labels:
         app.kubernetes.io/name: loki
-        app.kubernetes.io/instance: loki
         app.kubernetes.io/component: compactor
         app.kubernetes.io/part-of: memberlist
     spec:
@@ -728,7 +649,7 @@ spec:
             - labelSelector:
                 matchLabels:
                   app.kubernetes.io/name: loki
-                  app.kubernetes.io/instance: loki
+                  
                   app.kubernetes.io/component: compactor
               topologyKey: kubernetes.io/hostname
           preferredDuringSchedulingIgnoredDuringExecution:
@@ -737,7 +658,7 @@ spec:
                 labelSelector:
                   matchLabels:
                     app.kubernetes.io/name: loki
-                    app.kubernetes.io/instance: loki
+                    
                     app.kubernetes.io/component: compactor
                 topologyKey: failure-domain.beta.kubernetes.io/zone
         
@@ -760,11 +681,7 @@ metadata:
   name: loki-distributor
   namespace: loki
   labels:
-    helm.sh/chart: loki-distributed-0.71.1
     app.kubernetes.io/name: loki
-    app.kubernetes.io/instance: loki
-    app.kubernetes.io/version: "2.8.3"
-    app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/component: distributor
     app.kubernetes.io/part-of: memberlist
 spec:
@@ -777,15 +694,12 @@ spec:
   selector:
     matchLabels:
       app.kubernetes.io/name: loki
-      app.kubernetes.io/instance: loki
+      
       app.kubernetes.io/component: distributor
   template:
     metadata:
-      annotations:
-        checksum/config: 992d5475b76e512ade123ae6feb4df894dff01356bb20b17d53c779f6c731934
       labels:
         app.kubernetes.io/name: loki
-        app.kubernetes.io/instance: loki
         app.kubernetes.io/component: distributor
         app.kubernetes.io/part-of: memberlist
     spec:
@@ -844,7 +758,7 @@ spec:
             - labelSelector:
                 matchLabels:
                   app.kubernetes.io/name: loki
-                  app.kubernetes.io/instance: loki
+                  
                   app.kubernetes.io/component: distributor
               topologyKey: kubernetes.io/hostname
           preferredDuringSchedulingIgnoredDuringExecution:
@@ -853,7 +767,7 @@ spec:
                 labelSelector:
                   matchLabels:
                     app.kubernetes.io/name: loki
-                    app.kubernetes.io/instance: loki
+                    
                     app.kubernetes.io/component: distributor
                 topologyKey: failure-domain.beta.kubernetes.io/zone
         
@@ -871,11 +785,7 @@ kind: Deployment
 metadata:
   name: loki-gateway
   labels:
-    helm.sh/chart: loki-distributed-0.71.1
     app.kubernetes.io/name: loki
-    app.kubernetes.io/instance: loki
-    app.kubernetes.io/version: "2.8.3"
-    app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/component: gateway
 spec:
   replicas: 1
@@ -885,7 +795,6 @@ spec:
   selector:
     matchLabels:
       app.kubernetes.io/name: loki
-      app.kubernetes.io/instance: loki
       app.kubernetes.io/component: gateway
   template:
     metadata:
@@ -893,7 +802,6 @@ spec:
         checksum/config: 06bad33205607ea06d831bed8a49719cd59730abf5c000925d450a3779fbdda4
       labels:
         app.kubernetes.io/name: loki
-        app.kubernetes.io/instance: loki
         app.kubernetes.io/component: gateway
     spec:
       serviceAccountName: default
@@ -944,7 +852,7 @@ spec:
             - labelSelector:
                 matchLabels:
                   app.kubernetes.io/name: loki
-                  app.kubernetes.io/instance: loki
+                  
                   app.kubernetes.io/component: gateway
               topologyKey: kubernetes.io/hostname
           preferredDuringSchedulingIgnoredDuringExecution:
@@ -953,7 +861,7 @@ spec:
                 labelSelector:
                   matchLabels:
                     app.kubernetes.io/name: loki
-                    app.kubernetes.io/instance: loki
+                    
                     app.kubernetes.io/component: gateway
                 topologyKey: failure-domain.beta.kubernetes.io/zone
         
@@ -973,11 +881,7 @@ metadata:
   name: loki-query-frontend
   namespace: loki
   labels:
-    helm.sh/chart: loki-distributed-0.71.1
     app.kubernetes.io/name: loki
-    app.kubernetes.io/instance: loki
-    app.kubernetes.io/version: "2.8.3"
-    app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/component: query-frontend
 spec:
   replicas: 3
@@ -989,7 +893,6 @@ spec:
   selector:
     matchLabels:
       app.kubernetes.io/name: loki
-      app.kubernetes.io/instance: loki
       app.kubernetes.io/component: query-frontend
   template:
     metadata:
@@ -997,7 +900,6 @@ spec:
         checksum/config: 992d5475b76e512ade123ae6feb4df894dff01356bb20b17d53c779f6c731934
       labels:
         app.kubernetes.io/name: loki
-        app.kubernetes.io/instance: loki
         app.kubernetes.io/component: query-frontend
     spec:
       serviceAccountName: default
@@ -1052,7 +954,7 @@ spec:
             - labelSelector:
                 matchLabels:
                   app.kubernetes.io/name: loki
-                  app.kubernetes.io/instance: loki
+                  
                   app.kubernetes.io/component: query-frontend
               topologyKey: kubernetes.io/hostname
           preferredDuringSchedulingIgnoredDuringExecution:
@@ -1061,7 +963,7 @@ spec:
                 labelSelector:
                   matchLabels:
                     app.kubernetes.io/name: loki
-                    app.kubernetes.io/instance: loki
+                    
                     app.kubernetes.io/component: query-frontend
                 topologyKey: failure-domain.beta.kubernetes.io/zone
         
@@ -1079,11 +981,7 @@ kind: Deployment
 metadata:
   name: loki-ruler
   labels:
-    helm.sh/chart: loki-distributed-0.71.1
     app.kubernetes.io/name: loki
-    app.kubernetes.io/instance: loki
-    app.kubernetes.io/version: "2.8.3"
-    app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/component: ruler
     app.kubernetes.io/part-of: memberlist
 spec:
@@ -1096,7 +994,7 @@ spec:
   selector:
     matchLabels:
       app.kubernetes.io/name: loki
-      app.kubernetes.io/instance: loki
+      
       app.kubernetes.io/component: ruler
   template:
     metadata:
@@ -1104,7 +1002,7 @@ spec:
         checksum/config: 992d5475b76e512ade123ae6feb4df894dff01356bb20b17d53c779f6c731934
       labels:
         app.kubernetes.io/name: loki
-        app.kubernetes.io/instance: loki
+        
         app.kubernetes.io/component: ruler
         app.kubernetes.io/part-of: memberlist
     spec:
@@ -1167,7 +1065,7 @@ spec:
             - labelSelector:
                 matchLabels:
                   app.kubernetes.io/name: loki
-                  app.kubernetes.io/instance: loki
+                  
                   app.kubernetes.io/component: ruler
               topologyKey: kubernetes.io/hostname
           preferredDuringSchedulingIgnoredDuringExecution:
@@ -1176,7 +1074,6 @@ spec:
                 labelSelector:
                   matchLabels:
                     app.kubernetes.io/name: loki
-                    app.kubernetes.io/instance: loki
                     app.kubernetes.io/component: ruler
                 topologyKey: failure-domain.beta.kubernetes.io/zone
         
@@ -1199,11 +1096,7 @@ metadata:
   name: loki-ingester
   namespace: loki
   labels:
-    helm.sh/chart: loki-distributed-0.71.1
     app.kubernetes.io/name: loki
-    app.kubernetes.io/instance: loki
-    app.kubernetes.io/version: "2.8.3"
-    app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/component: ingester
     app.kubernetes.io/part-of: memberlist
 spec:
@@ -1217,7 +1110,6 @@ spec:
   selector:
     matchLabels:
       app.kubernetes.io/name: loki
-      app.kubernetes.io/instance: loki
       app.kubernetes.io/component: ingester
   template:
     metadata:
@@ -1225,7 +1117,6 @@ spec:
         checksum/config: 992d5475b76e512ade123ae6feb4df894dff01356bb20b17d53c779f6c731934
       labels:
         app.kubernetes.io/name: loki
-        app.kubernetes.io/instance: loki
         app.kubernetes.io/component: ingester
         app.kubernetes.io/part-of: memberlist
     spec:
@@ -1236,7 +1127,6 @@ spec:
           labelSelector:
             matchLabels:
               app.kubernetes.io/name: loki
-              app.kubernetes.io/instance: loki
               app.kubernetes.io/component: ingester
         
       serviceAccountName: default
@@ -1296,7 +1186,6 @@ spec:
             - labelSelector:
                 matchLabels:
                   app.kubernetes.io/name: loki
-                  app.kubernetes.io/instance: loki
                   app.kubernetes.io/component: ingester
               topologyKey: kubernetes.io/hostname
           preferredDuringSchedulingIgnoredDuringExecution:
@@ -1305,7 +1194,7 @@ spec:
                 labelSelector:
                   matchLabels:
                     app.kubernetes.io/name: loki
-                    app.kubernetes.io/instance: loki
+                    
                     app.kubernetes.io/component: ingester
                 topologyKey: failure-domain.beta.kubernetes.io/zone
         
@@ -1326,11 +1215,7 @@ metadata:
   name: loki-querier
   namespace: loki
   labels:
-    helm.sh/chart: loki-distributed-0.71.1
     app.kubernetes.io/name: loki
-    app.kubernetes.io/instance: loki
-    app.kubernetes.io/version: "2.8.3"
-    app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/component: querier
     app.kubernetes.io/part-of: memberlist
 spec:
@@ -1344,7 +1229,6 @@ spec:
   selector:
     matchLabels:
       app.kubernetes.io/name: loki
-      app.kubernetes.io/instance: loki
       app.kubernetes.io/component: querier
   template:
     metadata:
@@ -1352,7 +1236,6 @@ spec:
         checksum/config: 992d5475b76e512ade123ae6feb4df894dff01356bb20b17d53c779f6c731934
       labels:
         app.kubernetes.io/name: loki
-        app.kubernetes.io/instance: loki
         app.kubernetes.io/component: querier
         app.kubernetes.io/part-of: memberlist
     spec:
@@ -1363,7 +1246,6 @@ spec:
           labelSelector:
             matchLabels:
               app.kubernetes.io/name: loki
-              app.kubernetes.io/instance: loki
               app.kubernetes.io/component: querier
         
       serviceAccountName: default
@@ -1423,7 +1305,7 @@ spec:
             - labelSelector:
                 matchLabels:
                   app.kubernetes.io/name: loki
-                  app.kubernetes.io/instance: loki
+                  
                   app.kubernetes.io/component: querier
               topologyKey: kubernetes.io/hostname
           preferredDuringSchedulingIgnoredDuringExecution:
@@ -1432,7 +1314,7 @@ spec:
                 labelSelector:
                   matchLabels:
                     app.kubernetes.io/name: loki
-                    app.kubernetes.io/instance: loki
+                    
                     app.kubernetes.io/component: querier
                 topologyKey: failure-domain.beta.kubernetes.io/zone
         
