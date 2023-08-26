@@ -1,6 +1,6 @@
 # Source: loki-distributed/templates/prometheusrule.yaml
-apiVersion: monitoring.coreos.com/v1
-kind: PrometheusRule
+apiVersion: operator.victoriametrics.com/v1beta1
+kind: VMRule
 metadata:
   name: loki
   namespace: monitoring
@@ -62,8 +62,8 @@ spec:
         record: cluster_namespace_job_route:loki_request_duration_seconds_count:sum_rate
 ---
 # Source: loki-distributed/templates/distributor/servicemonitor-distributor.yaml
-apiVersion: monitoring.coreos.com/v1
-kind: ServiceMonitor
+apiVersion: operator.victoriametrics.com/v1beta1
+kind: VMServiceScrape
 metadata:
   name: loki-distributor
   namespace: monitoring
@@ -78,10 +78,13 @@ spec:
   endpoints:
     - port: http
       scheme: http
+  namespaceSelector:
+    matchNames:
+      - loki
 ---
 # Source: loki-distributed/templates/ingester/servicemonitor-ingester.yaml
-apiVersion: monitoring.coreos.com/v1
-kind: ServiceMonitor
+apiVersion: operator.victoriametrics.com/v1beta1
+kind: VMServiceScrape
 metadata:
   name: loki-ingester
   namespace: monitoring
@@ -101,10 +104,13 @@ spec:
   endpoints:
     - port: http
       scheme: http
+  namespaceSelector:
+    matchNames:
+      - loki
 ---
 # Source: loki-distributed/templates/querier/servicemonitor-querier.yaml
-apiVersion: monitoring.coreos.com/v1
-kind: ServiceMonitor
+apiVersion: operator.victoriametrics.com/v1beta1
+kind: VMServiceScrape
 metadata:
   name: loki-querier
   namespace: monitoring
@@ -124,10 +130,13 @@ spec:
   endpoints:
     - port: http
       scheme: http
+  namespaceSelector:
+    matchNames:
+      - loki
 ---
 # Source: loki-distributed/templates/query-frontend/servicemonitor-query-frontend.yaml
-apiVersion: monitoring.coreos.com/v1
-kind: ServiceMonitor
+apiVersion: operator.victoriametrics.com/v1beta1
+kind: VMServiceScrape
 metadata:
   name: loki-query-frontend
   namespace: monitoring
@@ -142,3 +151,6 @@ spec:
   endpoints:
     - port: http
       scheme: http
+  namespaceSelector:
+    matchNames:
+      - loki
