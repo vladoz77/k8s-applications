@@ -24,15 +24,15 @@ alertmanager:
   spec:
     image:
       tag: v0.25.0
-  storage:
-    volumeClaimTemplate:
-    - metadata:
-        name: alertmanager-storage
-      spec:
-        accessModes: ["ReadWriteOnce"]
-        resources:
-          requests:
-            storage: 1Gi
+    storage:
+      volumeClaimTemplate:
+        metadata:
+          name: alertmanager-storage
+        spec:
+          accessModes: ["ReadWriteOnce"]
+          resources:
+            requests:
+              storage: 1Gi
 
 vmalert:
   enabled: true
@@ -56,7 +56,7 @@ grafana:
       tlsSkipVerify: true
     orgId: 1
     type: loki
-    url: http://loki-query-frontend.loki.svc.cluster.local:3100
+    url: http://loki-gateway.loki.svc.cluster.local
     version: 1
 
 
