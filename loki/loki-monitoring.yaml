@@ -99,6 +99,10 @@ spec:
   endpoints:
     - port: http
       scheme: http
+      relabelConfigs:
+        - action: keep
+          source_labels: [__meta_kubernetes_service_name]
+          regex: loki-ingester
   namespaceSelector:
     matchNames:
       - loki
@@ -120,6 +124,10 @@ spec:
   endpoints:
     - port: http
       scheme: http
+      relabelConfigs:
+        - action: keep
+          source_labels: [__meta_kubernetes_service_name]
+          regex: loki-querier
   namespaceSelector:
     matchNames:
       - loki
@@ -141,10 +149,10 @@ spec:
   endpoints:
     - port: http
       scheme: http
-      # relabelConfigs:
-      #   - action: keep
-      #     source_labels: [__meta_kubernetes_service_name]
-      #     regex: loki-query-frontend
+      relabelConfigs:
+        - action: keep
+          source_labels: [__meta_kubernetes_service_name]
+          regex: loki-query-frontend
   namespaceSelector:
     matchNames:
       - loki

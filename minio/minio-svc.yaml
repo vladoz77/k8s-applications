@@ -29,6 +29,20 @@ spec:
     - name: minio-api
       port: 9000
       targetPort: minio-api
+  selector:
+    app.kubernetes.io/name: minio
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: minio-console
+  namespace: minio
+  labels:
+    app.kubernetes.io/name: minio-svc
+spec:
+  type: ClusterIP
+  ports:
     - name: minio-console
       port: 9001
       targetPort: minio-console
