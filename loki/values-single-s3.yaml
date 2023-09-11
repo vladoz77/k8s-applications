@@ -27,8 +27,11 @@ loki:
       object_store: s3
       schema: v12
 write:
-  replicas: 2
+  replicas: 1
 read:
+  replicas: 1
+minio:
+  enabled: true
   replicas: 1
 
 test:
