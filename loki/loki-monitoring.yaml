@@ -96,11 +96,6 @@ spec:
     matchLabels:
       app.kubernetes.io/name: loki
       app.kubernetes.io/component: ingester
-    matchExpressions:
-      - key: prometheus.io/service-monitor
-        operator: NotIn
-        values:
-          - "false"
   endpoints:
     - port: http
       scheme: http
@@ -122,11 +117,6 @@ spec:
     matchLabels:
       app.kubernetes.io/name: loki
       app.kubernetes.io/component: querier
-    matchExpressions:
-      - key: prometheus.io/service-monitor
-        operator: NotIn
-        values:
-          - "false"
   endpoints:
     - port: http
       scheme: http
@@ -151,6 +141,11 @@ spec:
   endpoints:
     - port: http
       scheme: http
+      # relabelConfigs:
+      #   - action: keep
+      #     source_labels: [__meta_kubernetes_service_name]
+      #     regex: loki-query-frontend
   namespaceSelector:
     matchNames:
       - loki
+
