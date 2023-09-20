@@ -12,10 +12,10 @@ global:
   dnsNamespace: "kube-system"
 
 # -- Overrides the chart's name
-nameOverride: loki
+nameOverride: null
 
 # -- Overrides the chart's computed fullname
-fullnameOverride: loki
+fullnameOverride: null
 
 # -- Image pull secrets for Docker images
 imagePullSecrets: []
@@ -76,6 +76,8 @@ loki:
     allowPrivilegeEscalation: false
   # -- Specify an existing secret containing loki configuration. If non-empty, overrides `loki.config`
   existingSecretForConfig: ""
+  # -- Store the loki configuration as a secret.
+  configAsSecret: false
   # -- Adds the appProtocol field to the memberlist service. This allows memberlist to work with istio protocol selection. Ex: "http" or "tcp"
   appProtocol: ""
   # -- Common annotations for all loki services
@@ -95,17 +97,6 @@ loki:
 
     common:
       compactor_address: http://{{ include "loki.compactorFullname" . }}:3100
-      path_prefix: /var/loki
-      replication_factor: 1
-      storage:
-        s3:
-          bucketnames: chunks
-          endpoint: minio-svc.minio.svc:9000
-          access_key_id: admin
-          secret_access_key: password
-          insecure: true
-          s3forcepathstyle: true
-          
 
     distributor:
       ring:
@@ -115,6 +106,10 @@ loki:
     memberlist:
       join_members:
         - {{ include "loki.fullname" . }}-memberlist
+
+    ingester_client:
+      grpc_client_config:
+        grpc_compression: gzip
 
     ingester:
       lifecycler:
@@ -212,14 +207,13 @@ loki:
       tail_proxy_url: http://{{ include "loki.querierFullname" . }}:3100
 
     compactor:
-      shared_store: s3
-      working_directory: /tmp/loki/boltdb-shipper-compactor
+      shared_store: filesystem
 
     ruler:
       storage:
-        type: s3
-        s3:
-          bucketnames: ruler
+        type: local
+        local:
+          directory: /etc/loki/rules
       ring:
         kvstore:
           store: memberlist
@@ -232,7 +226,7 @@ loki:
     configs:
     - from: 2020-09-07
       store: boltdb-shipper
-      object_store: s3
+      object_store: filesystem
       schema: v11
       index:
         prefix: loki_index_
@@ -241,10 +235,12 @@ loki:
   # -- Check https://grafana.com/docs/loki/latest/configuration/#storage_config for more info on how to configure storages
   storageConfig:
     boltdb_shipper:
-      shared_store: s3
+      shared_store: filesystem
       active_index_directory: /var/loki/index
       cache_location: /var/loki/cache
       cache_ttl: 168h
+    filesystem:
+      directory: /var/loki/chunks
 # -- Uncomment to configure each storage individually
 #   azure: {}
 #   gcs: {}
@@ -484,8 +480,8 @@ ingester:
     enabled: false
     # -- Use emptyDir with ramdisk for storage. **Please note that all data in ingester will be lost on pod restart**
     inMemory: false
-      # -- List of the ingester PVCs
-      # @notationType -- list
+    # -- List of the ingester PVCs
+    # @notationType -- list
     claims:
       - name: data
         size: 10Gi
@@ -1269,7 +1265,7 @@ gateway:
 # Configuration for the compactor
 compactor:
   # -- Specifies whether compactor should be enabled
-  enabled: true
+  enabled: false
   # -- hostAliases to add
   hostAliases: []
   #  - ip: 1.2.3.4
@@ -1720,6 +1716,10 @@ memcachedChunks:
     # If empty or set to null, no storageClassName spec is
     # set, choosing the default provisioner (gp2 on AWS, standard on GKE, AWS, and OpenStack).
     storageClass: null
+  # -- List of additional PVCs to be created for the memcached-chunks statefulset
+  volumeClaimTemplates: []
+  # -- List of additional volumes to be mounted for the memcached-chunks statefulset
+  extraVolumeMounts: []
 
 memcachedFrontend:
   # -- Specifies whether the Memcached frontend cache should be enabled

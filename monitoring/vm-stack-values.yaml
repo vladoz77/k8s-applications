@@ -10,7 +10,7 @@ vmsingle:
   enabled: true
   spec:
     image:
-      tag: v1.93.0
+      tag: v1.93.4
     replicaCount: 1
     storage:
       accessModes:
@@ -38,13 +38,13 @@ vmalert:
   enabled: true
   spec:
     image:
-      tag: v1.93.0
+      tag: v1.93.4
 
 vmagent:
   enabled: true
   spec:
     image:
-      tag: v1.93.0
+      tag: v1.93.4
 
 grafana:
   enabled: true

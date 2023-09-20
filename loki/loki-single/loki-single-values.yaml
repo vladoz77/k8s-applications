@@ -56,6 +56,10 @@ loki:
   podAnnotations: {}
   # -- Common labels for all pods
   podLabels: {}
+  # -- Common annotations for all services
+  serviceAnnotations: {}
+  # -- Common labels for all services
+  serviceLabels: {}
   # -- The number of old ReplicaSets to retain to allow rollback
   revisionHistoryLimit: 10
   # -- The SecurityContext for Loki pods
@@ -69,7 +73,7 @@ loki:
     readOnlyRootFilesystem: true
     capabilities:
       drop:
-      - ALL
+        - ALL
     allowPrivilegeEscalation: false
   # -- Should enableServiceLinks be enabled. Default to enable
   enableServiceLinks: true
@@ -166,9 +170,11 @@ loki:
 
     {{ include "loki.rulerConfig" . }}
 
+    {{- if or .Values.tableManager.retention_deletes_enabled .Values.tableManager.retention_period }}
     table_manager:
       retention_deletes_enabled: {{ .Values.tableManager.retention_deletes_enabled }}
       retention_period: {{ .Values.tableManager.retention_period }}
+    {{- end }}
 
     {{- with .Values.loki.memcached.results_cache }}
     query_range:
@@ -253,25 +259,21 @@ loki:
   # -- Check https://grafana.com/docs/loki/latest/configuration/#common_config for more info on how to provide a common configuration
   commonConfig:
     path_prefix: /var/loki
-    replication_factor: 1
+    replication_factor: 3
     compactor_address: '{{ include "loki.compactorAddress" . }}'
   # -- Storage config. Providing this will automatically populate all necessary storage configs in the templated config.
   storage:
     bucketNames:
       chunks: chunks
       ruler: ruler
-      admin: admin
-    type: filesystem
+      
+    type: s3
     s3:
-      s3: null
-      endpoint: null
-      region: null
-      secretAccessKey: null
-      accessKeyId: null
-      signatureVersion: null
-      s3ForcePathStyle: false
-      insecure: false
-      http_config: {}
+      access_key_id: admin
+      endpoint: minio-svc.minio.svc.cluster.local:9000
+      insecure: true
+      s3forcepathstyle: true
+      secret_access_key: password
     gcs:
       chunkBufferSize: 0
       requestTimeout: "0s"
@@ -335,7 +337,7 @@ enterprise:
   # Enable enterprise features, license must be provided
   enabled: false
   # Default verion of GEL to deploy
-  version: v1.7.3
+  version: v1.8.1
   # -- Optional name of the GEL cluster, otherwise will use .Release.Name
   # The cluster name must match what is in your GEL license
   cluster_name: null
@@ -492,6 +494,14 @@ rbac:
   pspEnabled: false
   # -- For OpenShift set pspEnabled to 'false' and sccEnabled to 'true' to use the SecurityContextConstraints.
   sccEnabled: false
+  # -- Specify PSP annotations
+  # Ref: https://kubernetes.io/docs/reference/access-authn-authz/psp-to-pod-security-standards/#podsecuritypolicy-annotations
+  pspAnnotations: {}
+  # seccomp.security.alpha.kubernetes.io/allowedProfileNames: '*'
+  # seccomp.security.alpha.kubernetes.io/defaultProfileName: 'docker/default'
+  # apparmor.security.beta.kubernetes.io/defaultProfileName: 'runtime/default'
+  # -- Whether to install RBAC in the namespace only or cluster-wide. Useful if you want to watch ConfigMap globally.
+  namespaced: false
 # -- Section for configuring optional Helm test
 test:
   enabled: false
@@ -533,7 +543,7 @@ monitoring:
     # -- If enabled, create PrometheusRule resource with Loki recording rules
     enabled: false
     # -- Include alerting rules
-    alerting: false
+    alerting: true
     # -- Alternative namespace to create PrometheusRule resources in
     namespace: null
     # -- Additional annotations for the rules PrometheusRule resource
@@ -581,7 +591,7 @@ monitoring:
     # -- If defined, will create a MetricsInstance for the Grafana Agent Operator.
     metricsInstance:
       # -- If enabled, MetricsInstance resources for Grafana Agent Operator are created
-      enabled: false
+      enabled: true
       # -- MetricsInstance annotations
       annotations: {}
       # -- Additional MetricsInstance labels
@@ -643,6 +653,11 @@ monitoring:
     annotations: {}
     # -- Additional labels for each `loki-canary` pod
     podLabels: {}
+    service:
+      # -- Annotations for loki-canary Service
+      annotations: {}
+      # -- Additional labels for loki-canary Service
+      labels: {}
     # -- Additional CLI arguments for the `loki-canary' command
     extraArgs: []
     # -- Environment variables to add to the canary pods
@@ -651,6 +666,8 @@ monitoring:
     extraEnvFrom: []
     # -- Resource requests and limits for the canary
     resources: {}
+    # -- DNS config for canary pods
+    dnsConfig: {}
     # -- Node selector for canary pods
     nodeSelector: {}
     # -- Tolerations for canary pods
@@ -677,14 +694,14 @@ monitoring:
 # Configuration for the write pod(s)
 write:
   # -- Number of replicas for the write
-  replicas: 3
+  replicas: 1
   autoscaling:
     # -- Enable autoscaling for the write.
-    enabled: false
+    enabled: true
     # -- Minimum autoscaling replicas for the write.
     minReplicas: 1
     # -- Maximum autoscaling replicas for the write.
-    maxReplicas: 3
+    maxReplicas: 6
     # -- Target CPU utilisation percentage for the write.
     targetCPUUtilizationPercentage: 60
     # -- Target memory utilization percentage for the write.
@@ -694,14 +711,14 @@ write:
       # -- see https://github.com/grafana/loki/blob/main/docs/sources/operations/storage/wal.md#how-to-scale-updown for scaledown details
       scaleUp:
         policies:
-        - type: Pods
-          value: 1
-          periodSeconds: 900
+          - type: Pods
+            value: 1
+            periodSeconds: 900
       scaleDown:
         policies:
-        - type: Pods
-          value: 1
-          periodSeconds: 1800
+          - type: Pods
+            value: 1
+            periodSeconds: 1800
         stabilizationWindowSeconds: 3600
   image:
     # -- The Docker registry for the write image. Overrides `loki.image.registry`
@@ -720,8 +737,11 @@ write:
   podLabels: {}
   # -- Additional selector labels for each `write` pod
   selectorLabels: {}
-  # -- Labels for ingester service
-  serviceLabels: {}
+  service:
+    # -- Annotations for write Service
+    annotations: {}
+    # -- Additional labels for write Service
+    labels: {}
   # -- Comma-separated list of Loki modules to load for the write
   targetModule: "write"
   # -- Additional CLI args for the write
@@ -760,6 +780,8 @@ write:
             matchLabels:
               {{- include "loki.writeSelectorLabels" . | nindent 10 }}
           topologyKey: kubernetes.io/hostname
+  # -- DNS config for write pods
+  dnsConfig: {}
   # -- Node selector for write pods
   nodeSelector: {}
   # -- Tolerations for write pods
@@ -800,8 +822,11 @@ tableManager:
   annotations: {}
   # -- Annotations for table-manager pods
   podAnnotations: {}
-  # -- Labels for table-manager service
-  serviceLabels: {}
+  service:
+    # -- Annotations for table-manager Service
+    annotations: {}
+    # -- Additional labels for table-manager Service
+    labels: {}
   # -- Additional CLI args for the table-manager
   extraArgs: []
   # -- Environment variables to add to the table-manager pods
@@ -834,6 +859,8 @@ tableManager:
               matchLabels:
                 {{- include "loki.tableManagerSelectorLabels" . | nindent 12 }}
             topologyKey: failure-domain.beta.kubernetes.io/zone
+  # -- DNS config table-manager pods
+  dnsConfig: {}
   # -- Node selector for table-manager pods
   nodeSelector: {}
   # -- Tolerations for table-manager pods
@@ -845,14 +872,14 @@ tableManager:
 # Configuration for the read pod(s)
 read:
   # -- Number of replicas for the read
-  replicas: 3
+  replicas: 1
   autoscaling:
     # -- Enable autoscaling for the read, this is only used if `queryIndex.enabled: true`
-    enabled: false
+    enabled: true
     # -- Minimum autoscaling replicas for the read
     minReplicas: 1
     # -- Maximum autoscaling replicas for the read
-    maxReplicas: 3
+    maxReplicas: 6
     # -- Target CPU utilisation percentage for the read
     targetCPUUtilizationPercentage: 60
     # -- Target memory utilisation percentage for the read
@@ -888,8 +915,11 @@ read:
   podLabels: {}
   # -- Additional selector labels for each `read` pod
   selectorLabels: {}
-  # -- Labels for read service
-  serviceLabels: {}
+  service:
+    # -- Annotations for read Service
+    annotations: {}
+    # -- Additional labels for read Service
+    labels: {}
   # -- Comma-separated list of Loki modules to load for the read
   targetModule: "read"
   # -- Whether or not to use the 2 target type simple scalable mode (read, write) or the
@@ -921,6 +951,8 @@ read:
             matchLabels:
               {{- include "loki.readSelectorLabels" . | nindent 10 }}
           topologyKey: kubernetes.io/hostname
+  # -- DNS config for read pods
+  dnsConfig: {}
   # -- Node selector for read pods
   nodeSelector: {}
   # -- Tolerations for read pods
@@ -943,14 +975,14 @@ read:
 # Configuration for the backend pod(s)
 backend:
   # -- Number of replicas for the backend
-  replicas: 3
+  replicas: 1
   autoscaling:
     # -- Enable autoscaling for the backend.
     enabled: false
     # -- Minimum autoscaling replicas for the backend.
     minReplicas: 1
     # -- Maximum autoscaling replicas for the backend.
-    maxReplicas: 3
+    maxReplicas: 6
     # -- Target CPU utilization percentage for the backend.
     targetCPUUtilizationPercentage: 60
     # -- Target memory utilization percentage for the backend.
@@ -986,8 +1018,11 @@ backend:
   podLabels: {}
   # -- Additional selector labels for each `backend` pod
   selectorLabels: {}
-  # -- Labels for ingester service
-  serviceLabels: {}
+  service:
+    # -- Annotations for backend Service
+    annotations: {}
+    # -- Additional labels for backend Service
+    labels: {}
   # -- Comma-separated list of Loki modules to load for the read
   targetModule: "backend"
   # -- Additional CLI args for the backend
@@ -1017,6 +1052,8 @@ backend:
             matchLabels:
               {{- include "loki.backendSelectorLabels" . | nindent 10 }}
           topologyKey: kubernetes.io/hostname
+  # -- DNS config for backend pods
+  dnsConfig: {}
   # -- Node selector for backend pods
   nodeSelector: {}
   # -- Tolerations for backend pods
@@ -1039,10 +1076,10 @@ backend:
 # Configuration for the single binary node(s)
 singleBinary:
   # -- Number of replicas for the single binary
-  replicas: 1
+  replicas: 0
   autoscaling:
     # -- Enable autoscaling
-    enabled: true
+    enabled: false
     # -- Minimum autoscaling replicas for the single binary
     minReplicas: 1
     # -- Maximum autoscaling replicas for the single binary
@@ -1068,6 +1105,11 @@ singleBinary:
   podLabels: {}
   # -- Additional selector labels for each `single binary` pod
   selectorLabels: {}
+  service:
+    # -- Annotations for single binary Service
+    annotations: {}
+    # -- Additional labels for single binary Service
+    labels: {}
   # -- Comma-separated list of Loki modules to load for the single binary
   targetModule: "all"
   # -- Labels for single binary service
@@ -1097,6 +1139,8 @@ singleBinary:
             matchLabels:
               {{- include "loki.singleBinarySelectorLabels" . | nindent 10 }}
           topologyKey: kubernetes.io/hostname
+  # -- DNS config for single binary pods
+  dnsConfig: {}
   # -- Node selector for single binary pods
   nodeSelector: {}
   # -- Tolerations for single binary pods
@@ -1132,28 +1176,30 @@ ingress:
   #    blackbox.monitoring.exclude: "true"
   paths:
     write:
-    - /api/prom/push
-    - /loki/api/v1/push
+      - /api/prom/push
+      - /loki/api/v1/push
     read:
-    - /api/prom/tail
-    - /loki/api/v1/tail
-    - /loki/api
-    - /api/prom/rules
-    - /loki/api/v1/rules
-    - /prometheus/api/v1/rules
-    - /prometheus/api/v1/alerts
+      - /api/prom/tail
+      - /loki/api/v1/tail
+      - /loki/api
+      - /api/prom/rules
+      - /loki/api/v1/rules
+      - /prometheus/api/v1/rules
+      - /prometheus/api/v1/alerts
     singleBinary:
-    - /api/prom/push
-    - /loki/api/v1/push
-    - /api/prom/tail
-    - /loki/api/v1/tail
-    - /loki/api
-    - /api/prom/rules
-    - /loki/api/v1/rules
-    - /prometheus/api/v1/rules
-    - /prometheus/api/v1/alerts
+      - /api/prom/push
+      - /loki/api/v1/push
+      - /api/prom/tail
+      - /loki/api/v1/tail
+      - /loki/api
+      - /api/prom/rules
+      - /loki/api/v1/rules
+      - /prometheus/api/v1/rules
+      - /prometheus/api/v1/alerts
+  # -- Hosts configuration for the ingress, passed through the `tpl` function to allow templating
   hosts:
-  - loki.example.com
+    - loki.example.com
+  # -- TLS configuration for the ingress. Hosts passed through the `tpl` function to allow templating
   tls: []
 #    - hosts:
 #       - loki.example.com
@@ -1242,7 +1288,7 @@ gateway:
     readOnlyRootFilesystem: true
     capabilities:
       drop:
-      - ALL
+        - ALL
     allowPrivilegeEscalation: false
   # -- Resource requests and limits for the gateway
   resources: {}
@@ -1257,6 +1303,8 @@ gateway:
             matchLabels:
               {{- include "loki.gatewaySelectorLabels" . | nindent 10 }}
           topologyKey: kubernetes.io/hostname
+  # -- DNS config for gateway pods
+  dnsConfig: {}
   # -- Node selector for gateway pods
   nodeSelector: {}
   # -- Tolerations for gateway pods
@@ -1287,18 +1335,18 @@ gateway:
     annotations: {}
     # -- Labels for the gateway ingress
     labels: {}
-    # -- Hosts configuration for the gateway ingress
+    # -- Hosts configuration for the gateway ingress, passed through the `tpl` function to allow templating
     hosts:
-    - host: gateway.loki.example.com
-      paths:
-      - path: /
-        # -- pathType (e.g. ImplementationSpecific, Prefix, .. etc.) might also be required by some Ingress Controllers
-        # pathType: Prefix
-    # -- TLS configuration for the gateway ingress
+      - host: gateway.loki.example.com
+        paths:
+          - path: /
+            # -- pathType (e.g. ImplementationSpecific, Prefix, .. etc.) might also be required by some Ingress Controllers
+            # pathType: Prefix
+    # -- TLS configuration for the gateway ingress. Hosts passed through the `tpl` function to allow templating
     tls:
-    - secretName: loki-gateway-tls
-      hosts:
-      - gateway.loki.example.com
+      - secretName: loki-gateway-tls
+        hosts:
+          - gateway.loki.example.com
   # Basic auth configuration
   basicAuth:
     # -- Enables basic authentication for the gateway
@@ -1313,8 +1361,12 @@ gateway:
     # high CPU load.
     htpasswd: >-
       {{ if .Values.loki.tenants }}
+
+
         {{- range $t := .Values.loki.tenants }}
       {{ htpasswd (required "All tenants must have a 'name' set" $t.name) (required "All tenants must have a 'password' set" $t.password) }}
+
+
         {{- end }}
       {{ else }} {{ htpasswd (required "'gateway.basicAuth.username' is required" .Values.gateway.basicAuth.username) (required "'gateway.basicAuth.password' is required" .Values.gateway.basicAuth.password) }} {{ end }}
     # -- Existing basic auth secret to use. Must contain '.htpasswd'
@@ -1393,7 +1445,7 @@ tracing:
 # Configuration for `minio` child chart
 # -------------------------------------
 minio:
-  enabled: true
+  enabled: false
   replicas: 1
   # Minio requires 2 to 16 drives for erasure code (drivesPerNode * replicas)
   # https://docs.min.io/docs/minio-erasure-code-quickstart-guide
@@ -1402,15 +1454,15 @@ minio:
   rootUser: enterprise-logs
   rootPassword: supersecret
   buckets:
-  - name: chunks
-    policy: none
-    purge: false
-  - name: ruler
-    policy: none
-    purge: false
-  - name: admin
-    policy: none
-    purge: false
+    - name: chunks
+      policy: none
+      purge: false
+    - name: ruler
+      policy: none
+      purge: false
+    - name: admin
+      policy: none
+      purge: false
   persistence:
     size: 5Gi
   resources:
@@ -1437,4 +1489,63 @@ extraObjects: []
 #               category: logs
 #             annotations:
 #               message: "loki has encountered errors"
+
+sidecar:
+  image:
+    # -- The Docker registry and image for the k8s sidecar
+    repository: kiwigrid/k8s-sidecar
+    # -- Docker image tag
+    tag: 1.24.3
+    # -- Docker image sha. If empty, no sha will be used
+    sha: ""
+    # -- Docker image pull policy
+    pullPolicy: IfNotPresent
+  # -- Resource requests and limits for the sidecar
+  resources: {}
+  #   limits:
+  #     cpu: 100m
+  #     memory: 100Mi
+  #   requests:
+  #     cpu: 50m
+  #     memory: 50Mi
+  # -- The SecurityContext for the sidecar.
+  securityContext: {}
+  # -- Set to true to skip tls verification for kube api calls.
+  skipTlsVerify: false
+  # -- Ensure that rule files aren't conflicting and being overwritten by prefixing their name with the namespace they are defined in.
+  enableUniqueFilenames: false
+  # -- Readiness probe definition. Probe is disabled on the sidecar by default.
+  readinessProbe: {}
+  # -- Liveness probe definition. Probe is disabled on the sidecar by default.
+  livenessProbe: {}
+  rules:
+    # -- Whether or not to create a sidecar to ingest rule from specific ConfigMaps and/or Secrets.
+    enabled: true
+    # -- Label that the configmaps/secrets with rules will be marked with.
+    label: loki_rule
+    # -- Label value that the configmaps/secrets with rules will be set to.
+    labelValue: ""
+    # -- Folder into which the rules will be placed.
+    folder: /rules
+    # -- Comma separated list of namespaces. If specified, the sidecar will search for config-maps/secrets inside these namespaces.
+    # Otherwise the namespace in which the sidecar is running will be used.
+    # It's also possible to specify 'ALL' to search in all namespaces.
+    searchNamespace: null
+    # -- Method to use to detect ConfigMap changes. With WATCH the sidecar will do a WATCH request, with SLEEP it will list all ConfigMaps, then sleep for 60 seconds.
+    watchMethod: WATCH
+    # -- Search in configmap, secret, or both.
+    resource: both
+    # -- Absolute path to the shell script to execute after a configmap or secret has been reloaded.
+    script: null
+    # -- WatchServerTimeout: request to the server, asking it to cleanly close the connection after that.
+    # defaults to 60sec; much higher values like 3600 seconds (1h) are feasible for non-Azure K8S.
+    watchServerTimeout: 60
+    #
+    # -- WatchClientTimeout: is a client-side timeout, configuring your local socket.
+    # If you have a network outage dropping all packets with no RST/FIN,
+    # this is how long your client waits before realizing & dropping the connection.
+    # Defaults to 66sec.
+    watchClientTimeout: 60
+    # -- Log level of the sidecar container.
+    logLevel: INFO
 

@@ -7,38 +7,34 @@ metadata:
     app.kubernetes.io/name: loki
 data:
   config.yaml: |
-    server:
-      http_listen_port: 3100
     auth_enabled: false
     chunk_store_config:
       max_look_back_period: 0s
-    
     common:
       compactor_address: http://loki-compactor:3100
       path_prefix: /var/loki
       replication_factor: 1
-    
+      storage:
+        s3:
+          access_key_id: admin
+          bucketnames: chunks
+          endpoint: minio-svc.minio.svc.cluster.local:9000
+          insecure: true
+          s3forcepathstyle: true
+          secret_access_key: password
     compactor:
       shared_store: s3
       working_directory: /tmp/loki/boltdb-shipper-compactor
-      compaction_interval: 10m
-      retention_enabled: true
-      retention_delete_delay: 2h
-      retention_delete_worker_count: 150
-    
     distributor:
       ring:
         kvstore:
           store: memberlist
-    
     frontend:
       compress_responses: true
       log_queries_longer_than: 5s
       tail_proxy_url: http://loki-querier:3100
-    
     frontend_worker:
       frontend_address: loki-query-frontend-headless:9095
-    
     ingester:
       chunk_block_size: 262144
       chunk_encoding: snappy
@@ -52,18 +48,15 @@ data:
       max_transfer_retries: 0
       wal:
         dir: /var/loki/wal
-    
     limits_config:
       enforce_metric_name: false
       max_cache_freshness_per_query: 10m
       reject_old_samples: true
       reject_old_samples_max_age: 168h
       split_queries_by_interval: 15m
-    
     memberlist:
       join_members:
       - loki-memberlist
-    
     query_range:
       align_queries_with_step: true
       cache_results: true
@@ -73,7 +66,6 @@ data:
           embedded_cache:
             enabled: true
             ttl: 24h
-    
     ruler:
       alertmanager_url: http://alertmanager-service.monitoring.svc:9093
       ring:
@@ -84,10 +76,8 @@ data:
         s3:
           bucketnames: ruler
         type: s3
-    
     runtime_config:
       file: /var/loki-runtime/runtime.yaml
-    
     schema_config:
       configs:
       - from: "2020-09-07"
@@ -97,21 +87,17 @@ data:
         object_store: s3
         schema: v11
         store: boltdb-shipper
-
+    server:
+      http_listen_port: 3100
     storage_config:
       boltdb_shipper:
         active_index_directory: /var/loki/index
         cache_location: /var/loki/cache
         cache_ttl: 168h
         shared_store: s3
-      aws:
-        access_key_id: admin
-        bucketnames: chunks
-        endpoint: minio-svc.minio.svc.cluster.local:9000
-        insecure: true
-        s3forcepathstyle: true
-        secret_access_key: password
-
+    table_manager:
+      retention_deletes_enabled: false
+      retention_period: 0s
 
 ---
 apiVersion: v1

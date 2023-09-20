@@ -1,12 +1,11 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: loki-ruler
+  name: loki-query-frontend
   namespace: loki
   labels:
     app.kubernetes.io/name: loki
-    app.kubernetes.io/component: ruler
-    app.kubernetes.io/part-of: memberlist
+    app.kubernetes.io/component: query-frontend
 spec:
   replicas: 1
   strategy:
@@ -17,13 +16,14 @@ spec:
   selector:
     matchLabels:
       app.kubernetes.io/name: loki
-      app.kubernetes.io/component: ruler
+      app.kubernetes.io/component: query-frontend
   template:
     metadata:
+      annotations:
+        checksum/config: 7a9fed16af714203b1a55b43ea6ada4acbc7489f91af7854de7d07712018042f
       labels:
         app.kubernetes.io/name: loki
-        app.kubernetes.io/component: ruler
-        app.kubernetes.io/part-of: memberlist
+        app.kubernetes.io/component: query-frontend
     spec:
       serviceAccountName: default
       securityContext:
@@ -31,23 +31,20 @@ spec:
         runAsGroup: 10001
         runAsNonRoot: true
         runAsUser: 10001
-      terminationGracePeriodSeconds: 300
+      terminationGracePeriodSeconds: 30
       containers:
-        - name: ruler
-          image: docker.io/grafana/loki:2.8.4
+        - name: query-frontend
+          image: docker.io/grafana/loki:2.9.1
           imagePullPolicy: IfNotPresent
           args:
             - -config.file=/etc/loki/config/config.yaml
-            - -target=ruler
+            - -target=query-frontend
           ports:
             - name: http
               containerPort: 3100
               protocol: TCP
             - name: grpc
               containerPort: 9095
-              protocol: TCP
-            - name: http-memberlist
-              containerPort: 7946
               protocol: TCP
           securityContext:
             allowPrivilegeEscalation: false
@@ -71,10 +68,6 @@ spec:
               mountPath: /etc/loki/config
             - name: runtime-config
               mountPath: /var/loki-runtime
-            - name: data
-              mountPath: /var/loki
-            - name: tmp
-              mountPath: /tmp/loki
           resources:
             {}
       affinity:
@@ -83,7 +76,7 @@ spec:
             - labelSelector:
                 matchLabels:
                   app.kubernetes.io/name: loki
-                  app.kubernetes.io/component: ruler
+                  app.kubernetes.io/component: query-frontend
               topologyKey: kubernetes.io/hostname
           preferredDuringSchedulingIgnoredDuringExecution:
             - weight: 100
@@ -91,8 +84,9 @@ spec:
                 labelSelector:
                   matchLabels:
                     app.kubernetes.io/name: loki
-                    app.kubernetes.io/component: ruler
+                    app.kubernetes.io/component: query-frontend
                 topologyKey: failure-domain.beta.kubernetes.io/zone
+        
       volumes:
         - name: config
           configMap:
@@ -100,7 +94,3 @@ spec:
         - name: runtime-config
           configMap:
             name: loki-runtime
-        - name: tmp
-          emptyDir: {}
-        - name: data
-          emptyDir: {}
