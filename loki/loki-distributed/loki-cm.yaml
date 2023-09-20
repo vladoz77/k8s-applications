@@ -14,7 +14,6 @@ data:
       compactor_address: http://loki-compactor:3100
       path_prefix: /var/loki
       replication_factor: 1
-          
     compactor:
       shared_store: s3
       working_directory: /tmp/loki/boltdb-shipper-compactor
@@ -51,6 +50,7 @@ data:
       join_members:
       - loki-memberlist
     query_range:
+      parallelise_shardable_queries: false
       align_queries_with_step: true
       cache_results: true
       max_retries: 5

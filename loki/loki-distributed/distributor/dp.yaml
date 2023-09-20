@@ -1,51 +1,31 @@
 apiVersion: apps/v1
-kind: StatefulSet
+kind: Deployment
 metadata:
-  name: loki-querier
+  name: loki-distributor
   namespace: loki
   labels:
-    
     app.kubernetes.io/name: loki
-    
-    
-    
-    app.kubernetes.io/component: querier
+    app.kubernetes.io/component: distributor
     app.kubernetes.io/part-of: memberlist
 spec:
   replicas: 1
-  podManagementPolicy: Parallel
-  updateStrategy:
+  strategy:
     rollingUpdate:
-      partition: 0
-  serviceName: loki-querier-headless
+      maxSurge: 0
+      maxUnavailable: 1
   revisionHistoryLimit: 10
   selector:
     matchLabels:
       app.kubernetes.io/name: loki
-      
-      app.kubernetes.io/component: querier
+      app.kubernetes.io/component: distributor
   template:
     metadata:
-      annotations:
-        checksum/config: 7a9fed16af714203b1a55b43ea6ada4acbc7489f91af7854de7d07712018042f
       labels:
         app.kubernetes.io/name: loki
-        
-        app.kubernetes.io/component: querier
+        app.kubernetes.io/component: distributor
         app.kubernetes.io/part-of: memberlist
     spec:
-      topologySpreadConstraints:
-        - maxSkew: 1
-          topologyKey: kubernetes.io/hostname
-          whenUnsatisfiable: ScheduleAnyway
-          labelSelector:
-            matchLabels:
-              app.kubernetes.io/name: loki
-              
-              app.kubernetes.io/component: querier
-        
       serviceAccountName: default
-      
       securityContext:
         fsGroup: 10001
         runAsGroup: 10001
@@ -53,12 +33,12 @@ spec:
         runAsUser: 10001
       terminationGracePeriodSeconds: 30
       containers:
-        - name: querier
-          image: docker.io/grafana/loki:2.8.4
+        - name: distributor
+          image: docker.io/grafana/loki:2.9.1
           imagePullPolicy: IfNotPresent
           args:
             - -config.file=/etc/loki/config/config.yaml
-            - -target=querier
+            - -target=distributor
           ports:
             - name: http
               containerPort: 3100
@@ -91,8 +71,6 @@ spec:
               mountPath: /etc/loki/config
             - name: runtime-config
               mountPath: /var/loki-runtime
-            - name: data
-              mountPath: /var/loki
           resources:
             {}
       affinity:
@@ -101,8 +79,7 @@ spec:
             - labelSelector:
                 matchLabels:
                   app.kubernetes.io/name: loki
-                  
-                  app.kubernetes.io/component: querier
+                  app.kubernetes.io/component: distributor
               topologyKey: kubernetes.io/hostname
           preferredDuringSchedulingIgnoredDuringExecution:
             - weight: 100
@@ -110,10 +87,8 @@ spec:
                 labelSelector:
                   matchLabels:
                     app.kubernetes.io/name: loki
-                    
-                    app.kubernetes.io/component: querier
+                    app.kubernetes.io/component: distributor
                 topologyKey: failure-domain.beta.kubernetes.io/zone
-        
       volumes:
         - name: config
           configMap:
@@ -121,5 +96,3 @@ spec:
         - name: runtime-config
           configMap:
             name: loki-runtime
-        - name: data
-          emptyDir: {}
