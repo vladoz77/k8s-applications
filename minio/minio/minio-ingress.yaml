@@ -1,0 +1,19 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: minio-ingress
+  labels:
+    app.kubernetes.io/name: minio
+  namespace: minio
+spec:
+  rules:
+  - host: minio-console.home.local
+    http:
+      paths:
+      - pathType: Prefix
+        path: "/"
+        backend:
+          service:
+            name: minio-console
+            port: 
+              number: 9001

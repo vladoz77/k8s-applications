@@ -1,0 +1,22 @@
+apiVersion: operator.victoriametrics.com/v1beta1
+kind: VMServiceScrape
+metadata:
+  labels:
+    app.kubernetes.io/name: minio
+  name: minio
+  namespace: monitoring
+spec:
+  endpoints:
+  - port: minio-api
+    path: /minio/v2/metrics/cluster
+    interval: 15s
+    scheme: http
+    relabelConfigs:
+    - targetLabel: "job"
+      replacement: "minio-job"
+  selector:
+    matchLabels:
+       app.kubernetes.io/name: minio-headless
+  namespaceSelector:
+    matchNames:
+    - minio
