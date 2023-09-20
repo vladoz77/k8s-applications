@@ -6,14 +6,7 @@ common:
   compactor_address: http://loki-compactor:3100
   path_prefix: /var/loki
   replication_factor: 1
-  storage:
-    s3:
-      access_key_id: admin
-      bucketnames: chunks
-      endpoint: minio-svc.minio.svc.cluster.local:9000
-      insecure: true
-      s3forcepathstyle: true
-      secret_access_key: password
+  
 
 compactor:
   shared_store: s3
@@ -102,6 +95,14 @@ storage_config:
     cache_location: /var/loki/cache
     cache_ttl: 168h
     shared_store: s3
+  aws:
+    s3:
+      access_key_id: admin
+      bucketnames: chunks
+      endpoint: minio-svc.minio.svc.cluster.local:9000
+      insecure: true
+      s3forcepathstyle: true
+      secret_access_key: password
 
 table_manager:
   retention_deletes_enabled: false
