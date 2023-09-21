@@ -19,6 +19,7 @@ data:
       compactor_address: http://loki-compactor:3100
       path_prefix: /var/loki
       replication_factor: 1
+    
     compactor:
       apply_retention_interval: 1h
       compaction_interval: 5m
@@ -66,6 +67,7 @@ data:
       - loki-memberlist
     
     query_range:
+      parallelise_shardable_queries: false
       align_queries_with_step: true
       cache_results: true
       max_retries: 5
@@ -114,10 +116,7 @@ data:
         insecure: true
         s3forcepathstyle: true
         secret_access_key: password
-    table_manager:
-      retention_deletes_enabled: false
-      retention_period: 0s
-
+    
 ---
 apiVersion: v1
 kind: ConfigMap
