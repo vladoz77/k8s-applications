@@ -1,14 +1,15 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: loki
+  name: write
+  namespace: argocd
 spec:
   destination:
     name: ''
     namespace: loki
     server: 'https://kubernetes.default.svc'
   source:
-    path: loki/loki-single
+    path: loki/loki-single/write
     repoURL: 'https://github.com/vladoz77/argocd'
     targetRevision: HEAD
   sources: []
