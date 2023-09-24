@@ -1,0 +1,52 @@
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    k8s-app: calico-typha
+  name: typha-metrics-svc
+  namespace: calico-system
+spec:
+  clusterIP: None
+  ports:
+  - name: metrics-port
+    port: 9093
+  selector:
+    k8s-app: calico-typha
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    k8s-app: calico-felix
+  name: felix-metrics-svc
+  namespace: calico-system
+spec:
+  clusterIP: None
+  ports:
+  - name: metrics-port
+    port: 9091
+  selector:
+    k8s-app: calico-node
+---    
+apiVersion: operator.victoriametrics.com/v1beta1
+kind: VMServiceScrape
+metadata:
+  labels:
+    app.kubernetes.io/name: calico
+  name: calico
+  namespace: monitoring
+spec:
+  endpoints:
+  - port: metrics-port
+  selector:
+    matchExpressions:
+    - key: k8s-app
+      operator: In
+      values:
+      - calico-kube-controllers
+      - calico-typha
+      - calico-felix
+
+  namespaceSelector:
+    matchNames:
+    - calico-system

@@ -1,0 +1,27 @@
+apiVersion: operator.victoriametrics.com/v1beta1
+kind: VMSingle
+metadata:
+  name: vm
+  namespace: monitoring
+spec:
+  image:
+    tag: v1.93.3
+  extraArgs:
+    http.pathPrefix: /vm
+    dedup.minScrapeInterval: 60s
+  retentionPeriod: "14"
+  logFormat: json
+  removePvcAfterDelete: true
+  storage:
+    accessModes:
+    - ReadWriteOnce
+    resources:
+      requests:
+        storage: 10Gi
+  resources:
+    limits:
+      cpu: 1200m
+      memory: 1500Mi
+    requests:
+      cpu: 500m
+      memory: 500Mi

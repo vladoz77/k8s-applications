@@ -1,0 +1,73 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: karma-cm
+  namespace: monitoring
+data:
+  karma.conf: |
+    alertmanager:
+      interval: 60s
+      servers:
+        - name: alertmanager
+          uri: http://vmalertmanager-vm.monitoring.svc:9093
+          timeout: 10s
+          proxy: true
+          readonly: false
+    annotations:
+      default:
+        hidden: false
+      hidden:
+        - help
+      visible: []
+    custom:
+      css: /custom.css
+      js: /custom.js
+    debug: false
+    filters:
+      default: []
+
+    karma:
+      name: karma-prod
+    labels:
+      color:
+        static:
+          - job
+        unique:
+          - cluster
+          - instance
+          - "@receiver"
+      keep: []
+      strip: []
+    listen:
+      address: "0.0.0.0"
+      port: 8080
+      prefix: /
+      cors:
+        allowedOrigins:
+          - https://example.com
+    log:
+      config: false
+      level: info
+    silences:
+      comments:
+        linkDetect:
+          rules:
+            - regex: "(DEVOPS-[0-9]+)"
+              uriTemplate: https://jira.example.com/browse/$1
+    receivers:
+      keep: []
+      strip: []
+    silenceForm:
+      strip:
+        labels:
+          - job
+      defaultAlertmanagers:
+        - local
+    ui:
+      refresh: 30s
+      hideFiltersWhenIdle: true
+      colorTitlebar: false
+      minimalGroupWidth: 420
+      alertsPerGroup: 5
+      collapseGroups: collapsedOnMobile
+

@@ -1,0 +1,24 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: grafana
+  namespace: argocd
+  labels:
+    app: monitoring
+spec:
+  project: monitoring
+  source:
+    repoURL: 'https://github.com/vladoz77/k8s.git'
+    path: monitoring/grafana
+    targetRevision: HEAD
+    directory:
+      recurse: true
+      jsonnet: {}
+  destination:
+    server: 'https://kubernetes.default.svc'
+    namespace: monitoring
+  syncPolicy:
+    automated: {}
+    syncOptions:
+    - PruneLast=true
+    - CreateNamespace=true

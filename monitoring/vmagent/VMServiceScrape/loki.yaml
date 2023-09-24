@@ -1,0 +1,92 @@
+apiVersion: operator.victoriametrics.com/v1beta1
+kind: VMServiceScrape
+metadata:
+  name: loki-distributor
+  namespace: monitoring
+  labels:
+    app.kubernetes.io/name: loki
+    app.kubernetes.io/component: distributor
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: loki
+      app.kubernetes.io/component: distributor
+  endpoints:
+    - port: http
+      scheme: http
+  namespaceSelector:
+    matchNames:
+      - loki
+---
+# Source: loki-distributed/templates/ingester/servicemonitor-ingester.yaml
+apiVersion: operator.victoriametrics.com/v1beta1
+kind: VMServiceScrape
+metadata:
+  name: loki-ingester
+  namespace: monitoring
+  labels:
+    app.kubernetes.io/name: loki
+    app.kubernetes.io/component: ingester
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: loki
+      app.kubernetes.io/component: ingester
+    matchExpressions:
+      - key: prometheus.io/service-monitor
+        operator: NotIn
+        values:
+          - "false"
+  endpoints:
+    - port: http
+      scheme: http
+  namespaceSelector:
+    matchNames:
+      - loki
+---
+# Source: loki-distributed/templates/querier/servicemonitor-querier.yaml
+apiVersion: operator.victoriametrics.com/v1beta1
+kind: VMServiceScrape
+metadata:
+  name: loki-querier
+  namespace: monitoring
+  labels:
+    app.kubernetes.io/name: loki
+    app.kubernetes.io/component: querier
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: loki
+      app.kubernetes.io/component: querier
+    matchExpressions:
+      - key: prometheus.io/service-monitor
+        operator: NotIn
+        values:
+          - "false"
+  endpoints:
+    - port: http
+      scheme: http
+  namespaceSelector:
+    matchNames:
+      - loki
+---
+# Source: loki-distributed/templates/query-frontend/servicemonitor-query-frontend.yaml
+apiVersion: operator.victoriametrics.com/v1beta1
+kind: VMServiceScrape
+metadata:
+  name: loki-query-frontend
+  namespace: monitoring
+  labels:
+    app.kubernetes.io/name: loki
+    app.kubernetes.io/component: query-frontend
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: loki
+      app.kubernetes.io/component: query-frontend
+  endpoints:
+    - port: http
+      scheme: http
+  namespaceSelector:
+    matchNames:
+      - loki

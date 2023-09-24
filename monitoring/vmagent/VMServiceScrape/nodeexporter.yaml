@@ -1,0 +1,15 @@
+apiVersion: operator.victoriametrics.com/v1beta1
+kind: VMServiceScrape
+metadata:
+  labels:
+    app.kubernetes.io/name: node-exporter
+  name: node-exporter
+  namespace: monitoring
+spec:
+  endpoints:
+  - interval: 15s
+    port: http-metrics
+  jobLabel: jobLabel
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: node-exporter-service

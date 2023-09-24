@@ -1,0 +1,54 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: karma-dep
+  namespace: monitoring
+spec:
+  selector:
+    matchLabels:
+      app: karma
+  template:
+    metadata:
+      labels:
+        app: karma
+    spec:
+      containers:
+      - name: karma
+        image: ghcr.io/prymitive/karma:latest
+        env:
+        - name: CONFIG_FILE
+          value: /etc/karma/karma.conf
+        resources:
+          limits:
+            cpu: 100m
+            memory: 128Mi
+          requests:
+            cpu: 50m
+            memory: 32Mi
+        ports:
+        - containerPort: 8080
+          name: http-karma
+        volumeMounts:
+        - name: karma-vm
+          mountPath: /etc/karma/
+
+      volumes:
+      - name: karma-vm
+        configMap:
+          name: karma-cm
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: karma-service
+  namespace: monitoring
+  labels:
+    app.kubernetes.io/name: karma-service
+spec:
+  selector:
+    app: karma
+  ports:
+  - port: 8080
+    name: http-karma
+

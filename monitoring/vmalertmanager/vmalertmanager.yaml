@@ -1,0 +1,10 @@
+apiVersion: operator.victoriametrics.com/v1beta1
+kind: VMAlertmanager
+metadata:
+  name: vm
+  namespace: monitoring
+spec:
+  # Add fields here
+  replicaCount: 1
+  configSecret: alertmanager-config
+  selectAllByDefault: true
