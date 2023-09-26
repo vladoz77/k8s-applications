@@ -1,0 +1,206 @@
+---
+clusterName: "es-cluster"
+nodeGroup: "master"
+
+masterService: "es-cluster-master"
+fullnameOverride: master
+
+roles:
+  - master
+
+replicas: 1
+
+opensearchHome: /usr/share/opensearch
+
+config:
+  log4j2.properties: |
+    status = error
+  
+    appender.console.type = Console
+    appender.console.name = console
+    appender.console.layout.type = OpenSearchJsonLayout
+    appender.console.layout.type_name = server
+    rootLogger.level = info
+    rootLogger.appenderRef.console.ref = console
+  
+  opensearch.yml: |
+    cluster.name: es-cluster
+
+    # Bind to all interfaces because we don't know what IP address Docker will assign to us.
+    network.host: 0.0.0.0
+
+    # Setting network.host to a non-loopback address enables the annoying bootstrap checks. "Single-node" mode disables them again.
+    # Implicitly done if ".singleNode" is set to "true".
+    # discovery.type: single-node
+
+    # Start OpenSearch Security Demo Configuration
+    # WARNING: revise all the lines below before you go into production
+    plugins.security.nodes_dn:
+      - "CN=node*,OU=home,O=IT,L=Ryazan,C=RU"
+    plugins.security.authcz.admin_dn:
+      - "CN=admin,OU=home,O=IT,L=Ryazan,C=RU"
+    plugins:
+      security:
+        ssl:
+          transport:
+            pemcert_filepath: certs/node.pem
+            pemkey_filepath: certs/node-key.pem
+            pemtrustedcas_filepath: certs/root-ca.pem
+            enforce_hostname_verification: false
+          http:
+            enabled: true
+            pemcert_filepath: certs/node.pem
+            pemkey_filepath: certs/node-key.pem
+            pemtrustedcas_filepath: certs/root-ca.pem
+        allow_unsafe_democertificates: false
+        allow_default_init_securityindex: true
+        audit.type: internal_opensearch
+        enable_snapshot_restore_privilege: true
+        check_snapshot_restore_write_privileges: true
+        restapi:
+          roles_enabled: ["all_access", "security_rest_api_access"]
+        system_indices:
+          enabled: true
+          indices:
+            [
+              ".opendistro-alerting-config",
+              ".opendistro-alerting-alert*",
+              ".opendistro-anomaly-results*",
+              ".opendistro-anomaly-detector*",
+              ".opendistro-anomaly-checkpoints",
+              ".opendistro-anomaly-detection-state",
+              ".opendistro-reports-*",
+              ".opendistro-notifications-*",
+              ".opendistro-notebooks",
+              ".opendistro-asynchronous-search-response*",
+            ]
+    ######## End OpenSearch Security Demo Configuration ########
+
+# extraEnvs: 
+#   - name: DISABLE_INSTALL_DEMO_CONFIG
+#     value: "true"
+
+secretMounts: 
+  - name: opensearch-certs
+    secretName: opensearch-certs
+    path: /usr/share/opensearch/config/certs
+    defaultMode: 0644
+  
+
+
+
+opensearchJavaOpts: "-Xmx512M -Xms512M"
+
+resources:
+  requests:
+    cpu: "1000m"
+    memory: "100Mi"
+
+
+persistence:
+  enabled: true
+  enableInitChown: true
+  # storageClass: "-"
+  accessModes:
+    - ReadWriteOnce
+  size: 8Gi
+  annotations: {}
+
+antiAffinityTopologyKey: "kubernetes.io/hostname"
+
+antiAffinity: "soft"
+
+podManagementPolicy: "Parallel"
+
+enableServiceLinks: true
+
+protocol: https
+httpPort: 9200
+transportPort: 9300
+metricsPort: 9600
+
+securityConfig:
+  enabled: false
+  path: "/usr/share/opensearch/config/opensearch-security"
+  actionGroupsSecret: "opensearch-action-groups"
+  configSecret: "opensearch-config"
+  internalUsersSecret: "opensearch-internal-users"
+  rolesSecret: "opensearch-roles"
+  rolesMappingSecret: "opensearch-roles-mapping"
+  tenantsSecret: "opensearch-tenats"
+  # The following option simplifies securityConfig by using a single secret and
+  # specifying the config files as keys in the secret instead of creating
+  # different secrets for for each config file.
+  # Note that this is an alternative to the individual secret configuration
+  # above and shouldn't be used if the above secrets are used.
+  config:
+    # There are multiple ways to define the configuration here:
+    # * If you define anything under data, the chart will automatically create
+    #   a secret and mount it. This is best option to choose if you want to override all the
+    #   existing yml files at once.
+    # * If you define securityConfigSecret, the chart will assume this secret is
+    #   created externally and mount it. This is best option to choose if your intention is to
+    #   only update a single yml file.
+    # * It is an error to define both data and securityConfigSecret.
+    securityConfigSecret: ""
+    dataComplete: true
+    data: {}
+      # config.yml: |-
+      # internal_users.yml: |-
+      # roles.yml: |-
+      # roles_mapping.yml: |-
+      # action_groups.yml: |-
+      # tenants.yml: |-
+
+# How long to wait for opensearch to stop gracefully
+
+sysctlVmMaxMapCount: 262144
+
+startupProbe:
+  tcpSocket:
+    port: 9200
+  initialDelaySeconds: 5
+  periodSeconds: 10
+  timeoutSeconds: 3
+  failureThreshold: 30
+
+livenessProbe: 
+  periodSeconds: 20
+  timeoutSeconds: 5
+  failureThreshold: 10
+  successThreshold: 1
+  initialDelaySeconds: 10
+  tcpSocket:
+    port: 9200
+
+readinessProbe:
+  tcpSocket:
+    port: 9200
+  periodSeconds: 5
+  timeoutSeconds: 3
+  failureThreshold: 3
+
+
+# Enabling this will publically expose your OpenSearch instance.
+# Only enable this if you have security enabled on your cluster
+ingress:
+  enabled: true
+  # For Kubernetes >= 1.18 you should specify the ingress-controller via the field ingressClassName
+  # See https://kubernetes.io/blog/2020/04/02/improvements-to-the-ingress-api-in-kubernetes-1.18/#specifying-the-class-of-an-ingress
+  # ingressClassName: nginx
+
+  annotations: 
+    nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
+  path: /
+  hosts:
+    - esapi.home.local
+  tls: 
+   - secretName: node-cert
+     hosts:
+       - esapi.home.local
+
+
+masterTerminationFix: false
+
+sysctl:
+  enabled: false
