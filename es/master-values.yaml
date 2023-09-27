@@ -1,13 +1,12 @@
 ---
 clusterName: "es-cluster"
-nodeGroup: "data"
+nodeGroup: "master"
 
 masterService: "es-cluster-master"
-fullnameOverride: data
+fullnameOverride: master
 
 roles:
-  - data
-  - ingest
+  - master
 
 replicas: 1
 
@@ -85,7 +84,9 @@ secretMounts:
   - name: opensearch-certs
     secretName: opensearch-certs
     path: /usr/share/opensearch/config/certs
-    defaultMode: 0600
+    defaultMode: 0644
+  
+
 
 
 opensearchJavaOpts: "-Xmx512M -Xms512M"
@@ -120,13 +121,13 @@ metricsPort: 9600
 
 securityConfig:
   enabled: false
-  path: "/usr/share/opensearch/config/opensearch-security"
-  actionGroupsSecret: "opensearch-action-groups"
-  configSecret: "opensearch-config"
-  internalUsersSecret: "opensearch-internal-users"
-  rolesSecret: "opensearch-roles"
-  rolesMappingSecret: "opensearch-roles-mapping"
-  tenantsSecret: "opensearch-tenats"
+  path: /usr/share/opensearch/config/opensearch-security
+  actionGroupsSecret: opensearch-action-groups
+  configSecret: opensearch-config
+  internalUsersSecret: opensearch-internal-users
+  rolesSecret: opensearch-roles
+  rolesMappingSecret: opensearch-roles-mapping
+  tenantsSecret: opensearch-tenats
   # The following option simplifies securityConfig by using a single secret and
   # specifying the config files as keys in the secret instead of creating
   # different secrets for for each config file.
@@ -182,6 +183,21 @@ readinessProbe:
 
 # Enabling this will publically expose your OpenSearch instance.
 # Only enable this if you have security enabled on your cluster
+ingress:
+  enabled: true
+  # For Kubernetes >= 1.18 you should specify the ingress-controller via the field ingressClassName
+  # See https://kubernetes.io/blog/2020/04/02/improvements-to-the-ingress-api-in-kubernetes-1.18/#specifying-the-class-of-an-ingress
+  # ingressClassName: nginx
+
+  annotations: 
+    nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
+  path: /
+  hosts:
+    - esapi.home.local
+  tls: 
+   - secretName: node-cert
+     hosts:
+       - esapi.home.local
 
 
 masterTerminationFix: false

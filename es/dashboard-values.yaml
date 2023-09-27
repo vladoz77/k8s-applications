@@ -1,0 +1,47 @@
+opensearchHosts: "https://es-cluster-master:9200"
+replicaCount: 1
+
+fullnameOverride: "dashboard"
+
+secretMounts:
+  - name: opensearch-certs
+    secretName: opensearch-certs
+    path: /usr/share/opensearch-dashboards/certs
+
+envFrom:
+  - secretRef:
+      name: dashboard-user
+
+config:
+  opensearch_dashboards.yml: |
+    server:
+      name: dashboards
+      host: 0.0.0.0
+      ssl:
+        enabled: false
+        key: /usr/share/opensearch-dashboards/certs/node-key.pem
+        certificate: /usr/share/opensearch-dashboards/certs/node.pem
+    opensearch:
+      ssl:
+        certificateAuthorities: /usr/share/opensearch-dashboards/certs/root-ca.pem
+        verificationMode: certificate
+
+serverHost: "0.0.0.0"
+
+ingress:
+  enabled: true
+  annotations: {}
+  ingressClassName: "system-ingress"
+  hosts:
+    - host: kibana.home.local
+      paths:
+        - path: /
+          backend:
+            serviceName: dashboard
+            servicePort: 5601
+  
+
+resources:
+  requests:
+    cpu: "100m"
+    memory: "512M"

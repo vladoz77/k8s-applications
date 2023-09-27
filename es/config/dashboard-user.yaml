@@ -7,4 +7,4 @@ metadata:
 type: Opaque
 stringData:
   OPENSEARCH_USERNAME: kibanaserver
-  OPENSEARCH_PASSWORD: password
+  OPENSEARCH_PASSWORD: kibanaserver
