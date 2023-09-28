@@ -21,11 +21,24 @@ data:
     
     scrape_configs:
       # See also https://github.com/grafana/loki/blob/master/production/ksonnet/promtail/scrape_config.libsonnet for reference
+    
+    - job_name: journal
+      journal:
+        max_age: 12h
+        labels:
+          job: systemd-journal
+      relabel_configs:
+        - source_labels: 
+           - __journal__systemd_unit
+          target_label: 'unit'
+        - source_labels: 
+           - __journal__hostname
+          target_label: 'hostname'
+      
+      
       - job_name: kubernetes-pods
         pipeline_stages:
           - cri: {}
-
-       
         kubernetes_sd_configs:
           - role: pod
         relabel_configs:
@@ -93,6 +106,8 @@ data:
             - __meta_kubernetes_pod_annotation_kubernetes_io_config_hash
             - __meta_kubernetes_pod_container_name
             target_label: __path__
+
+      
     
     limits_config:
       

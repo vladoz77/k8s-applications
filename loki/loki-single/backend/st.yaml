@@ -34,6 +34,7 @@ spec:
         runAsNonRoot: true
         runAsUser: 10001
       terminationGracePeriodSeconds: 300
+      
       containers:
         - name: loki-sc-rules
           image: kiwigrid/k8s-sidecar:1.24.3
@@ -44,7 +45,7 @@ spec:
             - name: LABEL
               value: loki_rule
             - name: FOLDER
-              value: /rules
+              value: /var/loki/rules
             - name: RESOURCE
               value: both
             - name: WATCH_SERVER_TIMEOUT
@@ -55,8 +56,9 @@ spec:
               value: INFO
           resources: {}
           volumeMounts:
-            - name: sc-rules-volume
-              mountPath: /rules
+            - name: rules-volume
+              mountPath: /var/loki/rules
+        
         - name: loki
           image: docker.io/grafana/loki:2.9.1
           imagePullPolicy: IfNotPresent
@@ -95,8 +97,8 @@ spec:
               mountPath: /tmp
             - name: data
               mountPath: /var/loki
-            - name: sc-rules-volume
-              mountPath: /rules
+            - name: rules-volume
+              mountPath: /var/loki/rules
           resources: {}
       affinity:
         podAntiAffinity:
@@ -106,6 +108,7 @@ spec:
                   app.kubernetes.io/name: loki
                   app.kubernetes.io/component: backend
               topologyKey: kubernetes.io/hostname
+      
       volumes:
         - name: tmp
           emptyDir: {}
@@ -118,8 +121,10 @@ spec:
         - name: runtime-config
           configMap:
             name: loki-runtime
-        - name: sc-rules-volume
-          emptyDir: {}
+        - name: rules-volume
+          configMap:
+            name: loki-rules
+  
   volumeClaimTemplates:
     - metadata:
         name: data

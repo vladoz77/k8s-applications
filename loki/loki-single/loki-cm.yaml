@@ -43,9 +43,8 @@ data:
       align_queries_with_step: true
     ruler:
       storage:
-        s3:
-          bucketnames: ruler
-        type: s3
+        local:
+          directory: /var/loki/rules
     runtime_config:
       file: /etc/loki/runtime-config/runtime-config.yaml
     schema_config:
