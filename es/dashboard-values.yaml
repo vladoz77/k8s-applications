@@ -18,7 +18,7 @@ config:
       name: dashboards
       host: 0.0.0.0
       ssl:
-        enabled: false
+        enabled: true
         key: /usr/share/opensearch-dashboards/certs/node-key.pem
         certificate: /usr/share/opensearch-dashboards/certs/node.pem
     opensearch:

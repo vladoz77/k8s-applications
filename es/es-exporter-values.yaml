@@ -110,10 +110,10 @@ extraEnvSecrets: {}
 
 # A list of secrets and their paths to mount inside the pod
 # This is useful for mounting certificates for security
-secretMounts: []
-#  - name: elastic-certs
-#    secretName: elastic-certs
-#    path: /ssl
+secretMounts: 
+ - name: opensearch-certs
+   secretName: opensearch-certs
+   path: /ssl
 
 # A list of additional Volume to add to the deployment
 # this is useful if the volume you need is not a secret (csi volume etc.)
