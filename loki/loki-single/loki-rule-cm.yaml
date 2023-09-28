@@ -60,3 +60,13 @@ data:
           - expr: sum(rate(loki_request_duration_seconds_count[1m])) by (cluster, namespace,
               job, route)
             record: cluster_namespace_job_route:loki_request_duration_seconds_count:sum_rate
+          - alert: error show
+            expr: sum(rate({app="loki", component="read"} |= `level=error` [1h])) by (app) * 60 > 1
+            for: 1s
+            labels:
+              severity: info
+            annotations:
+              summary: test error alert
+
+     
+            

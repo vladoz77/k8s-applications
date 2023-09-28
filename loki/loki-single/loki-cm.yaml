@@ -45,6 +45,7 @@ data:
       storage:
         local:
           directory: /var/loki/rules
+      alertmanager_url: http://vmalertmanager-vm.monitoring.svc:9093
     runtime_config:
       file: /etc/loki/runtime-config/runtime-config.yaml
     schema_config:
