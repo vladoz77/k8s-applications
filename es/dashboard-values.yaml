@@ -4,8 +4,8 @@ replicaCount: 1
 fullnameOverride: "dashboard"
 
 secretMounts:
-  - name: opensearch-certs
-    secretName: opensearch-certs
+  - name: dashboard-tls
+    secretName: dashboard-tls
     path: /usr/share/opensearch-dashboards/certs
 
 envFrom:
@@ -18,27 +18,29 @@ config:
       name: dashboards
       host: 0.0.0.0
       ssl:
-        enabled: true
-        key: /usr/share/opensearch-dashboards/certs/node-key.pem
-        certificate: /usr/share/opensearch-dashboards/certs/node.pem
+        enabled: false
+        key: /usr/share/opensearch-dashboards/certs/tls.crt
+        certificate: /usr/share/opensearch-dashboards/certs/tls.key
     opensearch:
       ssl:
-        certificateAuthorities: /usr/share/opensearch-dashboards/certs/root-ca.pem
+        certificateAuthorities: /usr/share/opensearch-dashboards/certs/ca.crt
         verificationMode: certificate
 
 serverHost: "0.0.0.0"
 
 ingress:
   enabled: true
-  annotations: {}
-  ingressClassName: "system-ingress"
   hosts:
-    - host: kibana.home.local
+    - host: dashboard.home.local
       paths:
         - path: /
           backend:
             serviceName: dashboard
             servicePort: 5601
+  tls:
+    - secretName: dashboard-tls
+      hosts:
+        - dashboard.home.local
   
 
 resources:

@@ -25,66 +25,74 @@ config:
     rootLogger.appenderRef.console.ref = console
   
   opensearch.yml: |
-    cluster.name: es-cluster
+        cluster.name: opensearch-cluster
 
-    # Bind to all interfaces because we don't know what IP address Docker will assign to us.
-    network.host: 0.0.0.0
+        # Bind to all interfaces because we don't know what IP address Docker will assign to us.
+        network.host: 0.0.0.0
 
-    # Setting network.host to a non-loopback address enables the annoying bootstrap checks. "Single-node" mode disables them again.
-    # Implicitly done if ".singleNode" is set to "true".
-    # discovery.type: single-node
+        # Setting network.host to a non-loopback address enables the annoying bootstrap checks. "Single-node" mode disables them again.
+        # discovery.type: single-node
 
-    # Start OpenSearch Security Demo Configuration
-    # WARNING: revise all the lines below before you go into production
-    plugins.security.nodes_dn:
-      - "CN=node*,OU=home,O=IT,L=Ryazan,C=RU"
-    plugins.security.authcz.admin_dn:
-      - "CN=admin,OU=home,O=IT,L=Ryazan,C=RU"
-    plugins:
-      security:
-        ssl:
-          transport:
-            pemcert_filepath: certs/node.pem
-            pemkey_filepath: certs/node-key.pem
-            pemtrustedcas_filepath: certs/root-ca.pem
-            enforce_hostname_verification: false
-          http:
-            enabled: true
-            pemcert_filepath: certs/node.pem
-            pemkey_filepath: certs/node-key.pem
-            pemtrustedcas_filepath: certs/root-ca.pem
-        allow_unsafe_democertificates: false
-        allow_default_init_securityindex: true
-        audit.type: internal_opensearch
-        enable_snapshot_restore_privilege: true
-        check_snapshot_restore_write_privileges: true
-        restapi:
-          roles_enabled: ["all_access", "security_rest_api_access"]
-        system_indices:
-          enabled: true
-          indices:
-            [
-              ".opendistro-alerting-config",
-              ".opendistro-alerting-alert*",
-              ".opendistro-anomaly-results*",
-              ".opendistro-anomaly-detector*",
-              ".opendistro-anomaly-checkpoints",
-              ".opendistro-anomaly-detection-state",
-              ".opendistro-reports-*",
-              ".opendistro-notifications-*",
-              ".opendistro-notebooks",
-              ".opendistro-asynchronous-search-response*",
-            ]
-    ######## End OpenSearch Security Demo Configuration ########
+        # Start OpenSearch Security Demo Configuration
+        # WARNING: revise all the lines below before you go into production
+        plugins.security.nodes_dn:
+          - "CN=node*,OU=IT,O=Home,L=Ryazan,C=RU"
+          - "CN=dashboard*,OU=IT,O=Home,L=Ryazan,C=RU"
+        plugins:
+          security:
+            ssl:
+              transport:
+                pemcert_filepath: certs/tls.crt
+                pemkey_filepath: certs/tls.key
+                pemtrustedcas_filepath: certs/ca.crt
+                enforce_hostname_verification: false
+              http:
+                enabled: true
+                pemcert_filepath: certs/tls.crt
+                pemkey_filepath: certs/tls.key
+                pemtrustedcas_filepath: certs/ca.crt
+            allow_unsafe_democertificates: false
+            allow_default_init_securityindex: true
+            authcz:
+              admin_dn:
+                - "CN=admin,OU=IT dep,O=Home,L=Ryazan,C=RU"
+            audit.type: internal_opensearch
+            enable_snapshot_restore_privilege: true
+            check_snapshot_restore_write_privileges: true
+            restapi:
+              roles_enabled: ["all_access", "security_rest_api_access"]
+            system_indices:
+              enabled: true
+              indices:
+                [
+                  ".opendistro-alerting-config",
+                  ".opendistro-alerting-alert*",
+                  ".opendistro-anomaly-results*",
+                  ".opendistro-anomaly-detector*",
+                  ".opendistro-anomaly-checkpoints",
+                  ".opendistro-anomaly-detection-state",
+                  ".opendistro-reports-*",
+                  ".opendistro-notifications-*",
+                  ".opendistro-notebooks",
+                  ".opendistro-asynchronous-search-response*",
+                ]
 
 # extraEnvs: 
 #   - name: DISABLE_INSTALL_DEMO_CONFIG
 #     value: "true"
 
 secretMounts: 
-  - name: opensearch-certs
-    secretName: opensearch-certs
+  - name: node-tls
+    secretName: node-tls
     path: /usr/share/opensearch/config/certs
+    defaultMode: 0600
+  - name: dashboard-tls
+    secretName: dashboard-tls
+    path: /usr/share/opensearch/dashboard/
+    defaultMode: 0600
+  - name: admin-tls
+    secretName: admin-tls
+    path: /usr/share/opensearch/admin/
     defaultMode: 0600
 
 
@@ -192,5 +200,5 @@ sysctl:
 plugins:
   enabled: true
   installList: 
-   - https://github.com/aiven/prometheus-exporter-plugin-for-opensearch/releases/download/2.1.0.0/prometheus-exporter-2.1.0.0.zip
+   - https://github.com/aiven/prometheus-exporter-plugin-for-opensearch/releases/download/2.10.0.0/prometheus-exporter-2.10.0.0.zip
 

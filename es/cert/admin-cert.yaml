@@ -1,0 +1,34 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: admin-tls
+  namespace: es
+spec:
+  secretName: admin-tls
+
+  duration: 8760h # 1y
+  renewBefore: 360h # 15d
+
+  commonName: admin
+  subject:
+    organizations:
+      - "Home"
+    organizationalUnits:
+      - "IT"
+    localities:
+      - "Ryazan"
+    countries:
+      - "RU"
+
+  isCA: false
+  privateKey:
+    algorithm: RSA
+    encoding: PKCS8
+    rotationPolicy: Always
+    size: 4096
+  usages:
+    - client auth
+  issuerRef:
+    name: es-cluster-issuer-ca
+    kind: ClusterIssuer
+    group: cert-manager.io
