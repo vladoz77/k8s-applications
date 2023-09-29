@@ -35,6 +35,7 @@ config:
 
         # Start OpenSearch Security Demo Configuration
         # WARNING: revise all the lines below before you go into production
+        prometheus.indices: false
         plugins.security.nodes_dn:
           - "CN=node*,OU=IT,O=Home,L=Ryazan,C=RU"
           - "CN=dashboard*,OU=IT,O=Home,L=Ryazan,C=RU"
@@ -77,9 +78,7 @@ config:
                   ".opendistro-asynchronous-search-response*",
                 ]
 
-# extraEnvs: 
-#   - name: DISABLE_INSTALL_DEMO_CONFIG
-#     value: "true"
+
 
 secretMounts: 
   - name: node-tls
