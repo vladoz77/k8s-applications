@@ -10,7 +10,9 @@ data:
     server:
       grpc_listen_port: 9095
       http_listen_port: 3100
+    
     auth_enabled: false
+    
     common:
       compactor_address: 'loki-backend'
       path_prefix: /var/loki
@@ -23,31 +25,50 @@ data:
           insecure: true
           s3forcepathstyle: true
           secret_access_key: password
+    
     frontend:
       scheduler_address: query-scheduler-discovery.loki.svc.cluster.local.:9095
+    
     frontend_worker:
       scheduler_address: query-scheduler-discovery.loki.svc.cluster.local.:9095
+    
     index_gateway:
       mode: ring
+    
     limits_config:
       enforce_metric_name: false
       max_cache_freshness_per_query: 10m
+      max_query_parallelism: 8
       reject_old_samples: true
       reject_old_samples_max_age: 168h
       split_queries_by_interval: 15m
+    
     memberlist:
       join_members:
       - loki-memberlist
+    
     query_range:
       parallelise_shardable_queries: false
       align_queries_with_step: true
+    
     ruler:
       storage:
         local:
           directory: /var/loki/rules
       alertmanager_url: http://vmalertmanager-vm.monitoring.svc:9093
+      wal:
+        dir: /var/loki/loki-wal
+      remote_write:
+        enabled: true
+        clients:
+          victoria-metrics:
+            name: vm
+            url: http://vmsingle-vm.monitoring.svc:8429/vmsingle/api/v1/write
+           
+    
     runtime_config:
       file: /etc/loki/runtime-config/runtime-config.yaml
+    
     schema_config:
       configs:
       - from: "2022-01-11"
@@ -57,6 +78,7 @@ data:
         object_store: s3
         schema: v12
         store: boltdb-shipper
+    
     storage_config:
       boltdb_shipper:
         active_index_directory: /var/loki/index

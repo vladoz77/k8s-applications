@@ -7,8 +7,8 @@ metadata:
     app.kubernetes.io/name: loki
 data:
   rules.yaml: |
-    groups:
-        - name: loki_rules
+    
+          name: loki_rules
           rules:
           - expr: histogram_quantile(0.99, sum(rate(loki_request_duration_seconds_bucket[1m]))
               by (le, cluster, job))
