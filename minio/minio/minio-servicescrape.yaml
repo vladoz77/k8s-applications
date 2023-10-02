@@ -4,7 +4,7 @@ metadata:
   labels:
     app.kubernetes.io/name: minio
   name: minio
-  namespace: monitoring
+  namespace: minio
 spec:
   endpoints:
   - port: minio-api
@@ -16,7 +16,7 @@ spec:
       replacement: "minio-job"
   selector:
     matchLabels:
-       app.kubernetes.io/name: minio-headless
+       app.kubernetes.io/name: minio-svc
   namespaceSelector:
     matchNames:
     - minio
