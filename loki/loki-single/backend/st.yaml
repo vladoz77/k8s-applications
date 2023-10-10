@@ -98,7 +98,8 @@ spec:
             - name: data
               mountPath: /var/loki
             - name: rules-volume
-              mountPath: /var/loki/rules
+              mountPath: /var/loki/rules/fake/rules.yaml
+              subPath: rules.yaml
           resources: {}
       affinity:
         podAntiAffinity:
