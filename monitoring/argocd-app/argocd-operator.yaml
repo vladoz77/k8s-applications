@@ -12,7 +12,7 @@ spec:
     server: 'https://kubernetes.default.svc'
   source:
     path: monitoring/operator
-    repoURL: 'https://github.com/vladoz77/k8s.git'
+    repoURL: 'https://github.com/vladoz77/argocd'
     targetRevision: HEAD
     directory:
       recurse: true
