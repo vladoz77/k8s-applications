@@ -5,9 +5,9 @@ metadata:
   namespace: argocd
 spec:
   sourceRepos:
-  - https://github.com/vladoz77/k8s.git
+  - https://github.com/vladoz77/argocd
   destinations:
-  - namespace: '*'
+  - namespace: monitoring
     server: https://kubernetes.default.svc
   namespaceResourceWhitelist:
   - group: '*'
