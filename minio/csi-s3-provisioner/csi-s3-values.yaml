@@ -17,7 +17,7 @@ storageClass:
   # mounter to use - either geesefs, s3fs or rclone (default geesefs)
   mounter: geesefs
   # GeeseFS mount options
-  mountOptions: "--memory-limit 1000 --dir-mode 0777 --file-mode 0666"
+  mountOptions: "--memory-limit 1000 --dir-mode 0777 --file-mode 0666 --no-systemd"
   # Volume reclaim policy
   reclaimPolicy: Delete
   # Annotations for the storage class
