@@ -1,15 +1,15 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: kube-state-metrics
+  name: node-exporter
   namespace: argocd
   labels:
     app: monitoring
 spec:
   project: monitoring
   source:
-    repoURL: 'https://github.com/vladoz77/k8s.git'
-    path: monitoring/kube-state-metrics
+    repoURL: 'https://github.com/vladoz77/argocd'
+    path: monitoring/nodeexporter
     targetRevision: HEAD
     directory:
       recurse: true
@@ -18,7 +18,8 @@ spec:
     server: 'https://kubernetes.default.svc'
     namespace: monitoring
   syncPolicy:
-    automated: {}
+    automated:
+      prune: true
     syncOptions:
-    - PruneLast=true
     - CreateNamespace=true
+

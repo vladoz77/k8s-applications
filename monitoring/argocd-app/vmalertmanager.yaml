@@ -1,15 +1,15 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: vmsingle
+  name: alertmanager
   namespace: argocd
   labels:
     app: monitoring
 spec:
   project: monitoring
   source:
-    repoURL: 'https://github.com/vladoz77/k8s.git'
-    path: monitoring/vmsingle
+    repoURL: 'https://github.com/vladoz77/argocd'
+    path: monitoring/vmalertmanager
     targetRevision: HEAD
     directory:
       recurse: true

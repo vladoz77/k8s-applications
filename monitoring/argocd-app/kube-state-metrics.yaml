@@ -1,15 +1,15 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: vmalert
+  name: kube-state-metrics
   namespace: argocd
   labels:
     app: monitoring
 spec:
   project: monitoring
   source:
-    repoURL: 'https://github.com/vladoz77/k8s.git'
-    path: monitoring/vmalert
+    repoURL: 'https://github.com/vladoz77/argocd'
+    path: monitoring/kube-state-metrics
     targetRevision: HEAD
     directory:
       recurse: true
@@ -18,7 +18,7 @@ spec:
     server: 'https://kubernetes.default.svc'
     namespace: monitoring
   syncPolicy:
-    automated:
-      prune: true
+    automated: {}
     syncOptions:
+    - PruneLast=true
     - CreateNamespace=true

@@ -1,15 +1,15 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: node-exporter
+  name: vmsingle
   namespace: argocd
   labels:
     app: monitoring
 spec:
   project: monitoring
   source:
-    repoURL: 'https://github.com/vladoz77/k8s.git'
-    path: monitoring/nodeexporter
+    repoURL: 'https://github.com/vladoz77/argocd'
+    path: monitoring/vmsingle
     targetRevision: HEAD
     directory:
       recurse: true
@@ -18,8 +18,7 @@ spec:
     server: 'https://kubernetes.default.svc'
     namespace: monitoring
   syncPolicy:
-    automated:
-      prune: true
+    automated: {}
     syncOptions:
+    - PruneLast=true
     - CreateNamespace=true
-
