@@ -53,9 +53,11 @@ data:
     
     ruler:
       storage:
+        type: local
         local:
-          directory: /var/loki/rules
-      alertmanager_url: http://vmalertmanager-vm.monitoring.svc:9093
+          directory: /etc/loki/rules
+      
+      alertmanager_url: http://vmalertmanager-vm.monitoring.svc.cluster.local:9093
       wal:
         dir: /var/loki/loki-wal
       remote_write:
@@ -63,7 +65,7 @@ data:
         clients:
           victoria-metrics:
             name: vm
-            url: http://vmsingle-vm.monitoring.svc:8429/vmsingle/api/v1/write
+            url: http://vmsingle-vm.monitoring.svc.cluster.local:8429/vm/api/v1/write
            
     
     runtime_config:
