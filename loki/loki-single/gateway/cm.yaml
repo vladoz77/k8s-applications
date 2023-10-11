@@ -52,6 +52,9 @@ data:
         listen             8080;
         listen             [::]:8080;
 
+        proxy_read_timeout = 310s;
+        proxy_send_timeout = 310s;
+
         location = / {
           return 200 'OK';
           auth_basic off;

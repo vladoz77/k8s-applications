@@ -6,5 +6,5 @@ metadata:
 spec:
   # Add fields here
   replicaCount: 1
-  configSecret: alertmanager-config
+  configSecret: vm-alertmanager-config
   selectAllByDefault: true
