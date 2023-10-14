@@ -22,6 +22,31 @@ data:
     scrape_configs:
       # See also https://github.com/grafana/loki/blob/master/production/ksonnet/promtail/scrape_config.libsonnet for reference
     
+      - job_name: journal
+        pipeline_stages:
+        - match:
+            selector: '{job="systemd-journal"}'
+            stages:
+            - regex:
+                expression: '.*level=(?P<level>[a-zA-Z]+).*'
+            - labels:
+                level:
+            - regex:
+                expression: '.*source="(?P<source>[a-zA-Z]+)".*'
+            - labels:
+                source:
+        journal:
+          labels:
+            job: systemd-journal
+          max_age: 12h
+          path: /var/log/journal
+        relabel_configs:
+        - source_labels:
+          - __journal__systemd_unit
+          target_label: unit
+        - source_labels:
+          - __journal__hostname
+          target_label: hostname
       
       - job_name: kubernetes-pods
         pipeline_stages:

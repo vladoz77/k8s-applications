@@ -36,6 +36,9 @@ spec:
             - mountPath: /var/log/pods
               name: pods
               readOnly: true
+            - mountPath: /var/log/journal
+              name: journal
+              readOnly: true
           env:
             - name: HOSTNAME
               valueFrom:
@@ -80,3 +83,6 @@ spec:
         - hostPath:
             path: /var/log/pods
           name: pods
+        - hostPath:
+            path: /var/log/journal
+          name: journal
