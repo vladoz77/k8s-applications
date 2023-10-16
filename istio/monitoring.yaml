@@ -9,8 +9,9 @@ metadata:
 spec:
   selector:
     matchExpressions:
-    - key: istio-prometheus-ignore
-      operator: DoesNotExist
+    - key: envoy
+      operator: In
+      values: [monitoring]
   namespaceSelector:
     any: true
   jobLabel: envoy-stats
