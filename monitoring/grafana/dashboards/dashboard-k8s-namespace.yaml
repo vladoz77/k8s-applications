@@ -32,7 +32,7 @@ data:
       "editable": true,
       "fiscalYearStartMonth": 0,
       "graphTooltip": 1,
-      "id": 1,
+      "id": 8,
       "links": [],
       "liveNow": false,
       "panels": [
@@ -698,7 +698,7 @@ data:
               },
               "editorMode": "code",
               "exemplar": true,
-              "expr": "sum(rate(container_cpu_usage_seconds_total{namespace=~\"$namespace\", image!=\"\", pod=~\"${created_by}.*\"}[$__rate_interval])) by (pod)",
+              "expr": "sum(rate(container_cpu_usage_seconds_total{namespace=~\"$namespace\", pod=~\"${created_by}.*\"}[$__rate_interval])) by (pod)",
               "interval": "$resolution",
               "legendFormat": "{{ pod }}",
               "range": true,
@@ -795,7 +795,7 @@ data:
               },
               "editorMode": "code",
               "exemplar": true,
-              "expr": "sum(container_memory_working_set_bytes{namespace=~\"$namespace\", image!=\"\", pod=~\"${created_by}.*\"}) by (pod)",
+              "expr": "sum(container_memory_working_set_bytes{namespace=~\"$namespace\",  pod=~\"${created_by}.*\"}) by (pod)",
               "interval": "$resolution",
               "legendFormat": "{{ pod }}",
               "range": true,
@@ -2130,10 +2130,10 @@ data:
             "current": {
               "selected": true,
               "text": [
-                "monitoring"
+                "All"
               ],
               "value": [
-                "monitoring"
+                "$__all"
               ]
             },
             "datasource": {
