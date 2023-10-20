@@ -1,5 +1,5 @@
 # Name allows overriding the release name. Generally this should not be set
-name: ""
+name: istio-ingressgateway
 # revision declares which revision this gateway is a part of
 revision: ""
 

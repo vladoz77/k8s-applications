@@ -148,7 +148,7 @@ istiodRemote:
   # Override to pass env variables, for example: /inject/cluster/remote/net/network2
   injectionPath: "/inject"
 telemetry:
-  enabled: true
+  enabled: false
   v2:
     # For Null VM case now.
     # This also enables metadata exchange.
@@ -231,7 +231,7 @@ global:
   # Dev builds from prow are on gcr.io
   hub: docker.io/istio
   # Default tag for Istio images.
-  tag: 1.19.1
+  tag: 1.19.3
   # Variant of the image to use.
   # Currently supported are: [debug, distroless]
   variant: ""
@@ -253,7 +253,7 @@ global:
     enableAnalysis: false
 
   # To output all istio components logs in json format by adding --log_as_json argument to each container argument
-  logAsJson: true
+  logAsJson: false
 
   # Comma-separated minimum per-scope logging level of messages to output, in the form of <scope>:<level>,<scope>:<level>
   # The control plane has different scopes depending on component, but can configure default log level across all components
