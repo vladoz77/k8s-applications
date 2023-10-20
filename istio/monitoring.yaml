@@ -3,8 +3,6 @@ kind: VMPodScrape
 metadata:
   name: envoy-stats-monitor
   namespace: istio-system
-  labels:
-    monitoring: istio-proxies
 spec:
   selector:
     matchExpressions:
@@ -50,8 +48,6 @@ kind: VMServiceScrape
 metadata:
   name: istio-component-monitor
   namespace: istio-system
-  labels:
-    monitoring: istio-components
 spec:
   jobLabel: istio
   targetLabels: [app]
