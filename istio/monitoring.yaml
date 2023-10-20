@@ -5,13 +5,11 @@ metadata:
   namespace: istio-system
   labels:
     monitoring: istio-proxies
-    release: istio
 spec:
   selector:
     matchExpressions:
-    - key: envoy
-      operator: In
-      values: [monitoring]
+    - key: istio-prometheus-ignore
+      operator: DoesNotExist
   namespaceSelector:
     any: true
   jobLabel: envoy-stats
@@ -54,15 +52,12 @@ metadata:
   namespace: istio-system
   labels:
     monitoring: istio-components
-    release: istio
 spec:
   jobLabel: istio
   targetLabels: [app]
   selector:
     matchExpressions:
-    - key: istio
-      operator: In
-      values: [pilot]
+    - {key: istio, operator: In, values: [pilot]}
   namespaceSelector:
     any: true
   endpoints:
