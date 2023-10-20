@@ -5,10 +5,10 @@ metadata:
   namespace: monitoring
 spec:
   image:
-    tag: v1.93.3
+    tag: v1.93.6
   extraArgs:
     http.pathPrefix: /vm
-    maxLabelsPerTimeseries: "30"
+    maxLabelsPerTimeseries: "50"
   retentionPeriod: "14"
   logFormat: json
   removePvcAfterDelete: true
