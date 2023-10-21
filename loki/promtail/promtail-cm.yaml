@@ -16,6 +16,8 @@ data:
     clients:
       - url: http://loki-gateway/loki/api/v1/push
         tenant_id: 1
+        external_labels:
+          cluster: "prod"
     
     positions:
       filename: /run/promtail/positions.yaml
