@@ -30,6 +30,11 @@ data:
           s3forcepathstyle: true
           secret_access_key: password
     
+    ingester:
+      chunk_idle_period: 2h
+      chunk_target_size: 1536000
+      max_chunk_age: 2h
+    
     frontend:
       scheduler_address: query-scheduler-discovery.loki.svc.cluster.local.:9095
     
@@ -42,7 +47,7 @@ data:
     limits_config:
       enforce_metric_name: false
       max_cache_freshness_per_query: 10m
-      max_query_parallelism: 8
+      max_query_parallelism: 8 
       reject_old_samples: true
       reject_old_samples_max_age: 168h
       split_queries_by_interval: 15m
