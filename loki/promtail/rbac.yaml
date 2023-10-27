@@ -34,7 +34,7 @@ metadata:
 subjects:
   - kind: ServiceAccount
     name: promtail
-    namespace: monitoring
+    namespace: loki
 roleRef:
   kind: ClusterRole
   name: promtail
