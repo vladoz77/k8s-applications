@@ -2,7 +2,6 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: promtail
-  namespace: loki
   labels:
     app.kubernetes.io/name: promtail
 data:
@@ -14,7 +13,7 @@ data:
       
     
     clients:
-      - url: http://loki-gateway/loki/api/v1/push
+      - url: http://loki:3100/loki/api/v1/push
         tenant_id: 1
         external_labels:
           cluster: "prod"
@@ -54,6 +53,39 @@ data:
       - job_name: kubernetes-pods
         pipeline_stages:
           - cri: {}
+          - json:
+              expressions:
+                log:
+          # selector to vmagent
+          - match: 
+              selector: '{app=~"vmagent|promtail|grafana|vm-operator"}'
+              stages:
+                - json:
+                    expressions:
+                      log:
+                - json:
+                    expressions:
+                      level: level
+                    source: log
+                - labels:
+                    level:
+                - output:
+                    source: log
+          - match: 
+              selector: '{app=~"tempo|loki"}'
+              stages:
+                - json:
+                    expressions:
+                      log:
+                - logfmt:
+                    mapping:
+                      level: level
+                    source: log
+                - labels:
+                    level:
+                - output:
+                    source: log
+                
         kubernetes_sd_configs:
           - role: pod
         relabel_configs:
@@ -123,7 +155,6 @@ data:
             target_label: __path__
 
       
-    
     limits_config:
       
     

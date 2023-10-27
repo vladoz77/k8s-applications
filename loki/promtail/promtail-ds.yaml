@@ -2,7 +2,6 @@ apiVersion: apps/v1
 kind: DaemonSet
 metadata:
   name: promtail
-  namespace: loki
   labels:
     app.kubernetes.io/name: promtail
 spec:
