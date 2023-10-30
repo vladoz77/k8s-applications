@@ -148,6 +148,6 @@ spec:
     protocol: TCP
     targetPort: http-grafana
   selector:
-    app: grafana
+    app.kubernetes.io/name: grafana
 
 
