@@ -5,8 +5,8 @@ metadata:
   namespace: monitoring
 spec:
   image:
-    tag: v1.93.6
-  serviceAccountName: vmagent
+    tag: v1.94.0
+  serviceAccountName: vmagent-vm
   selectAllByDefault: true
   serviceScrapeNamespaceSelector: {}
   podScrapeNamespaceSelector: {}
@@ -15,7 +15,7 @@ spec:
   scrapeInterval: 60s
   logFormat: json
   replicaCount: 2
-  vmAgentExternalLabelName: vmagentha
+  vmAgentExternalLabelName: vmagent_ha
   resources:
     limits:
       cpu: 200m
