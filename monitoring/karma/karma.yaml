@@ -3,14 +3,18 @@ kind: Deployment
 metadata:
   name: karma-dep
   namespace: monitoring
+  labels:
+    app.kubernetes.io/name: karma
+    app.kubernetes.io/component: monitoring
 spec:
   selector:
     matchLabels:
-      app: karma
+      app.kubernetes.io/name: karma
   template:
     metadata:
       labels:
-        app: karma
+        app.kubernetes.io/name: karma
+        app.kubernetes.io/component: monitoring
     spec:
       containers:
       - name: karma
@@ -47,7 +51,7 @@ metadata:
     app.kubernetes.io/name: karma-service
 spec:
   selector:
-    app: karma
+    app.kubernetes.io/name: karma
   ports:
   - port: 8080
     name: http-karma

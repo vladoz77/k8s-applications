@@ -5,7 +5,7 @@ metadata:
   namespace: monitoring
 spec:
   image:
-    tag: v1.93.6
+    tag: v1.94.0
   extraArgs:
     http.pathPrefix: /vm
     maxLabelsPerTimeseries: "50"

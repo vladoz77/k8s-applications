@@ -3,6 +3,7 @@ kind: Deployment
 metadata:
   labels:
     app.kubernetes.io/name: kube-state-metrics
+    app.kubernetes.io/component: monitoring
   name: kube-state-metrics
   namespace: monitoring
 spec:
@@ -14,6 +15,7 @@ spec:
     metadata:
       labels:
         app.kubernetes.io/name: kube-state-metrics
+        app.kubernetes.io/component: monitoring
     spec:
       automountServiceAccountToken: true
       containers:

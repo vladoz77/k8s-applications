@@ -15,9 +15,6 @@ data:
     
     clients:
       - url: http://loki-gateway/loki/api/v1/push
-        tenant_id: 1
-        external_labels:
-          cluster: "prod"
     
     positions:
       filename: /run/promtail/positions.yaml
@@ -54,23 +51,14 @@ data:
       - job_name: kubernetes-pods
         pipeline_stages:
           - cri: {}
-          # - json:
-          #     expressions:
-          #       level: level
-          #       msg: msg
-          # - labels:
-          #     level:
-          # - output:
-          #     source: msg
+          - json:
+              expressions:
+                log:
+          - output:
+              source: log
+          - labeldrop:
+              - filename
           
-          # - logfmt:
-          #     mapping:
-          #       level: level
-          #       msg: msg
-          # - labels:
-          #     level:
-          # - output:
-          #     source: msg
                 
         kubernetes_sd_configs:
           - role: pod
