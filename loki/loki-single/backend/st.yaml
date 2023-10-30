@@ -97,6 +97,7 @@ spec:
               mountPath: /tmp
             - name: data
               mountPath: /var/loki
+            
             - name: rules-volume
               mountPath: /etc/loki/rules/fake/rules.yaml
               subPath: rules.yaml

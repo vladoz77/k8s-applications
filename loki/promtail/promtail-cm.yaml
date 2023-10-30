@@ -2,6 +2,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: promtail
+  namespace: loki
   labels:
     app.kubernetes.io/name: promtail
 data:
@@ -53,40 +54,23 @@ data:
       - job_name: kubernetes-pods
         pipeline_stages:
           - cri: {}
-          - json:
-              expressions:
-                log:
-          - output:
-              source: log
-          # selector to vmagent
-          # - match: 
-          #     selector: '{app=~"vmagent|promtail|grafana|vm-operator"}'
-          #     stages:
-          #       - json:
-          #           expressions:
-          #             log:
-          #       - json:
-          #           expressions:
-          #             level: level
-          #           source: log
-          #       - labels:
-          #           level:
-          #       - output:
-          #           source: log
-          # - match: 
-          #     selector: '{app=~"tempo|loki"}'
-          #     stages:
-          #       - json:
-          #           expressions:
-          #             log:
-          #       - logfmt:
-          #           mapping:
-          #             level: level
-          #           source: log
-          #       - labels:
-          #           level:
-          #       - output:
-          #           source: log
+          # - json:
+          #     expressions:
+          #       level: level
+          #       msg: msg
+          # - labels:
+          #     level:
+          # - output:
+          #     source: msg
+          
+          # - logfmt:
+          #     mapping:
+          #       level: level
+          #       msg: msg
+          # - labels:
+          #     level:
+          # - output:
+          #     source: msg
                 
         kubernetes_sd_configs:
           - role: pod

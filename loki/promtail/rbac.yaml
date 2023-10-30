@@ -4,6 +4,7 @@ metadata:
   name: promtail
   labels:
     app.kubernetes.io/name: promtail
+  namespace: loki
 ---
 kind: ClusterRole
 apiVersion: rbac.authorization.k8s.io/v1

@@ -10,6 +10,11 @@ data:
     groups:
         - name: loki-alert
           rules:
+            - record: error:loki:sum_rate
+              expr: sum(rate({app="loki", component="read"} |= `level=error` [1h])) by (app) * 60 > 1
+              labels:
+                type: loki-alert
+
             - alert: error show
               expr: sum(rate({app="loki", component="read"} |= `level=error` [1h])) by (app) * 60 > 1
               for: 1s
@@ -18,6 +23,8 @@ data:
                 type: loki-alert
               annotations:
                 summary: app {{$labels.app}} component {{$labels.component}} has a lot of error
+  
+  
 
      
             
