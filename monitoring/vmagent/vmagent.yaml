@@ -6,13 +6,12 @@ metadata:
 spec:
   image:
     tag: v1.94.0
-  serviceAccountName: vmagent-vm
   selectAllByDefault: true
   serviceScrapeNamespaceSelector: {}
   podScrapeNamespaceSelector: {}
   podScrapeSelector: {}
   serviceScrapeSelector: {}
-  scrapeInterval: 60s
+  scrapeInterval: 30s
   logFormat: json
   replicaCount: 2
   vmAgentExternalLabelName: vmagent_ha

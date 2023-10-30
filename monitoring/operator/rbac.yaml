@@ -2,7 +2,7 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
   name: leader-election-role
-  namespace: monitoring
+  namespace: monitoring-system
 rules:
 - apiGroups:
   - ""
@@ -319,6 +319,14 @@ rules:
   - patch
   - update
 - apiGroups:
+  - discovery.k8s.io
+  resources:
+  - endpointslices
+  verbs:
+  - list
+  - watch
+  - get
+- apiGroups:
   - ""
   resources:
   - nodes
@@ -327,7 +335,6 @@ rules:
   - services
   - endpoints
   - pods
-  - endpointslices
   - configmaps
   verbs:
   - get
@@ -541,7 +548,7 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
   name: leader-election-rolebinding
-  namespace: monitoring
+  namespace: monitoring-system
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: Role
@@ -549,7 +556,7 @@ roleRef:
 subjects:
 - kind: ServiceAccount
   name: vm-operator
-  namespace: monitoring
+  namespace: monitoring-system
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
@@ -562,4 +569,4 @@ roleRef:
 subjects:
 - kind: ServiceAccount
   name: vm-operator
-  namespace: monitoring
+  namespace: monitoring-system
