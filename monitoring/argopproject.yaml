@@ -7,7 +7,7 @@ spec:
   sourceRepos:
   - https://github.com/vladoz77/argocd
   destinations:
-  - namespace: monitoring
+  - namespace: '*'
     server: https://kubernetes.default.svc
   namespaceResourceWhitelist:
   - group: '*'
