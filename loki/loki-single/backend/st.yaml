@@ -99,8 +99,12 @@ spec:
               mountPath: /var/loki
             
             - name: rules-volume
-              mountPath: /etc/loki/rules/fake/rules.yaml
-              subPath: rules.yaml
+              mountPath: /etc/loki/rules/fake/loki-rules.yaml
+              subPath: loki-rules.yaml
+            - name: alert-volume
+              mountPath: /etc/loki/rules/fake/loki-alert.yaml
+              subPath: loki-alert.yaml
+
           resources: {}
       affinity:
         podAntiAffinity:
@@ -123,9 +127,14 @@ spec:
         - name: runtime-config
           configMap:
             name: loki-runtime
+        
         - name: rules-volume
           configMap:
             name: loki-rules
+        - name: alert-volume
+          configMap:
+            name: loki-alert
+
   
   volumeClaimTemplates:
     - metadata:
