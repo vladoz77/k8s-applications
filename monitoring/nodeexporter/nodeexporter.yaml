@@ -96,6 +96,9 @@ metadata:
   labels:
     app.kubernetes.io/name: node-exporter-service
     jobLabel: node-exporter
+  annotations:  
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "9100"
 spec:
   selector:
     app.kubernetes.io/name: node-exporter
