@@ -29,6 +29,9 @@ spec:
     promscrape.streamParse: "true"
   remoteWrite:
   - url: "http://vmsingle-vm.monitoring.svc:8429/vm/api/v1/write"
+  additionalScrapeConfigs:
+    name: additional-scrape-configs
+    key: autoscrape.yaml
   statefulMode: true
   statefulStorage:
     volumeClaimTemplate:
