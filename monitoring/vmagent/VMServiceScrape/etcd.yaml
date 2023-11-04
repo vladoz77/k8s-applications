@@ -1,0 +1,42 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: etcd-metrics
+  namespace: kube-system
+  labels:
+    app.kubernetes.io/name: etcd-metrics
+    jobLabel: etcd
+spec:
+  selector:
+    component: etcd
+  ports:
+  - port: 2379
+    targetPort: 2379
+    name: metrics
+
+---
+apiVersion: operator.victoriametrics.com/v1beta1
+kind: VMServiceScrape
+metadata:
+  name: etcd
+  namespace: monitoring
+spec:
+  endpoints:
+    - port: metrics
+      scheme: https
+      tlsConfig:
+        cert:
+          secret:
+            name:  etcd-ca
+            key: server.crt
+        keySecret:
+          name:  etcd-ca
+          key: server.key
+        insecureSkipVerify: true
+  jobLabel: app.kubernetes.io/name
+  namespaceSelector:
+    matchNames:
+      - kube-system
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: etcd-metrics
