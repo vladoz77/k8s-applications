@@ -28,10 +28,6 @@ data:
             selector: '{job="systemd-journal"}'
             stages:
             - regex:
-                expression: '.*level=(?P<level>[a-zA-Z]+).*'
-            - labels:
-                level:
-            - regex:
                 expression: '.*source="(?P<source>[a-zA-Z]+)".*'
             - labels:
                 source:
