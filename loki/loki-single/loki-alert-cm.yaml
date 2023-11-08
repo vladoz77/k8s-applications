@@ -8,13 +8,24 @@ metadata:
 data:
   loki-alert.yaml: |
      groups:
-        - name: loki-rules
+        - name: loki-alert
           rules:
             - alert: error show
-              expr: sum(rate({app="loki", component="read"} |= `level=error` [1h])) by (app) * 60 > 1
+              expr: sum(rate({app="loki"} |= `level=error` [1h])) by (app) * 60 > 1
               for: 1s
               labels:
                 severity: info
                 type: loki-alert
+                app: loki
               annotations:
                 summary: app {{$labels.app}} component {{$labels.component}} has a lot of error
+
+            - alert: failed to flush chunks
+              expr: rate({app="loki"} |= "failed to flush chunks"[5m]) * 60 > 10
+              for: 1s
+              labels:
+                severity: critical
+                type: loki-alert
+                app: loki
+              annotations:
+                summary: error failed to flush chunks on loki {{$labels.component}}

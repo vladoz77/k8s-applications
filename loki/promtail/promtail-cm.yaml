@@ -54,6 +54,7 @@ data:
               source: log
           - labeldrop:
               - filename
+              - instance
           
                 
         kubernetes_sd_configs:
