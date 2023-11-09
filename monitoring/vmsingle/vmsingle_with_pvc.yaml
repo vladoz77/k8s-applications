@@ -11,7 +11,7 @@ spec:
     maxLabelsPerTimeseries: "50"
     dedup.minScrapeInterval: 60s
   retentionPeriod: "14"
-  logFormat: json
+  # logFormat: json
   removePvcAfterDelete: true
   storage:
     accessModes:

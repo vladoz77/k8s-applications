@@ -9,7 +9,7 @@ spec:
   extraArgs:
     http.pathPrefix: /vmalert
   replicaCount: 1
-  logFormat: json
+  # logFormat: json
   datasource:
     url: "http://vmsingle-vm.monitoring.svc:8429/vm"
   notifier:

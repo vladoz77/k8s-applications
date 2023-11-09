@@ -24,7 +24,7 @@ spec:
       memory: 200Mi
   extraArgs:
     memory.allowedPercent: "40"
-    loggerFormat: json
+    # loggerFormat: json
     http.pathPrefix: /vmagent
     promscrape.streamParse: "true"
   remoteWrite:
