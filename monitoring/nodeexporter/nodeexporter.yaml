@@ -35,7 +35,7 @@ spec:
           type: ''
       containers:
       - name: node-exporter
-        image: quay.io/prometheus/node-exporter:v1.4.0
+        image: quay.io/prometheus/node-exporter:v1.7.0
         args:
         - '--path.procfs=/host/proc'
         - '--path.sysfs=/host/sys'
