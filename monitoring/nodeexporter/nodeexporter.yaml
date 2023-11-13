@@ -16,9 +16,6 @@ spec:
         app.kubernetes.io/name: node-exporter
         jobLabel: node-exporter
         app.kubernetes.io/component: monitoring
-      annotations:
-        prometheus.io/scrape: "true"
-        prometheus.io/port: "9100"
     spec:
       volumes:
       - name: proc
@@ -103,26 +100,26 @@ spec:
   - port: 9100
     name: http-metrics
 
-# ---
-# apiVersion: operator.victoriametrics.com/v1beta1
-# kind: VMServiceScrape
-# metadata:
-#   labels:
-#     app.kubernetes.io/name: node-exporter
-#   name: node-exporter
-#   namespace: monitoring
-# spec:
-#   endpoints:
-#   - interval: 15s
-#     port: http-metrics
-#     relabelConfigs:
-#     - source_labels: [__meta_kubernetes_endpoint_node_name]
-#       target_label: instance
-#   jobLabel: jobLabel
-#   selector:
-#     matchLabels:
-#       app.kubernetes.io/name: node-exporter-service
-#   namespaceSelector:
-#     matchNames:
-#     - monitoring
+---
+apiVersion: operator.victoriametrics.com/v1beta1
+kind: VMServiceScrape
+metadata:
+  labels:
+    app.kubernetes.io/name: node-exporter
+  name: node-exporter
+  namespace: monitoring
+spec:
+  endpoints:
+  - interval: 15s
+    port: http-metrics
+    relabelConfigs:
+    - source_labels: [__meta_kubernetes_endpoint_node_name]
+      target_label: instance
+  jobLabel: jobLabel
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: node-exporter-service
+  namespaceSelector:
+    matchNames:
+    - monitoring
 

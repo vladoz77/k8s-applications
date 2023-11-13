@@ -16,9 +16,6 @@ spec:
       labels:
         app.kubernetes.io/name: kube-state-metrics
         app.kubernetes.io/component: monitoring
-      annotations:
-        prometheus.io/scrape: "true"
-        prometheus.io/port: "8080"
     spec:
       automountServiceAccountToken: true
       containers:
@@ -76,25 +73,25 @@ spec:
   selector:
     app.kubernetes.io/name: kube-state-metrics
 
-# ---
-# apiVersion: operator.victoriametrics.com/v1beta1
-# kind: VMServiceScrape
-# metadata:
-#   name: kube-state-metrics
-#   namespace: monitoring
-#   labels:
-#     app.kubernetes.io/name: kube-state-metrics
-# spec:
-#   endpoints:
-#   - honorLabels: true
-#     port: http-metrics
-#   jobLabel: app.kubernetes.io/name
-#   namespaceSelector:
-#     matchNames:
-#     - monitoring
-#   selector:
-#     matchLabels:
-#       app.kubernetes.io/name: kube-state-metrics
+---
+apiVersion: operator.victoriametrics.com/v1beta1
+kind: VMServiceScrape
+metadata:
+  name: kube-state-metrics
+  namespace: monitoring
+  labels:
+    app.kubernetes.io/name: kube-state-metrics
+spec:
+  endpoints:
+  - honorLabels: true
+    port: http-metrics
+  jobLabel: app.kubernetes.io/name
+  namespaceSelector:
+    matchNames:
+    - monitoring
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: kube-state-metrics
 
 
 
