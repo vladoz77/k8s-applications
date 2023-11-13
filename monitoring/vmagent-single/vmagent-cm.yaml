@@ -17,7 +17,7 @@ data:
       - targets:
         - localhost:8429
     
-    
+      
     # kube-apiservice
     - job_name: kubernetes-apiservers
       kubernetes_sd_configs:
@@ -196,3 +196,35 @@ data:
       - source_labels:
         - __meta_kubernetes_pod_node_name
         target_label: node
+
+    - job_name: 'node-exporter'
+      kubernetes_sd_configs:
+          - role: endpoints
+      relabel_configs:
+        - action: keep
+          source_labels: [__meta_kubernetes_namespace, __meta_kubernetes_service_name, __meta_kubernetes_endpoint_port_name]
+          regex: monitoring;node-exporter-service;http-metrics
+        - source_labels: [__meta_kubernetes_pod_node_name]
+          target_label: node
+        - source_labels: [__meta_kubernetes_namespace]
+          target_label: namespace
+        - source_labels: [__meta_kubernetes_service_name]
+          target_label: service
+        - source_labels: [__meta_kubernetes_pod_name]
+          target_label: pod
+
+    - job_name: 'kube-state-metrics'
+      kubernetes_sd_configs:
+        - role: endpoints
+      relabel_configs:
+        - action: keep
+          source_labels: [__meta_kubernetes_namespace, __meta_kubernetes_service_name, __meta_kubernetes_endpoint_port_name]
+          regex: monitoring;kube-state-metrics;http-metrics
+        - source_labels: [__meta_kubernetes_pod_node_name]
+          target_label: node
+        - source_labels: [__meta_kubernetes_namespace]
+          target_label: namespace
+        - source_labels: [__meta_kubernetes_service_name]
+          target_label: service
+        - source_labels: [__meta_kubernetes_pod_name]
+          target_label: pod
