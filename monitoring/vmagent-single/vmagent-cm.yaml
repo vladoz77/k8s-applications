@@ -19,7 +19,7 @@ data:
     
       
     # kube-apiservice
-    - job_name: kubernetes-apiservers
+    - job_name: apiserver
       kubernetes_sd_configs:
       - role: endpoints
       scheme: https
@@ -42,6 +42,8 @@ data:
         target_label: service
       - source_labels: [__meta_kubernetes_pod_name]
         target_label: pod
+      - target_label: endpoint
+        replacement: https
 
     # kubernetes-scheduler  
     - job_name: kubernetes-scheduler
@@ -69,7 +71,7 @@ data:
         target_label: pod
 
     # kube-controller
-    - job_name: kubernetes-controller-manager
+    - job_name: kube-scheduler
       kubernetes_sd_configs:
       - role: endpoints
       scheme: https
@@ -200,7 +202,7 @@ data:
         - __meta_kubernetes_pod_label_app_kubernetes_io_name
         target_label: job
 
-    - job_name: 'node-exporter'
+    - job_name: node-exporter
       kubernetes_sd_configs:
           - role: endpoints
       relabel_configs:
@@ -216,7 +218,7 @@ data:
         - source_labels: [__meta_kubernetes_pod_name]
           target_label: pod
 
-    - job_name: 'kube-state-metrics'
+    - job_name: kube-state-metrics
       kubernetes_sd_configs:
         - role: endpoints
       relabel_configs:
