@@ -10,15 +10,22 @@ data:
     
     global:
       scrape_interval: 10s
-    
+
     scrape_configs:
+
     - job_name: vmagent
       static_configs:
       - targets:
         - localhost:8429
-    
+
+
+
+
+
+
       
     # kube-apiservice
+
     - job_name: apiserver
       kubernetes_sd_configs:
       - role: endpoints
@@ -34,6 +41,16 @@ data:
         - __meta_kubernetes_endpoint_port_name
         regex: default;kubernetes;https
         action: keep
+      # - source_labels: [__meta_kubernetes_endpoint_address_target_kind, __meta_kubernetes_endpoint_address_target_name]
+      #   separator: ;
+      #   target_label: node
+      #   regex: Node;(.*)
+      #   replacement: ${1}
+      # - source_labels: [__meta_kubernetes_endpoint_address_target_kind, __meta_kubernetes_endpoint_address_target_name]
+      #   separator: ;
+      #   target_label: pod
+      #   regex: Pod;(.*)
+      #   replacement: ${1}
       - source_labels: [__meta_kubernetes_pod_node_name]
         target_label: node
       - source_labels: [__meta_kubernetes_namespace]
@@ -46,6 +63,7 @@ data:
         replacement: https
 
     # kubernetes-scheduler  
+
     - job_name: kubernetes-scheduler
       kubernetes_sd_configs:
       - role: endpoints
@@ -61,6 +79,16 @@ data:
         - __meta_kubernetes_endpoint_port_name
         regex: kube-system;kube-scheduler-service;metrics
         action: keep
+      # - source_labels: [__meta_kubernetes_endpoint_address_target_kind, __meta_kubernetes_endpoint_address_target_name]
+      #   separator: ;
+      #   target_label: node
+      #   regex: Node;(.*)
+      #   replacement: ${1}
+      # - source_labels: [__meta_kubernetes_endpoint_address_target_kind, __meta_kubernetes_endpoint_address_target_name]
+      #   separator: ;
+      #   target_label: pod
+      #   regex: Pod;(.*)
+      #   replacement: ${1}
       - source_labels: [__meta_kubernetes_pod_node_name]
         target_label: node
       - source_labels: [__meta_kubernetes_namespace]
@@ -69,8 +97,11 @@ data:
         target_label: service
       - source_labels: [__meta_kubernetes_pod_name]
         target_label: pod
+      - source_labels: [__meta_kubernetes_pod_container_name]
+        target_label: container
 
     # kube-controller
+
     - job_name: kube-scheduler
       kubernetes_sd_configs:
       - role: endpoints
@@ -86,6 +117,16 @@ data:
         - __meta_kubernetes_service_name
         - __meta_kubernetes_endpoint_port_name
         regex: kube-system;kube-controller-manager-service;metrics
+      - source_labels: [__meta_kubernetes_endpoint_address_target_kind, __meta_kubernetes_endpoint_address_target_name]
+        separator: ;
+        target_label: node
+        regex: Node;(.*)
+        replacement: ${1}
+      - source_labels: [__meta_kubernetes_endpoint_address_target_kind, __meta_kubernetes_endpoint_address_target_name]
+        separator: ;
+        target_label: pod
+        regex: Pod;(.*)
+        replacement: ${1}
       - source_labels: [__meta_kubernetes_pod_node_name]
         target_label: node
       - source_labels: [__meta_kubernetes_namespace]
@@ -94,10 +135,18 @@ data:
         target_label: service
       - source_labels: [__meta_kubernetes_pod_name]
         target_label: pod
- 
+      - source_labels: [__meta_kubernetes_pod_container_name]
+        target_label: container
+
+
+
+
+
+
 
         
     # kubelet  
+
     - job_name: kubelet
       scheme: https
       tls_config:
@@ -116,8 +165,14 @@ data:
         target_label: __metrics_path__
       - source_labels: [__meta_kubernetes_node_name]
         target_label: node
+
+
+
+
+
       
     # cadvisor
+
     - job_name: cadvisor
       bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
       honor_timestamps: false
@@ -138,7 +193,13 @@ data:
       - source_labels: [__meta_kubernetes_node_name]
         target_label: node
 
+
+
+
+      
+
     # kube-proxy
+
     - job_name: kube-proxy
       honor_labels: true
       kubernetes_sd_configs:
@@ -166,8 +227,14 @@ data:
         target_label: pod
       - source_labels: [__meta_kubernetes_pod_container_name]
         target_label: container
+
+
+
+
+
       
     # Autodiscover pod with annotaions
+
     - job_name: kubernetes-pods
       kubernetes_sd_configs:
       - role: pod
@@ -203,6 +270,7 @@ data:
         target_label: job
 
     - job_name: node-exporter
+      honor_labels: true
       kubernetes_sd_configs:
           - role: endpoints
       relabel_configs:
@@ -217,8 +285,11 @@ data:
           target_label: service
         - source_labels: [__meta_kubernetes_pod_name]
           target_label: pod
+        - source_labels: [__meta_kubernetes_pod_container_name]
+          target_label: container
 
     - job_name: kube-state-metrics
+      honor_labels: true
       kubernetes_sd_configs:
         - role: endpoints
       relabel_configs:
@@ -233,3 +304,5 @@ data:
           target_label: service
         - source_labels: [__meta_kubernetes_pod_name]
           target_label: pod
+        - source_labels: [__meta_kubernetes_pod_container_name]
+          target_label: container
