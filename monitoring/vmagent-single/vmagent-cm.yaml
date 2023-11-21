@@ -18,12 +18,6 @@ data:
       - targets:
         - localhost:8429
 
-
-
-
-
-
-      
     # kube-apiservice
 
     - job_name: apiserver
@@ -41,16 +35,6 @@ data:
         - __meta_kubernetes_endpoint_port_name
         regex: default;kubernetes;https
         action: keep
-      # - source_labels: [__meta_kubernetes_endpoint_address_target_kind, __meta_kubernetes_endpoint_address_target_name]
-      #   separator: ;
-      #   target_label: node
-      #   regex: Node;(.*)
-      #   replacement: ${1}
-      # - source_labels: [__meta_kubernetes_endpoint_address_target_kind, __meta_kubernetes_endpoint_address_target_name]
-      #   separator: ;
-      #   target_label: pod
-      #   regex: Pod;(.*)
-      #   replacement: ${1}
       - source_labels: [__meta_kubernetes_pod_node_name]
         target_label: node
       - source_labels: [__meta_kubernetes_namespace]
@@ -79,16 +63,6 @@ data:
         - __meta_kubernetes_endpoint_port_name
         regex: kube-system;kube-scheduler-service;metrics
         action: keep
-      # - source_labels: [__meta_kubernetes_endpoint_address_target_kind, __meta_kubernetes_endpoint_address_target_name]
-      #   separator: ;
-      #   target_label: node
-      #   regex: Node;(.*)
-      #   replacement: ${1}
-      # - source_labels: [__meta_kubernetes_endpoint_address_target_kind, __meta_kubernetes_endpoint_address_target_name]
-      #   separator: ;
-      #   target_label: pod
-      #   regex: Pod;(.*)
-      #   replacement: ${1}
       - source_labels: [__meta_kubernetes_pod_node_name]
         target_label: node
       - source_labels: [__meta_kubernetes_namespace]
@@ -117,16 +91,6 @@ data:
         - __meta_kubernetes_service_name
         - __meta_kubernetes_endpoint_port_name
         regex: kube-system;kube-controller-manager-service;metrics
-      - source_labels: [__meta_kubernetes_endpoint_address_target_kind, __meta_kubernetes_endpoint_address_target_name]
-        separator: ;
-        target_label: node
-        regex: Node;(.*)
-        replacement: ${1}
-      - source_labels: [__meta_kubernetes_endpoint_address_target_kind, __meta_kubernetes_endpoint_address_target_name]
-        separator: ;
-        target_label: pod
-        regex: Pod;(.*)
-        replacement: ${1}
       - source_labels: [__meta_kubernetes_pod_node_name]
         target_label: node
       - source_labels: [__meta_kubernetes_namespace]
@@ -138,13 +102,6 @@ data:
       - source_labels: [__meta_kubernetes_pod_container_name]
         target_label: container
 
-
-
-
-
-
-
-        
     # kubelet  
 
     - job_name: kubelet
@@ -166,10 +123,6 @@ data:
       - source_labels: [__meta_kubernetes_node_name]
         target_label: node
 
-
-
-
-
       
     # cadvisor
 
@@ -183,20 +136,17 @@ data:
       kubernetes_sd_configs:
       - role: node
       relabel_configs:
-      - replacement: kubernetes.default.svc:443
-        target_label: __address__
-      - regex: (.+)
-        replacement: /api/v1/nodes/$1/proxy/metrics/cadvisor
-        source_labels:
-        - __meta_kubernetes_node_name
+      - target_label: __address__
+        replacement: kubernetes.default.svc:443
+      - source_labels: [__meta_kubernetes_node_name]
+        regex: (.+)
         target_label: __metrics_path__
+        replacement: /api/v1/nodes/$1/proxy/metrics/cadvisor
       - source_labels: [__meta_kubernetes_node_name]
         target_label: node
+     
 
 
-
-
-      
 
     # kube-proxy
 
@@ -227,10 +177,6 @@ data:
         target_label: pod
       - source_labels: [__meta_kubernetes_pod_container_name]
         target_label: container
-
-
-
-
 
       
     # Autodiscover pod with annotaions
