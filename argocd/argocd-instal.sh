@@ -34,8 +34,6 @@ echo ingress have created
 # Get init admin password and update
 sleep 30
 ADMIN_INIT_PASS=$(kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d; echo)
-
-# Change admin password
 read -p 'Enter new admin password ' NEW_PASS
 argocd login argocd.dev.local --username admin --password ${ADMIN_INIT_PASS} --insecure 
 argocd account update-password --account admin --current-password  ${ADMIN_INIT_PASS}  --new-password ${NEW_PASS}
