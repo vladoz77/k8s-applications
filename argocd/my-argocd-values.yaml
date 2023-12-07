@@ -1,0 +1,27 @@
+nameOverride: argocd
+fullnameOverride: argocd
+
+controller:
+  metrics:
+    enabled: true
+
+dex:
+  metrics:
+    enabled: true
+
+redis:
+  metrics:
+    enabled: true
+
+server:
+  extraArgs:
+  - --insecure
+  metrics:
+    enabled: true
+  ingress:
+    enabled: true
+    annotations:
+      ingress.kubernetes.io/force-ssl-redirect: "true"
+    hosts:
+     - argocd.home.local
+
