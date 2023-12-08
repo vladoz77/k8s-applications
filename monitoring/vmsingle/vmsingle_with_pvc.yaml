@@ -6,7 +6,7 @@ metadata:
 spec:
   podMetadata:
     annotations:
-      prometheus.io/scrape: true
+      prometheus.io/scrape: "true"
       prometheus.io/port: "8429"
       prometheus.io/path: /vm/metrics
   image:
