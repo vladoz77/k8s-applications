@@ -34,6 +34,7 @@ data:
       chunk_idle_period: 2h
       chunk_target_size: 1536000
       max_chunk_age: 2h
+      chunk_encoding: snappy
     
     frontend:
       scheduler_address: query-scheduler-discovery.loki.svc.cluster.local.:9095
