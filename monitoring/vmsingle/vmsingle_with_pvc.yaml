@@ -4,11 +4,6 @@ metadata:
   name: vm
   namespace: monitoring
 spec:
-  podMetadata:
-    annotations:
-      prometheus.io/scrape: true
-      prometheus.io/port: 8429
-      prometheus.io/path: /vm/metrics
   image:
     tag: v1.94.0
   extraArgs:
