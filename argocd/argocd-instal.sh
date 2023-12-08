@@ -14,7 +14,7 @@ sleep 10
 echo 'argocd have installed'
 
 #Patch argocd-server
-
+# kubectl patch deployments.apps -n argocd argocd-server -p '{"spec":{"template":{"spec":{"containers":[{"name":"argocd-server","image":"quay.io/argoproj/argocd:v2.9.3","args":["/usr/local/bin/argocd-server","--insecure"]}]}}}}'
 kubectl patch deployments.apps -n argocd argocd-server --patch-file=/dev/stdin  <<EOF
 spec:
   template:
