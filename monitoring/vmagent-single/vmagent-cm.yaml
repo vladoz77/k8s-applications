@@ -19,7 +19,6 @@ data:
         - localhost:8429
 
     # kube-apiservice
-
     - job_name: apiserver
       kubernetes_sd_configs:
       - role: endpoints
@@ -47,7 +46,6 @@ data:
         replacement: https
 
     # kubernetes-scheduler  
-
     - job_name: kubernetes-scheduler
       kubernetes_sd_configs:
       - role: endpoints
@@ -75,7 +73,6 @@ data:
         target_label: container
 
     # kube-controller
-
     - job_name: kube-scheduler
       kubernetes_sd_configs:
       - role: endpoints
@@ -103,7 +100,6 @@ data:
         target_label: container
 
     # kubelet  
-
     - job_name: kubelet
       scheme: https
       tls_config:
@@ -125,7 +121,6 @@ data:
 
       
     # cadvisor
-
     - job_name: cadvisor
       bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
       honor_timestamps: false
@@ -149,7 +144,6 @@ data:
 
 
     # kube-proxy
-
     - job_name: kube-proxy
       honor_labels: true
       kubernetes_sd_configs:
@@ -180,7 +174,6 @@ data:
 
       
     # Autodiscover pod with annotaions
-
     - job_name: kubernetes-pods
       kubernetes_sd_configs:
       - role: pod
@@ -214,6 +207,44 @@ data:
       - source_labels: 
         - __meta_kubernetes_pod_label_app_kubernetes_io_name
         target_label: job
+
+    # Autodiscover pod with annotaions
+    - job_name: kubernetes-endpoints
+      kubernetes_sd_configs:
+      - role: endpointslices
+      relabel_configs:
+      - action: drop
+        source_labels: [__meta_kubernetes_pod_container_init]
+        regex: "true"
+      - action: keep_if_equal
+        source_labels: [__meta_kubernetes_service_annotation_prometheus_io_port, __meta_kubernetes_pod_container_port_number]
+      - action: keep
+        source_labels: [__meta_kubernetes_service_annotation_prometheus_io_scrape]
+        regex: "true"
+      - action: replace
+        source_labels: [__meta_kubernetes_service_annotation_prometheus_io_scheme]
+        target_label: __scheme__
+        regex: (https?)
+      - action: replace
+        source_labels: [__meta_kubernetes_service_annotation_prometheus_io_path]
+        target_label: __metrics_path__
+        regex: (.+)
+      - action: replace
+        source_labels: [__address__, __meta_kubernetes_service_annotation_prometheus_io_port]
+        target_label: __address__
+        regex: ([^:]+)(?::\d+)?;(\d+)
+        replacement: $1:$2
+      - source_labels: [__meta_kubernetes_pod_name]
+        target_label: pod
+      - source_labels: [__meta_kubernetes_pod_container_name]
+        target_label: container
+      - source_labels: [__meta_kubernetes_namespace]
+        target_label: namespace
+      - source_labels: [__meta_kubernetes_pod_node_name]
+        target_label: node
+      - source_labels: [__meta_kubernetes_pod_label_app_kubernetes_io_name]
+        target_label: job
+
 
     - job_name: node-exporter
       honor_labels: true
