@@ -2,7 +2,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: vmagent-config
-  namespace: monitoring-test
+  namespace: monitoring
   labels:
     app.kubernetes.io/name: vmagent
 data:
@@ -118,6 +118,7 @@ data:
         target_label: __metrics_path__
       - source_labels: [__meta_kubernetes_node_name]
         target_label: node
+
 
       
     # cadvisor

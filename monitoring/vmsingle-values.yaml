@@ -3,7 +3,7 @@
 # Declare variables to be passed into your templates.
 
 rbac:
-  create: false
+  create: true
   # Note: The PSP will only be deployed, if Kubernetes (<1.25) supports the resource.
   pspEnabled: true
   namespaced: false
@@ -198,12 +198,13 @@ server:
     #timeoutSeconds: 5
 
   # -- Security context to be added to server pods
-  securityContext: {}
+  securityContext: 
+
   # -- Pod's security context. Ref: [https://kubernetes.io/docs/tasks/configure-pod-container/security-context/](https://kubernetes.io/docs/tasks/configure-pod-container/security-context/)
   podSecurityContext: {}
   ingress:
     # -- Enable deployment of ingress for server component
-    enabled: false
+    enabled: true
     # -- Ingress annotations
     annotations: {}
     #   kubernetes.io/ingress.class: nginx
@@ -212,10 +213,10 @@ server:
     # -- Ingress extra labels
     extraLabels: {}
     # -- Array of host objects
-    hosts: []
-    #   - name: vmselect.local
-    #     path: /select
-    #     port: http
+    hosts:
+      - name: vmsingle.home.local
+        path: /
+        port: http
 
     # -- Array of TLS objects
     tls: []
