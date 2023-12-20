@@ -10,7 +10,7 @@ spec:
     http.pathPrefix: /vm
     maxLabelsPerTimeseries: "50"
     dedup.minScrapeInterval: 60s
-  retentionPeriod: "14"
+  retentionPeriod: "30"
   # logFormat: json
   removePvcAfterDelete: true
   storage:
