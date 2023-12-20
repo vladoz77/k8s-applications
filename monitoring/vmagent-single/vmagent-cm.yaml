@@ -2,7 +2,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: vmagent-config
-  namespace: monitoring
+  namespace: monitoring-test
   labels:
     app.kubernetes.io/name: vmagent
 data:
@@ -137,8 +137,29 @@ data:
         regex: (.+)
         target_label: __metrics_path__
         replacement: /api/v1/nodes/$1/proxy/metrics/cadvisor
-      - source_labels: [__meta_kubernetes_node_name]
-        target_label: node
+      - target_label: job
+        replacement: cadvisor
+      metric_relabel_configs:
+        - action: drop
+          source_labels: [__name__]
+          regex: container_cpu_(cfs_throttled_seconds_total|load_average_10s|system_seconds_total|user_seconds_total)
+        - action: drop
+          source_labels: [__name__]
+          regex: container_fs_(io_current|io_time_seconds_total|io_time_weighted_seconds_total|reads_merged_total|sector_reads_total|sector_writes_total|writes_merged_total)
+        - action: drop
+          source_labels: [__name__]
+          regex: container_memory_(mapped_file|swap)
+        - action: drop
+          source_labels: [__name__]
+          regex: container_(file_descriptors|tasks_state|threads_max)
+        - action: drop
+          source_labels: [__name__]
+          regex: container_spec.*
+        - action: drop
+          source_labels: [id, pod]
+          regex: .+;
+
+        
      
     
     # kube-proxy
@@ -146,9 +167,6 @@ data:
       honor_labels: true
       kubernetes_sd_configs:
       - role: endpoints
-        namespaces:
-          names:
-            - kube-system
       relabel_configs:
       - source_labels: [__meta_kubernetes_endpoints_label_app]
         regex: kube-proxy-metrics-svc
@@ -166,6 +184,9 @@ data:
         target_label: pod
       - source_labels: [__meta_kubernetes_pod_container_name]
         target_label: container
+      - source_labels: [__meta_kubernetes_service_name]
+        target_label: job
+
 
  
 
@@ -239,7 +260,7 @@ data:
         target_label: namespace
       - source_labels: [__meta_kubernetes_pod_node_name]
         target_label: node
-      - source_labels: [__meta_kubernetes_pod_label_app_kubernetes_io_name]
+      - source_labels: [__meta_kubernetes_service_name]
         target_label: job
 
 
@@ -249,18 +270,24 @@ data:
           - role: endpoints
       relabel_configs:
         - action: keep
-          source_labels: [__meta_kubernetes_namespace, __meta_kubernetes_service_name, __meta_kubernetes_endpoint_port_name]
-          regex: monitoring;node-exporter-service;http-metrics
-        - source_labels: [__meta_kubernetes_pod_node_name]
-          target_label: node
-        - source_labels: [__meta_kubernetes_namespace]
-          target_label: namespace
-        - source_labels: [__meta_kubernetes_service_name]
-          target_label: service
+          source_labels: [__meta_kubernetes_service_label_app_kubernetes_io_name]
+          regex: node-exporter-service
+        - action: keep
+          source_labels: [__meta_kubernetes_endpoint_port_name]
+          regex: http-metrics
         - source_labels: [__meta_kubernetes_pod_name]
           target_label: pod
         - source_labels: [__meta_kubernetes_pod_container_name]
           target_label: container
+        - source_labels: [__meta_kubernetes_namespace]
+          target_label: namespace
+        - source_labels: [__meta_kubernetes_service_name]
+          target_label: service
+        - source_labels: [__meta_kubernetes_service_name]
+          target_label: job
+        - source_labels: [__meta_kubernetes_endpoint_node_name]
+          target_label: instance
+
 
     - job_name: kube-state-metrics
       honor_labels: true
@@ -268,8 +295,12 @@ data:
         - role: endpoints
       relabel_configs:
         - action: keep
-          source_labels: [__meta_kubernetes_namespace, __meta_kubernetes_service_name, __meta_kubernetes_endpoint_port_name]
-          regex: monitoring;kube-state-metrics;http-metrics
+          source_labels: 
+            - __meta_kubernetes_endpoints_label_app_kubernetes_io_name
+          regex: kube-state-metrics
+        - source_labels: [__meta_kubernetes_endpoint_port_name]
+          regex: http-metrics
+          action: keep
         - source_labels: [__meta_kubernetes_pod_node_name]
           target_label: node
         - source_labels: [__meta_kubernetes_namespace]
@@ -280,30 +311,32 @@ data:
           target_label: pod
         - source_labels: [__meta_kubernetes_pod_container_name]
           target_label: container
+        - source_labels: [__meta_kubernetes_service_name]
+          target_label: job
 
     - job_name: argocd
       honor_labels: true
       kubernetes_sd_configs:
       - role: endpoints
-        namespaces:
-          names:
-            - argocd
       relabel_configs:
-        - source_labels: [__meta_kubernetes_service_name]
-          regex: argocd-metrics|argocd-server-metrics|argocd-repo-server|argocd-applicationset-controller
-          action: keep
-        - source_labels: [__meta_kubernetes_endpoint_port_name]
+        - action: keep
+          source_labels: [__meta_kubernetes_service_label_app_kubernetes_io_name]
+          regex:
+          - argocd-metrics
+          - argocd-server-metrics
+          - argocd-repo-server
+          - argocd-applicationset-controller
+        - action: keep
+          source_labels: [__meta_kubernetes_endpoint_port_name]
           regex: metrics
-          action: keep
-        - source_labels: [__meta_kubernetes_pod_node_name]
-          target_label: node
-        - source_labels: [__meta_kubernetes_namespace]
-          target_label: namespace
-        - source_labels: [__meta_kubernetes_service_name]
-          target_label: service
         - source_labels: [__meta_kubernetes_pod_name]
           target_label: pod
         - source_labels: [__meta_kubernetes_pod_container_name]
           target_label: container
-        - source_labels: [__meta_kubernetes_pod_label_app_kubernetes_io_name]
+        - source_labels: [__meta_kubernetes_namespace]
+          target_label: namespace
+        - source_labels: [__meta_kubernetes_service_name]
+          target_label: service
+        - source_labels: [__meta_kubernetes_service_name]
           target_label: job
+
