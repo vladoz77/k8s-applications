@@ -1,12 +1,12 @@
 apiVersion: cert-manager.io/v1
 kind: Certificate
 metadata:
-  name: ca
+  name: ca-nginx
   namespace: default
 spec:
   isCA: true
-  commonName: ca
-  secretName: ca-secret
+  commonName: ca-nginx
+  secretName: ca-nginx
   privateKey:
     algorithm: ECDSA
     size: 256
@@ -14,14 +14,17 @@ spec:
     name: selfsigned-cluster-issuer
     kind: ClusterIssuer
     group: cert-manager.io
-
 ---
 # Create CA Issure 
 apiVersion: cert-manager.io/v1
 kind: Issuer
 metadata:
-  name: ca-issuer
+  name: ca-issuer-nginx
   namespace: default
 spec:
   ca:
-    secretName: ca-secret
+    secretName: ca-nginx
+
+
+
+

@@ -4,10 +4,16 @@ metadata:
   name: web
   namespace: default
 spec:
+  duration: 2160h # 90d
+  renewBefore: 360h # 15d
+  subject:
+    organizations:
+      - home
   secretName: web-cert
   dnsNames:
   - web.home.local
   issuerRef:
-    name: ca-issuer
+    name: ca-issuer-nginx
     kind: Issuer
     group: cert-manager.io
+    
