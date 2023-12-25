@@ -42,7 +42,7 @@ spec:
   tls:
   - hosts:
     - web.home.local
-    secretName: web-cert
+    secretName: kuard-cert
   rules:
   - host: web.home.local
     http:

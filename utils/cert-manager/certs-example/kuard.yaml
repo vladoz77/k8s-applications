@@ -1,7 +1,7 @@
 apiVersion: cert-manager.io/v1
 kind: Certificate
 metadata:
-  name: web
+  name: kuard
   namespace: default
 spec:
   duration: 2160h # 90d
@@ -9,11 +9,11 @@ spec:
   subject:
     organizations:
       - home
-  secretName: web-cert
+  secretName: kuard-cert
   dnsNames:
   - web.home.local
   issuerRef:
-    name: ca-issuer-nginx
-    kind: Issuer
+    name: ca-issuer
+    kind: ClusterIssuer
     group: cert-manager.io
     
