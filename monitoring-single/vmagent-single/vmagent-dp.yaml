@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: vmagent
-  namespace: monitoring
+  namespace: monitoring-test
   labels:
     app.kubernetes.io/name: vmagent
 spec:
@@ -26,7 +26,7 @@ spec:
           args:
             - -promscrape.config=/config/scrape.yml
             - -remoteWrite.tmpDataPath=/tmpData
-            - -remoteWrite.url=http://vmsingle.monitoring.svc.cluster.local:8428/api/v1/write
+            - -remoteWrite.url=http://vmsingle.monitoring-test.svc.cluster.local:8428/api/v1/write
             - -envflag.enable=true
             - -envflag.prefix=VM_
             - -loggerFormat=json
