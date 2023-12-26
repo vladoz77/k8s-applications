@@ -1,0 +1,23 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    # добавить аннотацию, указывающую на издателя, которого следует использовать.
+    cert-manager.io/cluster-issuer: ca-issuer
+  name: kuard-ingress
+spec:
+  rules:
+  - host:  web.home.local
+    http:
+      paths:
+      - pathType: Prefix
+        path: /
+        backend:
+          service:
+            name: kuard
+            port:
+              number: 80
+  tls: # < Размещение хоста в конфигурации TLS будет определять, что будет содержаться в subjectAltNames сертификата
+  - hosts:
+    -  web.home.local
+    secretName: kuard-cert # < cert-manager будет хранить созданный сертификат в этом секрете.
