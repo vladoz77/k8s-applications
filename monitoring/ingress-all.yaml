@@ -1,0 +1,59 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: vm-ingress
+  namespace: monitoring
+  annotations:
+    cert-manager.io/cluster-issuer: ca-issuer
+spec:
+  rules:
+  - host: "mon.home.local"
+    http:
+      paths:
+      - path: /grafana
+        pathType: Prefix
+        backend:
+          service:
+            name: grafana-service
+            port:
+              number: 3000
+      - path: /vmagent
+        pathType: Prefix
+        backend:
+          service:
+            name: vmagent-vm
+            port:
+              number: 8429
+      - path: /vm
+        pathType: Prefix
+        backend:
+          service:
+            name: vmsingle-vm
+            port:
+              number: 8429
+      - pathType: Prefix
+        path: /vmalert
+        backend:
+          service:
+            name: vmalert-vm
+            port:
+              number: 8080
+      - path: /alertmanager
+        pathType: Prefix
+        backend:
+          service:
+            name: vmalertmanager-vm
+            port:
+              number: 9093
+      - path: /karma
+        pathType: Prefix
+        backend:
+          service:
+            name: karma-service
+            port:
+              number: 8080
+          
+  tls:
+    - hosts:
+      - mon.home.local
+      secretName: vm-cert
