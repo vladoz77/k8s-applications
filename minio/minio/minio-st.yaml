@@ -10,7 +10,7 @@ spec:
     matchLabels:
       app.kubernetes.io/name: minio
   serviceName: minio-headless
-  replicas: 1
+  replicas: 2
   podManagementPolicy: Parallel
   updateStrategy:
     type: RollingUpdate
@@ -19,23 +19,23 @@ spec:
       labels:
         app.kubernetes.io/name: minio
     spec:
-      # affinity:
-      #   nodeAffinity:
-      #     requiredDuringSchedulingIgnoredDuringExecution:
-      #       nodeSelectorTerms:
-      #       - matchExpressions:
-      #         - key: minio
-      #           operator: In
-      #           values:
-      #           - "true"
-      #   podAntiAffinity:
-      #     preferredDuringSchedulingIgnoredDuringExecution:
-      #       - podAffinityTerm:
-      #           labelSelector:
-      #             matchLabels:
-      #               app.kubernetes.io/name: minio
-      #           topologyKey: kubernetes.io/hostname
-      #         weight: 1
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: minio
+                operator: In
+                values:
+                - "true"
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - podAffinityTerm:
+                labelSelector:
+                  matchLabels:
+                    app.kubernetes.io/name: minio
+                topologyKey: kubernetes.io/hostname
+              weight: 1
       securityContext:
         fsGroup: 1001
       initContainers:
@@ -62,12 +62,12 @@ spec:
             runAsNonRoot: true
             runAsUser: 1001
           env:
-            # - name: BITNAMI_DEBUG
-            #   value: "false"
-            # - name: MINIO_DISTRIBUTED_MODE_ENABLED
-            #   value: "yes"
-            # - name: MINIO_DISTRIBUTED_NODES
-            #   value: "minio-{0...1}.minio-headless.minio.svc.cluster.local:9000/data-{0...1}/data"
+            - name: BITNAMI_DEBUG
+              value: "false"
+            - name: MINIO_DISTRIBUTED_MODE_ENABLED
+              value: "yes"
+            - name: MINIO_DISTRIBUTED_NODES
+              value: "minio-{0...1}.minio-headless.minio.svc.cluster.local:9000/data-{0...1}/data"
             - name: MINIO_SCHEME
               value: "http"
             - name: MINIO_FORCE_NEW_KEYS
@@ -123,10 +123,6 @@ spec:
               mountPath: /data-0/data
             - name: data-1
               mountPath: /data-1/data
-            - name: data-2
-              mountPath: /data-2/data
-            - name: data-3
-              mountPath: /data-3/data
      
       volumes:
         - name:  data-0
@@ -136,12 +132,4 @@ spec:
         - name:  data-1
           hostPath:
             path: /data-1/data
-            type: DirectoryOrCreate
-        - name:  data-2
-          hostPath:
-            path: /data-2/data
-            type: DirectoryOrCreate
-        - name:  data-3
-          hostPath:
-            path: /data-3/data
             type: DirectoryOrCreate
