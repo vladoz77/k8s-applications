@@ -4,7 +4,7 @@ metadata:
   name: vm
   namespace: monitoring
 spec:
-  # Add fields here
+  routePrefix: /alertmanager
   replicaCount: 1
   configSecret: vm-alertmanager-config
   selectAllByDefault: true

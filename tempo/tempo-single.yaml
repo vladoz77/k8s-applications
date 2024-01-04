@@ -1,8 +1,8 @@
 # -- Overrides the chart's name
-nameOverride: tempo
+nameOverride: ""
 
 # -- Overrides the chart's computed fullname
-fullnameOverride: tempo
+fullnameOverride: ""
 
 # -- Define the amount of instances
 replicas: 1
@@ -15,7 +15,7 @@ annotations: {}
 
 tempo:
   repository: grafana/tempo
-  tag: null
+  tag: ""
   pullPolicy: IfNotPresent
   ## Optionally specify an array of imagePullSecrets.
   ## Secrets must be manually created in the namespace.
@@ -63,17 +63,17 @@ tempo:
       # tempo storage backend
       # refer https://grafana.com/docs/tempo/latest/configuration/
       ## Use s3 for example
-      backend: s3
+      # backend: s3
       # store traces in s3
-      s3:
-        bucket: tempo                                     # store traces in this bucket
-        endpoint: minio-svc.minio.svc.cluster.local:9000  # api endpoint
-        access_key: admin                                  # optional. access key when using static credentials.
-        secret_key: password                                # optional. secret key when using static credentials.
-        insecure: true                                   # optional. enable if endpoint is http
-      # backend: local
-      # local:
-      #   path: /var/tempo/traces
+      # s3:
+      #   bucket: tempo                                   # store traces in this bucket
+      #   endpoint: s3.dualstack.us-east-2.amazonaws.com  # api endpoint
+      #   access_key: ...                                 # optional. access key when using static credentials.
+      #   secret_key: ...                                 # optional. secret key when using static credentials.
+      #   insecure: false                                 # optional. enable if endpoint is http
+      backend: local
+      local:
+        path: /var/tempo/traces
       wal:
         path: /var/tempo/wal
   # this configuration will listen on all ports and protocols that tempo is capable of.
@@ -265,7 +265,7 @@ serviceMonitor:
   # scrapeTimeout: 10s
 
 persistence:
-  enabled: true
+  enabled: false
   # storageClassName: local-path
   accessModes:
     - ReadWriteOnce

@@ -1,0 +1,42 @@
+fullnameOverride: tempo
+
+traces:
+  otlp:
+    grpc:
+      enabled: true
+    http:
+      enabled: true
+  zipkin:
+    enabled: true
+  jaeger:
+    thriftCompact:
+      enabled: true
+    thriftHttp:
+      enabled: true
+  opencensus:
+    enabled: true
+
+# Configure S3 backend
+storage:
+  trace:
+    backend: s3
+    s3:
+      bucket: tempo
+      endpoint: minio-svc.minio.svc.cluster.local:9000
+      access_key: admin
+      secret_key: password
+      insecure: true
+
+# Configure distributor
+distributor:
+  config:
+    log_received_spans:
+      enabled: true
+
+ingester:
+  replicas: 1
+  
+
+# Disable Minio server installation
+minio:
+  enabled: false
