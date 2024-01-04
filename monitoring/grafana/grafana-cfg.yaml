@@ -15,21 +15,33 @@ data:
   datasources.yaml: |
     apiVersion: 1
     datasources:
-    - access: proxy
+    - name: victoria-metrics
+      access: proxy
       editable: true
-      name: victoria-metrics
       orgId: 1
       type: prometheus
       url: http://vmsingle-vm.monitoring.svc.cluster.local:8429/vm
       version: 1
 
-    - access: proxy
+    - name: loki
+      access: proxy
       editable: true
-      name: loki
       orgId: 1
       type: loki
       url: http://loki-gateway.loki.svc
       version: 1
+      jsonData:
+      derivedFields:
+        - datasourceUid: tempo
+          matcherRegex: "trace_id":"(\w+)"
+          name: TraceID
+          url: ${__value.raw}
+
+    - name: Tempo
+      type: tempo
+      uid: tempo
+      access: proxy
+      url: http://tempo-query-frontend.tracing.svc.cluster.local:3100
 
   dashboards.yaml: |-
     apiVersion: 1
