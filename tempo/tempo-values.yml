@@ -33,9 +33,6 @@ distributor:
     log_received_spans:
       enabled: true
 
-ingester:
-  replicas: 1
-  
 
 # Disable Minio server installation
 minio:
