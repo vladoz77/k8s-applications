@@ -42,7 +42,7 @@ data:
       type: tempo
       uid: tempo
       access: proxy
-      url: http://tempo-query-frontend.tracing.svc.cluster.local:3100
+      url: http://tempo-gateway.tracing.svc.cluster.local
 
   dashboards.yaml: |-
     apiVersion: 1

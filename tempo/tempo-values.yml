@@ -37,3 +37,7 @@ distributor:
 # Disable Minio server installation
 minio:
   enabled: false
+
+# Configuration for the gateway
+gateway:
+  enabled: true
