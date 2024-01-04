@@ -31,11 +31,11 @@ data:
       url: http://loki-gateway.loki.svc
       version: 1
       jsonData:
-      derivedFields:
-        - datasourceUid: tempo
-          matcherRegex: "trace_id":"(\w+)"
-          name: TraceID
-          url: ${__value.raw}
+        derivedFields:
+          - datasourceUid: tempo
+            matcherRegex: '"trace_id": "(\w+)"'
+            name: TraceID
+            url: ${__value.raw}
 
     - name: Tempo
       type: tempo
