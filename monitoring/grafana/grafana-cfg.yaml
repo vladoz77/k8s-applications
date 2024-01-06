@@ -39,6 +39,7 @@ data:
             urlDisplaylabel: 'View Trace'
 
     - name: Tempo
+      editable: true
       type: tempo
       uid: tempo
       access: proxy
