@@ -6,15 +6,7 @@ traces:
       enabled: true
     http:
       enabled: true
-  zipkin:
-    enabled: true
-  jaeger:
-    thriftCompact:
-      enabled: true
-    thriftHttp:
-      enabled: true
-  opencensus:
-    enabled: true
+  
 
 # Configure S3 backend
 storage:
@@ -27,17 +19,24 @@ storage:
       secret_key: password
       insecure: true
 
-# Configure distributor
-distributor:
-  config:
-    log_received_spans:
-      enabled: true
+# # Configure distributor
+# distributor:
+#   config:
+#     log_received_spans:
+#       enabled: true
 
 
 # Disable Minio server installation
 minio:
   enabled: false
 
-# Configuration for the gateway
-gateway:
+
+metricsGenerator:
   enabled: true
+  config:
+    storage:
+      path: /var/tempo/wal
+      wal:
+      remote_write_flush_deadline: 1m
+      remote_write:
+       - url: http://vmsingle-vm.monitoring.svc:8429/vm/api/v1/write

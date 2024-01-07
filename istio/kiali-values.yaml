@@ -105,14 +105,16 @@ external_services:
       enabled: true
       # Grafana service name is "grafana" and is in the "telemetry" namespace.
       in_cluster_url: http://grafana-service.monitoring:3000/grafana
+      url: 'http://mon.home.local/grafana'
   prometheus:
       # Prometheus service name is "metrics" and is in the "telemetry" namespace
       url: http://vmsingle-vm.monitoring:8429/vm
   tracing:
       enable: true
-      in_cluster_url: http://tempo.tempo:3100
+      in_cluster_url: http://tempo-query-frontend.tracing:3100
       provider: tempo
       use_grpc: false
+      url: "http://mon.home.local/grafana"
 
 
 identity: {}

@@ -43,7 +43,10 @@ data:
       type: tempo
       uid: tempo
       access: proxy
-      url: http://tempo-gateway.tracing.svc.cluster.local
+      url: http://tempo-query-frontend.tracing.svc.cluster.local:3100
+      jsonData:
+          nodeGraph:
+            enabled: true
 
   dashboards.yaml: |-
     apiVersion: 1
