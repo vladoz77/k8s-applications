@@ -1,0 +1,63 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: petclinic
+  labels:
+    app: petclinic
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: petclinic
+  template:
+    metadata:
+      labels:
+        app: petclinic
+    spec:
+      containers:
+      - name: petclinic
+        image: springcommunity/spring-framework-petclinic
+        ports:
+        - containerPort: 8080
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: petclinic
+spec:
+  selector:
+    app: petclinic
+  ports:
+    - port: 80
+      targetPort: 8080
+    
+---
+apiVersion: gateway.networking.k8s.io/v1beta1
+kind: Gateway
+metadata:
+  name: petclinic-gateway
+spec:
+  gatewayClassName: istio
+  listeners:
+  - name: http
+    hostname: "*.home.local"
+    port: 80
+    protocol: HTTP
+    allowedRoutes:
+      namespaces:
+        from: All
+
+---
+apiVersion: gateway.networking.k8s.io/v1beta1
+kind: HTTPRoute
+metadata:
+  name: petclinic-route
+spec:
+  parentRefs:
+  - name: petclinic-gateway
+  hostnames:
+  - "petclinic.home.local"
+  rules:
+  - backendRefs:
+    - name: petclinic
+      port: 80

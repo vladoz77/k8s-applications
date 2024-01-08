@@ -6,6 +6,7 @@ traces:
       enabled: true
     http:
       enabled: true
+
   
 
 # Configure S3 backend
