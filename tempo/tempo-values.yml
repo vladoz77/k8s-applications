@@ -20,11 +20,11 @@ storage:
       secret_key: password
       insecure: true
 
-# # Configure distributor
-# distributor:
-#   config:
-#     log_received_spans:
-#       enabled: true
+# Configure distributor
+distributor:
+  config:
+    log_received_spans:
+      enabled: true
 
 
 # Disable Minio server installation

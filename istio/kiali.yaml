@@ -1,0 +1,41 @@
+fullnameOverride: "kiali"
+istio_namespace: istio-system
+
+auth:
+  strategy: anonymous
+
+deployment:
+  ingress:
+      enabled: true
+      override_yaml:
+        spec:
+          rules:
+            - host: kiali.home.local
+              http:
+                paths:
+                  - path: /
+                    pathType: Prefix
+                    backend:
+                      service:
+                        name: kiali
+                        port:
+                          number: 20001
+
+external_services:
+  istio:
+    component_status:
+        components:
+        - app_label: "istiod"
+        enabled: true
+  grafana:
+      enabled: true
+      in_cluster_url: http://grafana-service.monitoring:3000/grafana
+      url: 'http://mon.home.local/grafana'
+  prometheus:
+      url: http://vmsingle-vm.monitoring:8429/vm
+  tracing:
+      enable: true
+      in_cluster_url: http://tempo-query-frontend.tracing:3100
+      provider: tempo
+      use_grpc: false
+      url: "http://mon.home.local/grafana"

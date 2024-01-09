@@ -22,12 +22,15 @@ config:
       endpoint: tempo-distributor:4317
       tls:
         insecure: true
+    logging:
+        loglevel: info
 
   service:
     pipelines:
       traces: # here, we add the receivers and exporters accordingly
           exporters:
             - otlp
+            - logging
           processors:
             - memory_limiter
             - batch
