@@ -42,6 +42,7 @@ spec:
     - sourceLabels: [__meta_kubernetes_pod_name]
       action: replace
       targetLabel: pod_name
+
 ---
 apiVersion: operator.victoriametrics.com/v1beta1
 kind: VMServiceScrape
