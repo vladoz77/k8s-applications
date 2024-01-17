@@ -5,11 +5,11 @@ metadata:
   namespace: monitoring
 spec:
   image:
-    tag: v1.94.0
+    tag: v1.96.0
   extraArgs:
     http.pathPrefix: /vm
     maxLabelsPerTimeseries: "50"
-    dedup.minScrapeInterval: 60s
+    dedup.minScrapeInterval: 30s
   retentionPeriod: "30"
   # logFormat: json
   removePvcAfterDelete: true
