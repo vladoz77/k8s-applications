@@ -15,7 +15,7 @@ loki:
     common:
       compactor_address: 'loki-backend'
       path_prefix: /var/loki
-      replication_factor: 1
+      replication_factor: 2
       storage:
         s3:
           access_key_id: admin
@@ -29,6 +29,7 @@ loki:
       chunk_idle_period: 2h
       chunk_target_size: 1536000
       max_chunk_age: 2h
+      chunk_encoding: snappy
     
     frontend:
       scheduler_address: query-scheduler-discovery.loki.svc.cluster.local.:9095
@@ -46,10 +47,12 @@ loki:
       reject_old_samples: true
       reject_old_samples_max_age: 168h
       split_queries_by_interval: 15m
-      per_stream_rate_limit: 3MB
-      per_stream_rate_limit_burst: 10MB
+      per_stream_rate_limit: 5MB
+      per_stream_rate_limit_burst: 20MB
       ingestion_rate_mb: 20
       ingestion_burst_size_mb: 30
+      max_entries_limit_per_query: 100000
+      query_timeout: 300s
     
     
     memberlist:
@@ -61,7 +64,6 @@ loki:
       align_queries_with_step: true
     
     querier:
-      query_timeout: 300s
       engine:
         timeout: 300s
 
@@ -107,7 +109,7 @@ loki:
 
 # Configuration for the write pod(s)
 write:
-  replicas: 3
+  replicas: 2
   persistence:
     size: 10Gi
 
@@ -122,12 +124,18 @@ backend:
     size: 10Gi
   extraVolumeMounts: 
     - name: rules-volume
-      mountPath: /etc/loki/rules/fake/rules.yaml
-      subPath: rules.yaml
+      mountPath: /etc/loki/rules/fake/loki-rules.yaml
+      subPath: loki-rules.yaml
+    - name: rules-volume
+      mountPath: /etc/loki/rules/fake/loki-alert.yaml
+      subPath: loki-alert.yaml
   extraVolumes: 
     - name: rules-volume
       configMap:
         name: loki-rules
+    - name: alert-volume
+      configMap:
+        name: loki-alert
   
 
 memberlist:
