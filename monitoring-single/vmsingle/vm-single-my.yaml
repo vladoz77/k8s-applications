@@ -7,7 +7,3 @@ server:
   image:
     tag: v1.96.0
   fullnameOverride: vmsingle
-  ingress:
-    enabled: true
-    hosts:
-       - name: vmsingle.home.local
