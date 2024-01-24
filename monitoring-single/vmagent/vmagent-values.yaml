@@ -3,8 +3,8 @@ deployment:
 statefulset:
   enabled: true
 
-nameOverride: vmagent
-fullnameOverride: vmagent
+nameOverride: vm-agent
+fullnameOverride: vm-agent
 
 remoteWriteUrls: 
   - "http://vmsingle.monitoring-test.svc.cluster.local:8428/api/v1/write"
@@ -13,7 +13,7 @@ service:
   enabled: true
   annotations:
     prometheus.io/scrape: "true"
-    prometheus.io/port: "8429"
+    prometheus.io/port: "8428"
 
 persistence:
   enabled: true
