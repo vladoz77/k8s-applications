@@ -13,7 +13,7 @@ service:
   enabled: true
   annotations:
     prometheus.io/scrape: "true"
-    prometheus.io/port: "8428"
+    prometheus.io/port: "8429"
 
 persistence:
   enabled: true
