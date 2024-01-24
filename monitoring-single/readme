@@ -1,0 +1,1 @@
+helm install vmsingle vm/victoria-metrics-single -f vmsingle/vm-single-my.yaml -n monitoring-test --create-namespace
