@@ -1,8 +1,11 @@
 pilot:
-  podAnnotations:
-    prometheus.io/path: /stats/prometheus
-    prometheus.io/port: "15020"
-    prometheus.io/scrape: true
+  resources:
+    requests:
+      cpu: 100m
+      memory: 500Mi
+  serviceAnnotations:
+    prometheus.io/port: "15014"
+    prometheus.io/scrape: "true"
 
 meshConfig:
   accessLogFile: /dev/stdout
