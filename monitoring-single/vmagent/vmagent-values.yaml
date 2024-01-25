@@ -142,7 +142,7 @@ config:
         - __meta_kubernetes_pod_node_name
         target_label: node
       - source_labels: 
-        - __meta_kubernetes_pod_label_app_kubernetes_io_name
+        - __meta_kubernetes_pod_label_app
         target_label: job
 
     #kube-controller-manager
@@ -181,7 +181,7 @@ config:
         - __meta_kubernetes_pod_node_name
         target_label: node
       - source_labels: 
-        - __meta_kubernetes_pod_label_app_kubernetes_io_name
+        - __meta_kubernetes_pod_label_app
         target_label: job
 
     # kube-scheduler
@@ -220,7 +220,7 @@ config:
         - __meta_kubernetes_pod_node_name
         target_label: node
       - source_labels: 
-        - __meta_kubernetes_pod_label_app_kubernetes_io_name
+        - __meta_kubernetes_pod_label_app
         target_label: job
   
     # Autodiscover pod with annotaions
@@ -328,18 +328,12 @@ config:
           regex: ([^:]+)(?::\d+)?;(\d+)
           replacement: $1:$2
           target_label: __address__
-        - source_labels:
-          - __meta_kubernetes_namespace
+        - action: labelmap
+          regex: __meta_kubernetes_pod_label_(.+)
+        - source_labels: [__meta_kubernetes_namespace]
           action: replace
-          target_label: namespace
-        - source_labels:
-          - __meta_kubernetes_pod_name
+          target_label: kubernetes_namespace
+        - source_labels: [__meta_kubernetes_pod_name]
           action: replace
-          target_label: pod
-        - source_labels:
-          - __meta_kubernetes_pod_node_name
-          target_label: node
-        - source_labels: 
-          - __meta_kubernetes_pod_label_app_kubernetes_io_name
-          target_label: job
+          target_label: kubernetes_pod_name
         
