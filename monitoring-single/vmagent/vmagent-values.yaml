@@ -7,7 +7,7 @@ nameOverride: vm-agent
 fullnameOverride: vm-agent
 
 remoteWriteUrls: 
-  - "http://vmsingle.monitoring.svc.cluster.local:8428/api/v1/write"
+  - "http://vmsingle.monitoring-test.svc.cluster.local:8428/api/v1/write"
 
 service:
   enabled: true
@@ -117,12 +117,12 @@ config:
       honor_labels: true
       kubernetes_sd_configs:
       - role: pod
+        namespaces:
+            names:
+            - kube-system
       relabel_configs:
-      - source_labels:
-        - __meta_kubernetes_namespace
-        - __meta_kubernetes_pod_name
-        separator: '/'
-        regex: 'kube-system/kube-proxy.+'
+      - source_labels: [__meta_kubernetes_pod_name]
+        regex: 'kube-proxy.+'
         action: keep
       - source_labels:
         - __address__
@@ -156,18 +156,12 @@ config:
       bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
       kubernetes_sd_configs:
       - role: pod
+        namespaces:
+            names:
+            - kube-system
       relabel_configs:
-      # - source_labels:
-      #   - __meta_kubernetes_namespace
-      #   - __meta_kubernetes_pod_name
-      #   separator: '/'
-      #   regex: 'kube-system/kube-controller-manager.+'
-      #   action: keep
-      - source_labels: [__meta_kubernetes_namespace]
-        regex: 'kube-system'
-        action: keep
-      - source_labels: [__meta_kubernetes_pod_container_name]
-        regex: 'kube-controller.+'
+      - source_labels: [__meta_kubernetes_pod_label_component]
+        regex: 'kube-controller-manager'
         action: keep
       - source_labels:
         - __address__
@@ -240,7 +234,7 @@ config:
           - __meta_kubernetes_namespace
           - __meta_kubernetes_service_name
           - __meta_kubernetes_endpoint_port_name
-          regex: monitoring-test;node-exporter-service;http-metrics
+          regex: monitoring;node-exporter-service;http-metrics
           action: keep
         - source_labels: [__meta_kubernetes_pod_name]
           target_label: pod
@@ -265,7 +259,7 @@ config:
           - __meta_kubernetes_namespace
           - __meta_kubernetes_service_name
           - __meta_kubernetes_endpoint_port_name
-          regex: monitoring-test;kube-state-metrics;http-metrics
+          regex: monitoring;kube-state-metrics;http-metrics
           action: keep
         - source_labels: [__meta_kubernetes_pod_node_name]
           target_label: node
@@ -285,19 +279,20 @@ config:
       honor_labels: true
       kubernetes_sd_configs:
         - role: endpoints
+          namespaces:
+            names:
+            - istio-system
       relabel_configs:
-        - source_labels:
-          - __meta_kubernetes_namespace
-          - __meta_kubernetes_service_name
-          - __meta_kubernetes_endpoint_port_name
-          regex: istio-system;istiod;http-monitoring
-          action: keep
+        - action: keep
+          source_labels: [__meta_kubernetes_service_label_istio]
+          regex: pilot
+        - action: keep
+          source_labels: [__meta_kubernetes_endpoint_port_name]
+          regex: http-monitoring
         - source_labels: [__meta_kubernetes_pod_node_name]
           target_label: node
         - source_labels: [__meta_kubernetes_namespace]
           target_label: namespace
-        # - source_labels: [__meta_kubernetes_service_name]
-        #   target_label: service
         - source_labels: [__meta_kubernetes_pod_name]
           target_label: pod
         - source_labels: [__meta_kubernetes_pod_container_name]
@@ -307,6 +302,7 @@ config:
     
     #Istio-proxy
     - job_name: istio-proxy
+      honor_labels: true
       metrics_path: /stats/prometheus
       kubernetes_sd_configs:
       - role: pod
@@ -327,6 +323,35 @@ config:
       - action: replace
         source_labels: [__meta_kubernetes_pod_name]
         target_label: pod_name
+
+    #Calico
+    - job_name: Calico
+      honor_labels: true
+      kubernetes_sd_configs:
+        - role: endpoints
+          namespaces:
+            names:
+            - calico-system
+      relabel_configs:
+      - action: keep
+        source_labels: [__meta_kubernetes_service_label_k8s_app]
+        regex:
+        - calico-kube-controllers
+        - calico-typha
+        - calico-felix
+      - action: keep
+        source_labels: [__meta_kubernetes_endpoint_port_name]
+        regex: metrics-port
+      - source_labels: [__meta_kubernetes_pod_node_name]
+        target_label: node
+      - source_labels: [__meta_kubernetes_namespace]
+        target_label: namespace
+      - source_labels: [__meta_kubernetes_pod_name]
+        target_label: pod
+      - source_labels: [__meta_kubernetes_pod_container_name]
+        target_label: container
+      - source_labels: [__meta_kubernetes_service_name]
+        target_label: job
 
     # Autodiscover endpoint with annotaions
     - job_name: kubernetes-endpoints
