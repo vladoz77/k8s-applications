@@ -3,8 +3,8 @@ deployment:
 statefulset:
   enabled: true
 
-nameOverride: vm-agent
-fullnameOverride: vm-agent
+nameOverride: vmagent
+fullnameOverride: vmagent
 
 remoteWriteUrls: 
   - "http://vmsingle.monitoring-test.svc.cluster.local:8428/api/v1/write"

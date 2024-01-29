@@ -84,11 +84,6 @@ spec:
   selector:
     matchLabels:
       app.kubernetes.io/name: victoria-metrics-alert
-  strategy:
-    rollingUpdate:
-      maxSurge: 25%
-      maxUnavailable: 25%
-    type: RollingUpdate
   template:
     metadata:
       labels:
@@ -99,7 +94,7 @@ spec:
         - name: victoria-metrics-alert-server
           image: "victoriametrics/vmalert:v1.96.0"
           args:
-            - -rule=/rules/*.yaml
+            - -rule=/config/*.yaml
             - -datasource.url=http://vmsingle.monitoring.svc.cluster.local:8428
             - -notifier.url=
             - -remoteRead.url=
@@ -131,7 +126,7 @@ spec:
           
           volumeMounts:
             - name: record-rules
-              mountPath: /rules/record.yaml
+              mountPath: /config/record.yaml
               subPath: record.yaml
     
             
@@ -142,3 +137,16 @@ spec:
           configMap:
             name: record-rules-config
         
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: record-rules-config
+  namespace: monitoring
+data:
+  record.yaml: |
+    groups:
+    - name: record
+      rules:
+      - record: job:node_memory_MemFree_bytes:percent 
+        expr: 100 - (100 * node_memory_MemFree_bytes / node_memory_MemTotal_bytes) 

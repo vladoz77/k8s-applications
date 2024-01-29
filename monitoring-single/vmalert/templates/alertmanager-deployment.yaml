@@ -1,0 +1,129 @@
+{{- if .Values.alertmanager.enabled -}}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "vmalert.alertmanager.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "vmalert.alertmanager.labels" . | nindent 4 }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      {{- include "vmalert.alertmanager.matchLabels" . | nindent 6 }}
+{{- if .Values.alertmanager.persistentVolume.enabled }}
+  strategy:
+    # Must be "Recreate" when we have a persistent volume
+    type: Recreate
+{{- end }}
+  template:
+    metadata:
+      labels:
+        {{- include "vmalert.alertmanager.labels" . | nindent 8 }}
+        {{- range $key, $value := .Values.alertmanager.podMetadata.labels }}
+        {{ $key }}: {{ $value | quote }}
+        {{- end }}
+      annotations:
+        checksum/config: {{ include (print $.Template.BasePath "/alertmanager-configmap.yaml") . | sha256sum }}
+        {{- range $key, $value := .Values.alertmanager.podMetadata.annotations }}
+        {{ $key }}: {{ $value | quote }}
+        {{- end }}
+    spec:
+    {{- with .Values.alertmanager.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+      serviceAccountName: {{ template "vmalert.serviceAccountName" . }}
+      automountServiceAccountToken: {{ .Values.serviceAccount.automountToken }}
+      {{- with .Values.alertmanager.podSecurityContext }}
+      securityContext:
+        {{- toYaml .| nindent 8 }}
+      {{- end }}
+      containers:
+        - name: {{ template "vmalert.name" . }}-alertmanager
+          securityContext:
+            {{- toYaml .Values.alertmanager.securityContext | nindent 12 }}
+          image: "{{ .Values.alertmanager.image }}:{{ .Values.alertmanager.tag }}"
+          args:
+            - --config.file=/config/alertmanager.yaml
+            {{ if .Values.alertmanager.persistentVolume.enabled }}
+            - {{ printf "%s=%s" "--storage.path" .Values.alertmanager.persistentVolume.mountPath | quote}}
+            {{- else}}
+            - --storage.path=/data
+            {{- end}}
+            - --data.retention={{ .Values.alertmanager.retention }}
+            - --web.listen-address=0.0.0.0:9093
+            - --cluster.advertise-address=$(POD_IP):6783
+            {{ if .Values.alertmanager.baseURL }}
+            - --web.external-url={{ .Values.alertmanager.baseURL }}
+            {{- end }}
+            {{ if .Values.alertmanager.baseURLPrefix }}
+            - --web.route-prefix={{ .Values.alertmanager.baseURLPrefix }}
+            {{- end }}
+            {{- range $key, $value := .Values.alertmanager.extraArgs }}
+            - --{{ $key }}={{ $value }}
+            {{- end }}
+          ports:
+            - name: web
+              containerPort: 9093
+          env:
+            - name: POD_IP
+              valueFrom:
+                fieldRef:
+                  apiVersion: v1
+                  fieldPath: status.podIP
+          readinessProbe:
+            httpGet:
+              {{ if .Values.alertmanager.baseURLPrefix }}
+              path: {{ .Values.alertmanager.baseURLPrefix }}/-/ready
+              {{- else}}
+              path: /-/ready
+              {{- end }}
+              port: web
+          livenessProbe:
+            httpGet:
+              {{ if .Values.alertmanager.baseURLPrefix }}
+              path: {{ .Values.alertmanager.baseURLPrefix }}/-/healthy
+              {{- else}}
+              path: /-/healthy
+              {{- end }}
+              port: web
+          volumeMounts:
+            - name: storage
+              {{- if .Values.alertmanager.persistentVolume.enabled }}
+              mountPath: {{ .Values.alertmanager.persistentVolume.mountPath }}
+              {{- else }}
+              mountPath: /data
+              {{- end }}
+            - name: config
+              mountPath: /config
+              readOnly: true
+          resources:
+            {{- toYaml .Values.alertmanager.resources | nindent 12 }}
+      {{- with .Values.alertmanager.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- if .Values.alertmanager.priorityClassName }}
+      priorityClassName: {{ .Values.alertmanager.priorityClassName | quote }}
+      {{- end }}
+      {{- with .Values.server.affinity }}
+      affinity:
+        {{ toYaml . | nindent 8 }}
+      {{- end }}
+    {{- with .Values.alertmanager.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+      volumes:
+        - name: storage
+          {{- if .Values.alertmanager.persistentVolume.enabled }}
+          persistentVolumeClaim:
+            claimName: {{ if .Values.alertmanager.persistentVolume.existingClaim }}{{ .Values.alertmanager.persistentVolume.existingClaim }}{{- else }}{{ include "vmalert.alertmanager.fullname" . }}{{- end }}
+          {{- else }}
+          emptyDir: {}
+          {{- end }}
+        - name: config
+          configMap:
+            name: {{ include "vmalert.alertmanager.configname" . }}
+{{- end -}}
