@@ -1,5 +1,8 @@
 #Install vmsingle
-helm install vmsingle vm/victoria-metrics-single -f vmsingle/vm-single-my.yaml -n monitoring-test --create-namespace
+helm install vmsingle vm/victoria-metrics-single -f vmsingle/vm-single-my.yaml -n monitoring --create-namespace
 
 #Install vmagent
-helm install vmagent vm/victoria-metrics-agent -f vmagent-values.yaml -n monitoring
+helm install vmagent vmagent/ -f vmagent/vmagent-values.yaml -n monitoring
+
+# Install vmalert and alertmanager
+helm install vmalert vmalert/ -f vmalert/vmalert-values.yaml -n monitoring

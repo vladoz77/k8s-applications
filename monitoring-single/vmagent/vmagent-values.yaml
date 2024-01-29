@@ -7,7 +7,7 @@ nameOverride: vmagent
 fullnameOverride: vmagent
 
 remoteWriteUrls: 
-  - "http://vmsingle.monitoring-test.svc.cluster.local:8428/api/v1/write"
+  - "http://vmsingle.monitoring.svc.cluster.local:8428/api/v1/write"
 
 service:
   enabled: true
