@@ -2,7 +2,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: record-rules-config
-  namespace: monitoring
+  namespace: monitoring-test
 data:
   record.yaml: |
     groups:
