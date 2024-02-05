@@ -1,0 +1,14 @@
+image:
+  tag: v4.0.2
+
+nfs:
+  server: 192.168.49.3
+  path: /
+  mountOptions:
+  volumeName: nfs-subdir-external-provisioner-root
+  reclaimPolicy: Retain
+
+storageClass:
+  create: true
+  defaultClass: true
+  name: nfs
