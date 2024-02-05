@@ -7,6 +7,8 @@ server:
   image:
     tag: v1.96.0
   fullnameOverride: vmsingle
+  extraArgs:
+    dedup.minScrapeInterval: 30s
   statefulSet:
     service:
       annotations:
