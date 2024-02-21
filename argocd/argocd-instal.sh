@@ -33,7 +33,7 @@ kubectl create ingress -n argocd argocd-server-ingress --rule "${ARGOCD_HOST}/*=
 echo ingress have created
 
 # Get init admin password and update
-sleep 60
+sleep 120
 ADMIN_INIT_PASS=$(kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d; echo)
 read -p 'Enter new admin password ' NEW_PASS
 argocd login argocd.dev.local --username admin --password ${ADMIN_INIT_PASS} --insecure 
