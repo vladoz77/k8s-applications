@@ -23,8 +23,20 @@ data:
   scrape.yml: |
     global:
       scrape_interval: 10s
-    
-    scrape_configs:
+    scrape_config_files:
+      - /configs/*.yml
+---
+# Source: victoria-metrics-agent/templates/configmap.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: scrape-config
+  namespace: monitoring
+  labels:
+    app.kubernetes.io/name: vmagent
+    app.kubernetes.io/version: "v1.96.0"
+data:
+  scrape-config.yml: |
     - bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
       job_name: apiserver
       kubernetes_sd_configs:
@@ -575,7 +587,7 @@ spec:
           image: "victoriametrics/vmagent:v1.96.0"
           workingDir: /
           args:
-            - -promscrape.config=/config/scrape.yml
+            - -promscrape.config=/configs/scrape.yml
             - -remoteWrite.tmpDataPath=/tmpData
             - -remoteWrite.url=http://vmsingle.monitoring-test.svc.cluster.local:8428/api/v1/write
             - -envflag.enable=true
@@ -600,13 +612,20 @@ spec:
             - name: tmpdata
               mountPath: /tmpData
             - name: config
-              mountPath: /config
+              mountPath: /configs/scrape.yml
+              subPath: scrape.yml
+            - name: scrape-config
+              mountPath: /configs/scrape-config.yml
+              subPath: scrape-config.yml
           resources:
             {}
       volumes:
         - name: config
           configMap:
             name: vmagent-config
+        - name: scrape-config
+          configMap:
+            name: scrape-config
   volumeClaimTemplates:
   - metadata:
       name: tmpdata
