@@ -38,13 +38,19 @@ persistence:
   size: 10Gi
 
 extraVolumes:
-  - name: base-scrape-config
+  - name: system-scrape-config
     configMap:
       name: scrape-config
+  - name: autoscrape-config
+    configMap:
+      name: autoscrape-config
 extraVolumeMounts:
-  - name: base-scrape-config
+  - name: system-scrape-config
     mountPath: /config/scrape-config.yml
     subPath: scrape-config.yml
+  - name: autoscrape-config
+    mountPath: /config/autoscrape-config.yml
+    subPath: autoscrape-config.yml
 
 config:
   global:
