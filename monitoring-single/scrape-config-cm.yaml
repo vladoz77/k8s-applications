@@ -2,7 +2,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: scrape-config
-  namespace: monitoring
+  namespace: monitoring-test
 data:
   scrape-config.yml: |
     #apiserver
