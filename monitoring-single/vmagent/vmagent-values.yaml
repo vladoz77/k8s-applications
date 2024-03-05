@@ -12,6 +12,14 @@ extraArgs:
   promscrape.cluster.replicationFactor: 2
   # promscrape.cluster.memberURLTemplate: http://vmagent.dev.local-%d:8429/targets
 
+resources: 
+  limits:
+    cpu: 200m
+    memory: 500Mi
+  requests:
+    cpu: 100m
+    memory: 200Mi
+
 extraVolumeMounts:
 - name: autoscrape-config
   mountPath: /custom-configs/autoscrape-config.yml
