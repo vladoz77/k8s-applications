@@ -1,0 +1,48 @@
+vmselect:
+  enabled: true
+  replicaCount: 2
+  name: vmselect
+  fullnameOverride: vmselect
+  extraArgs:
+    replicationFactor: 2
+  podAnnotations:
+    prometheus.io/scrape: "true"
+    prometheus.io/port: "8481"
+  resources:
+    limits:
+      cpu: 50m
+      memory: 64Mi
+    requests:
+      cpu: 50m
+      memory: 64Mi
+
+vminsert:
+  enabled: true
+  name: vminsert
+  fullnameOverride: vminsert
+  replicaCount: 2
+  extraArgs:
+    replicationFactor: 2
+  podAnnotations:
+    prometheus.io/scrape: "true"
+    prometheus.io/port: "8480"
+  resources:
+    limits:
+      cpu: 50m
+      memory: 64Mi
+    requests:
+      cpu: 50m
+      memory: 64Mi
+
+vmstorage:
+  enabled: true
+  name: vmstorage
+  replicaCount: 2
+  fullnameOverride: vmstorage
+  podAnnotations:
+    prometheus.io/scrape: "true"
+    prometheus.io/port: "8482"
+  persistentVolume:
+    enabled: true
+    mountPath: /storage
+    size: 8Gi

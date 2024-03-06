@@ -31,7 +31,7 @@ extraVolumes:
     name: autoscrape-config
 
 remoteWriteUrls: 
-  - "http://vmsingle.monitoring-test.svc.cluster.local:8428/api/v1/write"
+  - "http://vminsert.monitoring.svc.cluster.local:8480/insert/0/prometheus/"
 
 service:
   enabled: true

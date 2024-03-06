@@ -4,10 +4,10 @@ server:
   nameOverride: vmalert
   fullnameOverride: vmalert
   datasource:
-    url:  http://vmsingle.monitoring-test.svc.cluster.local:8428
+    url:  "http://vmselect.monitoring.svc.cluster.local:8481/select/0/prometheus/"
   remote:
     write:
-      url:  http://vmsingle.monitoring-test.svc.cluster.local:8428
+      url: "http://vminsert.monitoring.svc.cluster.local:8480/insert/0/prometheus/"
   notifier:
     alertmanager:
       url: http://vmalert-alertmanager.monitoring-test.svc.cluster.local:9093
@@ -17,10 +17,16 @@ server:
     - name: record-rules
       configMap:
         name: record-rules-config
+    - name: alert-rules
+      configMap:
+        name: alert-rules-config
   extraVolumeMounts:
     - name: record-rules
-      mountPath: /rules/record.yaml
-      subPath: record.yaml
+      mountPath: /rules/record-rules.yaml
+      subPath: record-rules.yaml
+    - name: alert-rules
+      mountPath: /rules/alert-rules.yaml
+      subPath: alert-rules.yaml
 
 alertmanager:
   enabled: true
