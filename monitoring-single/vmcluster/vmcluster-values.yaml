@@ -5,16 +5,17 @@ vmselect:
   fullnameOverride: vmselect
   extraArgs:
     replicationFactor: 2
+    dedup.minScrapeInterval: 10s
   podAnnotations:
     prometheus.io/scrape: "true"
     prometheus.io/port: "8481"
-  resources:
-    limits:
-      cpu: 50m
-      memory: 64Mi
-    requests:
-      cpu: 50m
-      memory: 64Mi
+  # resources:
+  #   limits:
+  #     cpu: 50m
+  #     memory: 64Mi
+  #   requests:
+  #     cpu: 50m
+  #     memory: 64Mi
 
 vminsert:
   enabled: true
@@ -26,13 +27,13 @@ vminsert:
   podAnnotations:
     prometheus.io/scrape: "true"
     prometheus.io/port: "8480"
-  resources:
-    limits:
-      cpu: 50m
-      memory: 64Mi
-    requests:
-      cpu: 50m
-      memory: 64Mi
+  # resources:
+  #   limits:
+  #     cpu: 50m
+  #     memory: 64Mi
+  #   requests:
+  #     cpu: 50m
+  #     memory: 64Mi
 
 vmstorage:
   enabled: true

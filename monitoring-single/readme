@@ -5,7 +5,13 @@ helm install vmsingle vm/victoria-metrics-single -f vmsingle/vm-single-my.yaml -
 helm install vmcluster -n monitoring vm/victoria-metrics-cluster -f vmcluster/vmcluster-values.yaml
 
 #Install vmagent
-helm install vmagent vmagent/ -f vmagent/vmagent-values.yaml -n monitoring
+helm install vmagent vm/victoria-metrics-agent  -f vmagent/vmagent-values.yaml -n monitoring
 
-# Install vmalert and alertmanager
-helm install vmalert vmalert/ -f vmalert/vmalert-values.yaml -n monitoring
+# Install kube-state-metrics
+helm install kube-state-metrics prometheus-community/kube-state-metrics -n monitoring
+
+#Install node exporter
+helm install node-exporter prometheus-community/prometheus-node-exporter -n monitoring 
+
+#Install vmalert and alertmanager
+helm install vmalert vm/victoria-metrics-alert  -f vmalert/vmalert-values.yaml -n monitoring
