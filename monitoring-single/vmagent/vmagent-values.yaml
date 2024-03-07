@@ -7,6 +7,8 @@ statefulset:
 
 nameOverride: vmagent
 fullnameOverride: vmagent
+annotations:
+   configmap.reloader.stakater.com/reload: vmagent-config
 
 extraArgs:
   promscrape.cluster.replicationFactor: 2
@@ -31,7 +33,7 @@ extraArgs:
 #     name: autoscrape-config
 
 remoteWriteUrls: 
-  - "http://vminsert.monitoring.svc.cluster.local:8480/insert/0/prometheus/"
+  - "http://vminsert.monitoring-test.svc.cluster.local:8480/insert/0/prometheus/"
 
 service:
   enabled: true
@@ -57,7 +59,7 @@ persistence:
 
 config:
   global:
-    scrape_interval: 30s
+    scrape_interval: 10s
   scrape_config_files:
       - /custom-configs/*.yml
   scrape_configs:
@@ -346,58 +348,58 @@ config:
     #     - source_labels: [__meta_kubernetes_service_name]
     #       target_label: job
     
-    # #Istio-proxy
-    # - job_name: istio-proxy
-    #   honor_labels: true
-    #   metrics_path: /stats/prometheus
-    #   kubernetes_sd_configs:
-    #   - role: pod
-    #   relabel_configs:
-    #   - action: keep
-    #     source_labels: [__meta_kubernetes_pod_container_name]
-    #     regex: "istio-proxy"
-    #   - source_labels: [__address__, __meta_kubernetes_pod_annotation_prometheus_io_port]
-    #     action: replace
-    #     regex: ([^:]+)(?::\d+)?;(\d+)
-    #     replacement: $1:$2
-    #     target_label: __address__
-    #   - action: labeldrop
-    #     regex: __meta_kubernetes_pod_label_(.+)
-    #   - action: replace
-    #     source_labels: [__meta_kubernetes_namespace]
-    #     target_label: namespace
-    #   - action: replace
-    #     source_labels: [__meta_kubernetes_pod_name]
-    #     target_label: pod_name
+    #Istio-proxy
+    - job_name: istio-proxy
+      honor_labels: true
+      metrics_path: /stats/prometheus
+      kubernetes_sd_configs:
+      - role: pod
+      relabel_configs:
+      - action: keep
+        source_labels: [__meta_kubernetes_pod_container_name]
+        regex: "istio-proxy"
+      - source_labels: [__address__, __meta_kubernetes_pod_annotation_prometheus_io_port]
+        action: replace
+        regex: ([^:]+)(?::\d+)?;(\d+)
+        replacement: $1:$2
+        target_label: __address__
+      - action: labeldrop
+        regex: __meta_kubernetes_pod_label_(.+)
+      - action: replace
+        source_labels: [__meta_kubernetes_namespace]
+        target_label: namespace
+      - action: replace
+        source_labels: [__meta_kubernetes_pod_name]
+        target_label: pod_name
 
-    # #Calico
-    # - job_name: Calico
-    #   honor_labels: true
-    #   kubernetes_sd_configs:
-    #     - role: endpoints
-    #       namespaces:
-    #         names:
-    #         - calico-system
-    #   relabel_configs:
-    #   - action: keep
-    #     source_labels: [__meta_kubernetes_service_label_k8s_app]
-    #     regex:
-    #     - calico-kube-controllers
-    #     - calico-typha
-    #     - calico-felix
-    #   - action: keep
-    #     source_labels: [__meta_kubernetes_endpoint_port_name]
-    #     regex: metrics-port
-    #   - source_labels: [__meta_kubernetes_pod_node_name]
-    #     target_label: node
-    #   - source_labels: [__meta_kubernetes_namespace]
-    #     target_label: namespace
-    #   - source_labels: [__meta_kubernetes_pod_name]
-    #     target_label: pod
-    #   - source_labels: [__meta_kubernetes_pod_container_name]
-    #     target_label: container
-    #   - source_labels: [__meta_kubernetes_service_name]
-    #     target_label: job
+    #Calico
+    - job_name: Calico
+      honor_labels: true
+      kubernetes_sd_configs:
+        - role: endpoints
+          namespaces:
+            names:
+            - calico-system
+      relabel_configs:
+      - action: keep
+        source_labels: [__meta_kubernetes_service_label_k8s_app]
+        regex:
+        - calico-kube-controllers
+        - calico-typha
+        - calico-felix
+      - action: keep
+        source_labels: [__meta_kubernetes_endpoint_port_name]
+        regex: metrics-port
+      - source_labels: [__meta_kubernetes_pod_node_name]
+        target_label: node
+      - source_labels: [__meta_kubernetes_namespace]
+        target_label: namespace
+      - source_labels: [__meta_kubernetes_pod_name]
+        target_label: pod
+      - source_labels: [__meta_kubernetes_pod_container_name]
+        target_label: container
+      - source_labels: [__meta_kubernetes_service_name]
+        target_label: job
 
     # Autodiscover endpoint with annotaions
     - job_name: kubernetes-endpoints

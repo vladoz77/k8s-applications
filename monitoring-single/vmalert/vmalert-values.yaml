@@ -3,11 +3,13 @@ server:
     tag: ""
   nameOverride: vmalert
   fullnameOverride: vmalert
+  annotations:
+   configmap.reloader.stakater.com/reload: "record-rules-config,alert-rules-config"
   datasource:
-    url:  "http://vmselect.monitoring.svc.cluster.local:8481/select/0/prometheus/"
+    url:  "http://vmselect.monitoring-test.svc.cluster.local:8481/select/0/prometheus/"
   remote:
     write:
-      url: "http://vminsert.monitoring.svc.cluster.local:8480/insert/0/prometheus/"
+      url: "http://vminsert.monitoring-test.svc.cluster.local:8480/insert/0/prometheus/"
   notifier:
     alertmanager:
       url: http://vmalert-alertmanager.monitoring-test.svc.cluster.local:9093
