@@ -14,26 +14,27 @@ extraArgs:
   promscrape.cluster.replicationFactor: 2
   # promscrape.cluster.memberURLTemplate: http://vmagent.dev.local-%d:8429/targets
 
-# resources: 
-#   limits:
-#     cpu: 200m
-#     memory: 500Mi
-#   requests:
-#     cpu: 100m
-#     memory: 200Mi
+resources: 
+  limits:
+    cpu: 100m
+    memory: 128Mi
+  requests:
+    cpu: 100m
+    memory: 64Mi
 
-# extraVolumeMounts:
-# - name: autoscrape-config
-#   mountPath: /custom-configs/autoscrape-config.yml
-#   subPath: autoscrape-config.yml
+extraVolumeMounts:
+- name: etcd-tls-volume
+  mountPath: /tls/etcd-tls
+ 
 
-# extraVolumes:
-# - name: autoscrape-config
-#   configMap:
-#     name: autoscrape-config
+extraVolumes:
+- name: etcd-tls-volume
+  secret:
+    secretName: etcd-tls
+   
 
 remoteWriteUrls: 
-  - "http://vminsert.monitoring-test.svc.cluster.local:8480/insert/0/prometheus/"
+  - "http://vmsingle.monitoring-test.svc.cluster.local:8428/api/v1/write"
 
 service:
   enabled: true
@@ -63,6 +64,42 @@ config:
   scrape_config_files:
       - /custom-configs/*.yml
   scrape_configs:
+    #etcd
+    - job_name: etcd
+      honor_labels: true
+      kubernetes_sd_configs:
+      - role: pod
+        namespaces:
+            names:
+            - kube-system
+      scheme: https
+      tls_config:
+        insecure_skip_verify: true
+        cert_file: /tls/etcd-tls/server.crt
+        key_file: /tls/etcd-tls/server.key
+      relabel_configs:
+      - source_labels: [__meta_kubernetes_pod_label_component]
+        regex: etcd
+        action: keep
+      - source_labels:
+        - __address__
+        regex: (.+?)(\\:\\d+)?
+        replacement: $1:2379
+        action: replace
+        target_label: __address__
+      - source_labels:
+        - __meta_kubernetes_pod_name
+        target_label: pod
+      - source_labels:
+        - __meta_kubernetes_pod_container_name
+        target_label: container
+      - source_labels:
+        - __meta_kubernetes_namespace
+        target_label: namespace
+      - source_labels:
+        - __meta_kubernetes_pod_node_name
+        target_label: node
+    
     #apiserver
     - job_name: apiserver
       kubernetes_sd_configs:
@@ -184,9 +221,6 @@ config:
       - source_labels:
         - __meta_kubernetes_pod_node_name
         target_label: node
-      - source_labels: 
-        - __meta_kubernetes_pod_label_app
-        target_label: job
 
     #kube-controller-manager
     - job_name: kube-controller-manager
@@ -223,9 +257,6 @@ config:
       - source_labels:
         - __meta_kubernetes_pod_node_name
         target_label: node
-      - source_labels: 
-        - __meta_kubernetes_pod_label_app
-        target_label: job
 
     # kube-scheduler
     - job_name: kube-scheduler
@@ -262,9 +293,6 @@ config:
       - source_labels:
         - __meta_kubernetes_pod_node_name
         target_label: node
-      - source_labels: 
-        - __meta_kubernetes_pod_label_app
-        target_label: job
 
     #Node-exporter    
     - job_name: node-exporter
@@ -322,31 +350,31 @@ config:
         - source_labels: [__meta_kubernetes_service_name]
           target_label: job
 
-    # #Istio
-    # - job_name: istio
-    #   honor_labels: true
-    #   kubernetes_sd_configs:
-    #     - role: endpoints
-    #       namespaces:
-    #         names:
-    #         - istio-system
-    #   relabel_configs:
-    #     - action: keep
-    #       source_labels: [__meta_kubernetes_service_label_istio]
-    #       regex: pilot
-    #     - action: keep
-    #       source_labels: [__meta_kubernetes_endpoint_port_name]
-    #       regex: http-monitoring
-    #     - source_labels: [__meta_kubernetes_pod_node_name]
-    #       target_label: node
-    #     - source_labels: [__meta_kubernetes_namespace]
-    #       target_label: namespace
-    #     - source_labels: [__meta_kubernetes_pod_name]
-    #       target_label: pod
-    #     - source_labels: [__meta_kubernetes_pod_container_name]
-    #       target_label: container
-    #     - source_labels: [__meta_kubernetes_service_name]
-    #       target_label: job
+    #Istio
+    - job_name: istio
+      honor_labels: true
+      kubernetes_sd_configs:
+        - role: endpoints
+          namespaces:
+            names:
+            - istio-system
+      relabel_configs:
+        - action: keep
+          source_labels: [__meta_kubernetes_service_label_istio]
+          regex: pilot
+        - action: keep
+          source_labels: [__meta_kubernetes_endpoint_port_name]
+          regex: http-monitoring
+        - source_labels: [__meta_kubernetes_pod_node_name]
+          target_label: node
+        - source_labels: [__meta_kubernetes_namespace]
+          target_label: namespace
+        - source_labels: [__meta_kubernetes_pod_name]
+          target_label: pod
+        - source_labels: [__meta_kubernetes_pod_container_name]
+          target_label: container
+        - source_labels: [__meta_kubernetes_service_name]
+          target_label: job
     
     #Istio-proxy
     - job_name: istio-proxy
