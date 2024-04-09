@@ -72,7 +72,7 @@ loki:
         clients:
           victoria-metrics:
             name: vm
-            url: http://vmsingle-vm.monitoring.svc.cluster.local:8429/vm/api/v1/write
+            url: http://vmsingle.monitoring.svc.cluster.local:8428/api/v1/write
            
     
     runtime_config:
