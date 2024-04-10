@@ -1,0 +1,54 @@
+nameOverride: minio
+fullnameOverride: minio
+
+# Get root user/password from secret
+existingSecret: minio-secret
+
+mountPath: "/data"
+# Number of drives attached to a node
+drivesPerNode: 1
+# Number of MinIO containers running
+replicas: 2
+# Number of expanded MinIO clusters
+pools: 1
+
+persistence:
+  enabled: true
+  storageClass: local-path
+  accessMode: ReadWriteOnce
+  size: 5Gi
+
+resources:
+  requests:
+    memory: 1Gi
+
+ingress:
+  enabled: true
+  ingressClassName: traefik
+  annotations:
+    cert-manager.io/cluster-issuer: ca-issuer
+  path: /
+  hosts:
+    - minio.home.local
+  tls:
+    - secretName: minio-tls
+      hosts:
+        - minio.home.local
+
+consoleIngress:
+  enabled: true
+  ingressClassName: traefik
+  annotations:
+    cert-manager.io/cluster-issuer: ca-issuer
+  path: /
+  hosts:
+    - minio-console.home.local
+  tls:
+    - secretName: minio-console-tls
+      hosts:
+        - minio-console.home.local
+  
+
+
+
+
