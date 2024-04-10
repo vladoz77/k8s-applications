@@ -104,7 +104,7 @@ loki:
       - from: "2024-04-09" 
         index:
           period: 24h
-          prefix: loki_index_
+          prefix: tsdb_index_
         object_store: s3
         schema: v13
         store: tsdb
