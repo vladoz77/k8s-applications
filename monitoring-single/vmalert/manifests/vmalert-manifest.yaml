@@ -1,0 +1,208 @@
+---
+# Source: victoria-metrics-alert/templates/serviceaccount.yaml
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: vmalert-victoria-metrics-alert
+  namespace: monitoring-test
+  labels:
+    helm.sh/chart: victoria-metrics-alert-0.9.4
+    app.kubernetes.io/managed-by: Helm
+---
+
+# Source: victoria-metrics-alert/templates/clusterrolebinding.yaml
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: vmalert-clusterrolebinding
+  namespace: monitoring-test
+  labels:
+    app: server
+    app.kubernetes.io/name: victoria-metrics-alert
+    app.kubernetes.io/instance: vmalert
+    helm.sh/chart: victoria-metrics-alert-0.9.4
+    app.kubernetes.io/managed-by: Helm
+subjects:
+  - kind: ServiceAccount
+    name: vmalert-victoria-metrics-alert
+    namespace: monitoring-test
+roleRef:
+  kind: ClusterRole
+  name: vmalert-clusterrole
+  apiGroup: rbac.authorization.k8s.io
+---
+# Source: victoria-metrics-alert/templates/role.yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name:  vmalert
+  namespace: monitoring-test
+  labels:
+    app: server
+    app.kubernetes.io/name: victoria-metrics-alert
+    app.kubernetes.io/instance: vmalert
+    helm.sh/chart: victoria-metrics-alert-0.9.4
+    app.kubernetes.io/managed-by: Helm
+rules: []
+---
+# Source: victoria-metrics-alert/templates/rolebinding.yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: vmalert
+  namespace: monitoring-test
+  labels:
+    app: server
+    app.kubernetes.io/name: victoria-metrics-alert
+    app.kubernetes.io/instance: vmalert
+    helm.sh/chart: victoria-metrics-alert-0.9.4
+    app.kubernetes.io/managed-by: Helm
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: vmalert
+subjects:
+- kind: ServiceAccount
+  name: vmalert-victoria-metrics-alert
+  namespace: monitoring-test
+---
+
+# Source: victoria-metrics-alert/templates/server-service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  namespace: monitoring-test
+  labels:
+    app: server
+    app.kubernetes.io/name: victoria-metrics-alert
+    app.kubernetes.io/instance: vmalert
+    helm.sh/chart: victoria-metrics-alert-0.9.4
+    app.kubernetes.io/managed-by: Helm
+  name: vmalert
+spec:
+  ports:
+    - name: http
+      port: 8880
+      targetPort: http
+      protocol: TCP
+  selector:
+    app: server
+    app.kubernetes.io/name: victoria-metrics-alert
+    app.kubernetes.io/instance: vmalert
+  type: "ClusterIP"
+---
+
+# Source: victoria-metrics-alert/templates/server-deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: vmalert
+  namespace: monitoring-test
+  labels:
+    app: server
+    app.kubernetes.io/name: victoria-metrics-alert
+    app.kubernetes.io/instance: vmalert
+    helm.sh/chart: victoria-metrics-alert-0.9.4
+    app.kubernetes.io/managed-by: Helm
+  annotations:
+    configmap.reloader.stakater.com/reload: record-rules-config,alert-rules-config
+spec:
+  minReadySeconds: 0
+  replicas: 1
+  selector:
+    matchLabels:
+      app: server
+      app.kubernetes.io/name: victoria-metrics-alert
+      app.kubernetes.io/instance: vmalert
+  strategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app: server
+        app.kubernetes.io/name: victoria-metrics-alert
+        app.kubernetes.io/instance: vmalert
+        helm.sh/chart: victoria-metrics-alert-0.9.4
+        app.kubernetes.io/managed-by: Helm
+    spec:
+      serviceAccountName: vmalert-victoria-metrics-alert
+      containers:
+        - name: victoria-metrics-alert-server
+          securityContext:
+            {}
+          image: "victoriametrics/vmalert:v1.99.0"
+          args:
+            - -datasource.url=http://vmsingle.monitoring-test.svc.cluster.local:8428
+            - -notifier.url=http://vmalert-alertmanager:9093
+            - -remoteWrite.url=http://vmsingle.monitoring-test.svc.cluster.local:8428
+            - -envflag.enable=true
+            - -envflag.prefix=VM_
+            - -loggerFormat=json
+            - -rule="/rules/record-rules/*.yaml"
+            - -rule="/rules/alert-rules/*.yaml"
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 8880
+          
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 15
+            timeoutSeconds: 5
+            failureThreshold: 3
+          
+          livenessProbe:
+            tcpSocket:
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 15
+            timeoutSeconds: 5
+            failureThreshold: 3
+          
+          volumeMounts:
+            - mountPath: /rules/record-rules
+              name: record-rules
+            - mountPath: /rules/alert-rules
+              name: alert-rules
+            
+          resources: {}
+      
+      volumes:    
+        - configMap:
+            name: record-rules-config
+          name: record-rules
+        - configMap:
+            name: alert-rules-config
+          name: alert-rules
+
+---
+# Source: victoria-metrics-alert/templates/alertmanager-ingress.yaml
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  labels:
+    app: alertmanager
+    app.kubernetes.io/name: victoria-metrics-alert
+    app.kubernetes.io/instance: vmalert
+    helm.sh/chart: victoria-metrics-alert-0.9.4
+    app.kubernetes.io/managed-by: Helm
+  name: vmalert-alertmanager
+  namespace: monitoring-test
+spec:
+  rules:
+  - host: alert.dev.local
+    http:
+      paths:
+        - path: /
+          pathType: Prefix
+          backend:
+            service:
+              name: vmalert-alertmanager
+              port:
+                number: 9093
