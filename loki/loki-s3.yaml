@@ -1,0 +1,108 @@
+loki:
+  commonConfig:
+    replication_factor: 1
+  # Disable multi-tenant support
+  auth_enabled: false
+
+  # S3 backend storage configuration
+  storage:
+    bucketNames:
+      chunks: loki
+    type: s3
+    s3:
+      endpoint: minio-svc.minio.svc.cluster.local:9000
+      secretAccessKey: password
+      accessKeyId: minio
+      s3ForcePathStyle: true
+      insecure: true
+  schemaConfig:
+    configs:
+      - from: "2024-04-09" 
+        index:
+          period: 24h
+          prefix: loki_index_
+        object_store: s3
+        schema: v13
+        store: tsdb
+  storage_config:
+    tsdb_shipper:
+        active_index_directory: /var/loki/tsdb-index
+        cache_location: /var/loki/tsdb-cache
+        shared_store: s3
+
+  #Ruller config
+  rulerConfig:
+      storage:
+        type: local
+        local:
+          directory: /etc/loki/rules
+      alertmanager_url: http://vmalert-alertmanager.monitoring.svc.cluster.local:9093
+      wal:
+        dir: /var/loki/loki-wal
+      remote_write:
+        enabled: true
+        clients:
+          victoria-metrics:
+            name: vm
+            url: http://vmsingle.monitoring.svc.cluster.local:8428/api/v1/write
+           
+# Configuration for the write
+write:
+  # Number of replicas for the write
+  replicas: 1
+  persistence:
+    # -- Size of persistent disk
+    size: 10Gi
+
+# Configuration for the read
+read:
+  # Number of replicas for the read
+  replicas: 1
+  persistence:
+    # -- Size of persistent disk
+    size: 10Gi
+
+# Configuration for the gateway
+gateway:
+  # -- Specifies whether the gateway should be enabled
+  enabled: true
+  # -- Number of replicas for the gateway
+  replicas: 1
+
+# Configuration for the backend
+backend:
+  replicas: 1
+  persistence:
+    size: 10Gi
+  extraVolumeMounts: 
+    - name: rules-volume
+      mountPath: /etc/loki/rules/fake/loki-rules.yaml
+      subPath: loki-rules.yaml
+    - name: rules-volume
+      mountPath: /etc/loki/rules/fake/loki-alert.yaml
+      subPath: loki-alert.yaml
+  extraVolumes: 
+    - name: rules-volume
+      configMap:
+        name: loki-rules
+    - name: alert-volume
+      configMap:
+        name: loki-alert
+
+# Disable  installation
+test:
+  enabled: false
+monitoring:
+  dashboards:
+    enabled: false
+  rules:
+    enabled: false
+    alerting: false
+  serviceMonitor:
+    enabled: false
+  selfMonitoring:
+    enabled: false
+    grafanaAgent:
+      installOperator: false
+  lokiCanary:
+    enabled: false
