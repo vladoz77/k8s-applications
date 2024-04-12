@@ -2,14 +2,11 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: vmalert-alertmanager-alertmanager-config
-  namespace: monitoring-test
+  name: alertmanager-config
+  namespace: monitoring
   labels:
-    app: alertmanager
-    app.kubernetes.io/name: victoria-metrics-alert
-    app.kubernetes.io/instance: vmalert
-    helm.sh/chart: victoria-metrics-alert-0.9.4
-    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: alertmanager
+    app.kubernetes.io/instance: victoria-metrics
 data:
   alertmanager.yaml: |
     
@@ -30,14 +27,11 @@ data:
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: vmalert-alertmanager
-  namespace: monitoring-test
+  name: alertmanager-pvc
+  namespace: monitoring
   labels:
-    app: alertmanager
-    app.kubernetes.io/name: victoria-metrics-alert
-    app.kubernetes.io/instance: vmalert
-    helm.sh/chart: victoria-metrics-alert-0.9.4
-    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: alertmanager
+    app.kubernetes.io/instance: victoria-metrics
 spec:
   accessModes:
     - "ReadWriteOnce"
@@ -50,14 +44,14 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  namespace: monitoring-test
+  name: alertmanager
+  namespace: monitoring
   labels:
-    app: alertmanager
-    app.kubernetes.io/name: victoria-metrics-alert
-    app.kubernetes.io/instance: vmalert
-    helm.sh/chart: victoria-metrics-alert-0.9.4
-    app.kubernetes.io/managed-by: Helm
-  name: vmalert-alertmanager
+    app.kubernetes.io/name: alertmanager
+    app.kubernetes.io/instance: victoria-metrics
+  annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "9093"
 spec:
   ports:
     - name: web
@@ -65,47 +59,37 @@ spec:
       targetPort: web
       protocol: TCP
   selector:
-    app: alertmanager
-    app.kubernetes.io/name: victoria-metrics-alert
-    app.kubernetes.io/instance: vmalert
+    app.kubernetes.io/name: alertmanager
+    app.kubernetes.io/instance: victoria-metrics
 
 ---
 # Source: victoria-metrics-alert/templates/alertmanager-deployment.yaml
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: vmalert-alertmanager
-  namespace: monitoring-test
+  name: alertmanager
+  namespace: monitoring
   labels:
-    app: alertmanager
-    app.kubernetes.io/name: victoria-metrics-alert
-    app.kubernetes.io/instance: vmalert
-    helm.sh/chart: victoria-metrics-alert-0.9.4
-    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: alertmanager
+    app.kubernetes.io/instance: victoria-metrics
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: alertmanager
-      app.kubernetes.io/name: victoria-metrics-alert
-      app.kubernetes.io/instance: vmalert
+      app.kubernetes.io/name: alertmanager
+      app.kubernetes.io/instance: victoria-metrics
   strategy:
     # Must be "Recreate" when we have a persistent volume
     type: Recreate
   template:
     metadata:
       labels:
-        app: alertmanager
-        app.kubernetes.io/name: victoria-metrics-alert
-        app.kubernetes.io/instance: vmalert
-        helm.sh/chart: victoria-metrics-alert-0.9.4
-        app.kubernetes.io/managed-by: Helm
+        app.kubernetes.io/name: alertmanager
+        app.kubernetes.io/instance: victoria-metrics
     spec:
-      serviceAccountName: vmalert-victoria-metrics-alert
+      # serviceAccountName: vmalert-victoria-metrics-alert
       containers:
         - name: victoria-metrics-alert-alertmanager
-          securityContext:
-            null
           image: "prom/alertmanager:v0.25.0"
           args:
             - --config.file=/config/alertmanager.yaml
@@ -126,25 +110,43 @@ spec:
             httpGet:
               path: /-/ready
               port: web
-          
           livenessProbe:
             httpGet:
               path: /-/healthy
               port: web
-          
           volumeMounts:
             - name: storage
               mountPath: /data
             - name: config
               mountPath: /config
               readOnly: true
-          
           resources: {}
-      
       volumes:
         - name: storage
           persistentVolumeClaim:
-            claimName: vmalert-alertmanager
+            claimName: alertmanager-pvc
         - name: config
           configMap:
-            name: vmalert-alertmanager-alertmanager-config
+            name: alertmanager-config
+---
+# Source: victoria-metrics-alert/templates/alertmanager-ingress.yaml
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  labels:
+    app.kubernetes.io/name: alertmanager
+    app.kubernetes.io/instance: victoria-metrics
+  name: vmalert-alertmanager
+  namespace: monitoring
+spec:
+  rules:
+  - host: alert.dev.local
+    http:
+      paths:
+        - path: /
+          pathType: Prefix
+          backend:
+            service:
+              name: vmalert-alertmanager
+              port:
+                number: 9093

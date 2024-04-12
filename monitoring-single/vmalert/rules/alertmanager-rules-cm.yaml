@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: alertmanager-rules
+  namespace: monitoring
+data:
+  alertmanager-alert.yaml: |
+    groups:
+    - name: alertmanager.rules
+      rules:
+        - alert: AlertmanagerFailedReload
+          annotations:
+            description: Configuration has failed to load for {{ $labels.namespace }}/{{$labels.pod}}.
+            runbook_url: https://runbooks.prometheus-operator.dev/runbooks/alertmanager/alertmanagerfailedreload
+            summary: Reloading an Alertmanager configuration has failed.
+          expr: max_over_time(alertmanager_config_last_reload_successful{job="alertmanager",namespace="monitoring"}[5m]) == 0
+          for: 10m
+          labels:
+            severity: critical

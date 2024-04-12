@@ -1,3 +1,5 @@
+serviceAccount:
+  create: false
 server:
   image:
     tag: ""
