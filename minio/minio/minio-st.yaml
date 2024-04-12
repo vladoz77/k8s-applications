@@ -6,6 +6,23 @@ metadata:
   labels:
     app.kubernetes.io/name: minio
 spec:
+  volumeClaimTemplates:
+        - metadata: 
+            name: data-0
+          spec:
+            accessModes: ["ReadWriteOnce"]
+            storageClassName: local-path
+            resources:
+              requests:
+                storage: 5Gi
+        - metadata: 
+            name: data-1
+          spec:
+            accessModes: ["ReadWriteOnce"]
+            storageClassName: local-path
+            resources:
+              requests:
+                storage: 5Gi
   selector:
     matchLabels:
       app.kubernetes.io/name: minio
@@ -19,23 +36,24 @@ spec:
       labels:
         app.kubernetes.io/name: minio
     spec:
-      affinity:
-        nodeAffinity:
-          requiredDuringSchedulingIgnoredDuringExecution:
-            nodeSelectorTerms:
-            - matchExpressions:
-              - key: minio
-                operator: In
-                values:
-                - "true"
-        podAntiAffinity:
-          preferredDuringSchedulingIgnoredDuringExecution:
-            - podAffinityTerm:
-                labelSelector:
-                  matchLabels:
-                    app.kubernetes.io/name: minio
-                topologyKey: kubernetes.io/hostname
-              weight: 1
+      
+      # affinity:
+      #   nodeAffinity:
+      #     requiredDuringSchedulingIgnoredDuringExecution:
+      #       nodeSelectorTerms:
+      #       - matchExpressions:
+      #         - key: minio
+      #           operator: In
+      #           values:
+      #           - "true"
+      #   podAntiAffinity:
+      #     preferredDuringSchedulingIgnoredDuringExecution:
+      #       - podAffinityTerm:
+      #           labelSelector:
+      #             matchLabels:
+      #               app.kubernetes.io/name: minio
+      #           topologyKey: kubernetes.io/hostname
+      #         weight: 1
       securityContext:
         fsGroup: 1001
       initContainers:
@@ -53,10 +71,10 @@ spec:
               mountPath: /data-0/data
             - name: data-1
               mountPath: /data-1/data
-      
+    
       containers:
         - name: minio
-          image: docker.io/bitnami/minio:2023.9.30
+          image: docker.io/bitnami/minio:2024.4.6
           imagePullPolicy: "IfNotPresent"
           securityContext:
             runAsNonRoot: true
@@ -89,7 +107,7 @@ spec:
             - name: MINIO_PROMETHEUS_AUTH_TYPE
               value: "public"
             - name: MINIO_PROMETHEUS_URL
-              value: http://vmsingle-vm.monitoring.svc.cluster.local:8429/vm
+              value: http://vmsingle.monitoring.svc.cluster.local:8428
           ports:
             - name: minio-api
               containerPort: 9000
@@ -123,13 +141,13 @@ spec:
               mountPath: /data-0/data
             - name: data-1
               mountPath: /data-1/data
-     
-      volumes:
-        - name:  data-0
-          hostPath:
-            path: /data-0/data
-            type: DirectoryOrCreate
-        - name:  data-1
-          hostPath:
-            path: /data-1/data
-            type: DirectoryOrCreate
+  
+      # volumes:
+      #   - name:  data-0
+      #     hostPath:
+      #       path: /data-0/data
+      #       type: DirectoryOrCreate
+      #   - name:  data-1
+      #     hostPath:
+      #       path: /data-1/data
+      #       type: DirectoryOrCreate
