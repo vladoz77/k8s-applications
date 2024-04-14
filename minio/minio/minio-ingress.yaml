@@ -1,7 +1,7 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: minio-ingress
+  name: minio-console-ingress
   labels:
     app.kubernetes.io/name: minio
   namespace: minio
@@ -17,3 +17,24 @@ spec:
             name: minio-console
             port: 
               number: 9001
+
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: minio-ingress
+  labels:
+    app.kubernetes.io/name: minio
+  namespace: minio
+spec:
+  rules:
+  - host: minio.home.local
+    http:
+      paths:
+      - pathType: Prefix
+        path: "/"
+        backend:
+          service:
+            name: minio-svc
+            port: 
+              number: 9000
