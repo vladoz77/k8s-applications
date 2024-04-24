@@ -77,7 +77,7 @@ loki:
         local:
           directory: /etc/loki/rules
       
-      alertmanager_url: http://vmalertmanager-vm.monitoring.svc.cluster.local:9093
+      alertmanager_url: http://vmalert-alertmanager.monitoring.svc.cluster.local:9093
       wal:
         dir: /var/loki/loki-wal
       remote_write:
@@ -85,7 +85,7 @@ loki:
         clients:
           victoria-metrics:
             name: vm
-            url: http://vmsingle-vm.monitoring.svc.cluster.local:8429/vm/api/v1/write
+            url: http://vmsingle.monitoring.svc.cluster.local:8428/api/v1/write
            
     
     runtime_config:
@@ -123,17 +123,17 @@ loki:
         
 # Configuration for the write pod(s)
 write:
-  replicas: 2
+  replicas: 1
   persistence:
     size: 10Gi
 
 read:
-  replicas: 2
+  replicas: 1
   persistence:
     size: 10Gi
 
 backend:
-  replicas: 2
+  replicas: 1
   persistence:
     size: 10Gi
   extraVolumeMounts: 
