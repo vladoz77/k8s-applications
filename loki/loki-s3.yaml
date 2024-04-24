@@ -3,7 +3,9 @@ loki:
     replication_factor: 1
   # Disable multi-tenant support
   auth_enabled: false
-
+  # Limit config
+  limits_config:
+    retention_period: 30d
   # S3 backend storage configuration
   storage:
     bucketNames:
@@ -12,7 +14,7 @@ loki:
     s3:
       endpoint: minio-svc.minio.svc.cluster.local:9000
       secretAccessKey: password
-      accessKeyId: minio
+      accessKeyId: admin
       s3ForcePathStyle: true
       insecure: true
   schemaConfig:
@@ -45,6 +47,9 @@ loki:
           victoria-metrics:
             name: vm
             url: http://vmsingle.monitoring.svc.cluster.local:8428/api/v1/write
+  # Compactor config
+  compactor:
+    retention_enabled: true
            
 # Configuration for the write
 write:

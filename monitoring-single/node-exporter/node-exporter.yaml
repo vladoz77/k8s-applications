@@ -1,0 +1,10 @@
+nameOverride: node-exporter
+fullnameOverride: node-exporter
+
+resources:
+  limits:
+    cpu: 200m
+    memory: 50Mi
+  requests:
+    cpu: 100m
+    memory: 30Mi
