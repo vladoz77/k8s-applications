@@ -12,3 +12,10 @@ server:
       annotations:
         prometheus.io/scrape: "true"
         prometheus.io/port: "8428"
+  resources:
+    limits:
+      cpu: 500m
+      memory: 512Mi
+    requests:
+      cpu: 500m
+      memory: 512Mi
