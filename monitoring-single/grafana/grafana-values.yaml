@@ -6,6 +6,11 @@ resources:
     cpu: 100m
     memory: 200Mi
 
+admin:
+  existingSecret: grafana-admin
+  userKey: admin-user
+  passwordKey: admin-password
+
 persistence:
   enabled: true
 
@@ -17,6 +22,10 @@ ingress:
   pathType: Prefix
   hosts:
     - grafana.dev.local
+  tls:
+  - secretName: grafana-tls
+    hosts:
+       - grafana.dev.local
 
 datasources:
   datasources.yaml:
