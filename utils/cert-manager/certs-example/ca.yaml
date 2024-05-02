@@ -13,7 +13,7 @@ metadata:
   namespace: cert-manager
 spec:
   isCA: true
-  commonName: ca
+  commonName: kube-ca
   secretName: ca-secret
   privateKey:
     algorithm: ECDSA
