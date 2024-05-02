@@ -147,6 +147,6 @@ spec:
           pathType: Prefix
           backend:
             service:
-              name: vmalert-alertmanager
+              name: alertmanager
               port:
                 number: 9093
