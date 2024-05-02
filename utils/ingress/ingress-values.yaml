@@ -1,7 +1,7 @@
 namespaceOverride: ingress-nginx
 controller:
-  opentelemetry:
-    enabled: true
+  # opentelemetry:
+  #   enabled: true
   ingressClassResource:
     name: nginx
     enabled: true
@@ -10,28 +10,27 @@ controller:
 
   config:
         #Config log format
+        controller:
+  config:
         log-format-escape-json: "true"
-        log-format-upstream: '{"timestamp": "$time_iso8601", "requestID": "$req_id", "proxyUpstreamName":
-          "$proxy_upstream_name", "proxyAlternativeUpstreamName": "$proxy_alternative_upstream_name","upstreamStatus":
-          "$upstream_status", "upstreamAddr": "$upstream_addr","httpRequest":{"requestMethod":
-          "$request_method", "requestUrl": "$host$request_uri", "status": $status,"requestSize":
-          "$request_length", "responseSize": "$upstream_response_length", "userAgent": "$http_user_agent",
-          "remoteIp": "$remote_addr", "referer": "$http_referer", "latency": "$upstream_response_time s",
-          "protocol":"$server_protocol"}}'
+        log-format-upstream: '{"time": "$time_iso8601", "remote_addr": "$proxy_protocol_addr", "x_forwarded_for": "$proxy_add_x_forwarded_for", "request_id": "$req_id",
+          "remote_user": "$remote_user", "bytes_sent": $bytes_sent, "request_time": $request_time, "status": $status, "vhost": "$host", "request_proto": "$server_protocol",
+          "path": "$uri", "request_query": "$args", "request_length": $request_length, "duration": $request_time,"method": "$request_method", "http_referrer": "$http_referer",
+          "http_user_agent": "$http_user_agent" }'
         #Enable opentelemetry
-        enable-opentelemetry: true
-        otel-sampler: AlwaysOn
-        otel-sampler-ratio: "0.1"
-        otlp-collector-host: otel-collector.tracing.svc.cluster.local
-        otlp-collector-port: "4317"
-        opentelemetry-config: "/etc/nginx/opentelemetry.toml"
-        opentelemetry-operation-name: "HTTP $request_method $service_name $uri"
-        opentelemetry-trust-incoming-span: "true"
-        otel-max-queuesize: "2048"
-        otel-schedule-delay-millis: "5000"
-        otel-max-export-batch-size: "512"
-        otel-service-name: "nginx"
-        otel-sampler-parent-based: "true"
+        # enable-opentelemetry: true
+        # otel-sampler: AlwaysOn
+        # otel-sampler-ratio: "0.1"
+        # otlp-collector-host: otel-collector.tracing.svc.cluster.local
+        # otlp-collector-port: "4317"
+        # opentelemetry-config: "/etc/nginx/opentelemetry.toml"
+        # opentelemetry-operation-name: "HTTP $request_method $service_name $uri"
+        # opentelemetry-trust-incoming-span: "true"
+        # otel-max-queuesize: "2048"
+        # otel-schedule-delay-millis: "5000"
+        # otel-max-export-batch-size: "512"
+        # otel-service-name: "nginx"
+        # otel-sampler-parent-based: "true"
 
   affinity:
     podAntiAffinity:
@@ -44,7 +43,7 @@ controller:
                   - ingress-nginx
           topologyKey: "kubernetes.io/hostname"
 
-  replicaCount: 2
+  replicaCount: 1
   minAvailable: 1
   resources:
     requests:
@@ -66,6 +65,6 @@ controller:
        prometheus.io/scrape: "true"
        prometheus.io/port: "10254"
 
-  priorityClassName: "medium-priority"
+  # priorityClassName: "medium-priority"
 
 revisionHistoryLimit: 2
