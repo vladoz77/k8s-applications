@@ -13,9 +13,6 @@ metadata:
   namespace: cert-manager
 spec:
   isCA: true
-<<<<<<< HEAD
-  commonName: kube-ca
-=======
   subject:
     organizations:
       - "Vlad's homelab"
@@ -26,10 +23,10 @@ spec:
     countries:
       - "RU"
   commonName: ca
->>>>>>> 5a04b82ca877ec544a09639fc7c1957d6fe677a6
   secretName: ca-secret
   privateKey:
-    algorithm: ECDSA
+    encoding: PKCS8
+    algorithm: RSA
     size: 4096
   issuerRef:
     name: selfsigned-issuer
