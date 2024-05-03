@@ -5,7 +5,13 @@ metadata:
   labels:
     app.kubernetes.io/name: minio
   namespace: minio
+  annotations:
+    cert-manager.io/cluster-issuer: ca-issuer
 spec:
+  tls:
+    - secretName: minio-console-tls
+      hosts:
+        - minio-console.home.local
   rules:
   - host: minio-console.home.local
     http:
