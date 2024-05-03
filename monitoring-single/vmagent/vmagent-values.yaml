@@ -50,7 +50,7 @@ ingress:
       path: / 
       port: http
   tls:
-    - secretName: vmagent-ingress-tls
+    - secretName: vmagent-tls
       hosts:
         - vmagent.dev.local
 
