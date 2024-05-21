@@ -19,3 +19,15 @@ server:
     requests:
       cpu: 500m
       memory: 512Mi
+  ingress:
+    enabled: true
+    annotations: 
+      cert-manager.io/cluster-issuer: ca-issuer
+    hosts:
+    - name: vmsingle.dev.local
+      path: /
+    tls:
+      - secretName: vmsingle-tls
+        hosts:
+          - vmsingle.dev.local
+    
