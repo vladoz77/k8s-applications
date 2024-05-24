@@ -43,6 +43,18 @@ datasources:
       type: loki
       url: http://loki-gateway.loki.svc
       version: 1
+      jsonData:
+      derivedFields:
+          # NGINX traces integration
+        - datasourceUid: tempo
+          matcherRegex: '"trace_id": "(\w+)"'
+          name: TraceID
+          url: $${__value.raw}
+    - name: Tempo
+      uid: tempo
+      type: tempo
+      access: proxy
+      url: http://tempo-query-frontend.tempo.svc:3100
 
 dashboardProviders:
     dashboardproviders.yaml:

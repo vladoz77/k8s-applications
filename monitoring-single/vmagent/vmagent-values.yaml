@@ -22,15 +22,15 @@ resources:
     cpu: 100m
     memory: 64Mi
 
-# extraVolumeMounts:
-# - name: etcd-tls-volume
-#   mountPath: /tls/etcd-tls
+extraVolumeMounts:
+- name: etcd-tls-volume
+  mountPath: /tls/etcd-tls
  
 
-# extraVolumes:
-# - name: etcd-tls-volume
-#   secret:
-#     secretName: etcd-tls
+extraVolumes:
+- name: etcd-tls-volume
+  secret:
+    secretName: etcd-ca
    
 
 remoteWriteUrls: 
@@ -304,7 +304,7 @@ config:
               - monitoring
       relabel_configs:
         - source_labels: [__meta_kubernetes_service_label_app_kubernetes_io_name]
-          regex: node-exporter
+          regex: prometheus-node-exporter
           action: keep
         - action: keep
           source_labels: [__meta_kubernetes_endpoint_port_name]
@@ -336,7 +336,7 @@ config:
           action: keep
         - action: keep
           source_labels: [__meta_kubernetes_endpoint_port_name]
-          regex: http-metrics
+          regex: http
         - source_labels: [__meta_kubernetes_pod_node_name]
           target_label: node
         - source_labels: [__meta_kubernetes_namespace]

@@ -5,6 +5,7 @@ metadata:
     app.kubernetes.io/name: vmalert
     app.kubernetes.io/instance:  victoria-metrics
   name: vmalert
+  namespace: monitoring
 spec:
   ports:
     - name: http
@@ -24,6 +25,7 @@ metadata:
   labels:
     app.kubernetes.io/name: vmalert
     app.kubernetes.io/instance:  victoria-metrics
+  namespace: monitoring
   annotations:
     reloader.stakater.com/auto: "true"
 spec:
