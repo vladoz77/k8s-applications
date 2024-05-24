@@ -19,7 +19,7 @@ spec:
            - all
          env:
            - name: JAEGER_AGENT_HOST
-             value: otel-collector.tracing.svc.cluster.local
+             value: otel-collector.tempo.svc.cluster.local
            - name: JAEGER_AGENT_PORT
              value: '6831'
            - name: JAEGER_SAMPLER_TYPE

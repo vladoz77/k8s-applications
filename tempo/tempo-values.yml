@@ -7,8 +7,6 @@ traces:
     http:
       enabled: true
 
-  
-
 # Configure S3 backend
 storage:
   trace:
@@ -40,4 +38,4 @@ metricsGenerator:
       wal:
       remote_write_flush_deadline: 1m
       remote_write:
-       - url: http://vmsingle-vm.monitoring.svc:8429/vm/api/v1/write
+       - url: http://vmsingle.monitoring.svc:8428/api/v1/write

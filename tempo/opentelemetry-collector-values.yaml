@@ -1,5 +1,7 @@
 fullnameOverride: otel-collector
 mode: deployment
+image:
+  repository: otel/opentelemetry-collector-k8s
 config:
   receivers:
     jaeger:
@@ -22,15 +24,16 @@ config:
       endpoint: tempo-distributor:4317
       tls:
         insecure: true
-    logging:
-        loglevel: info
+    # debug:
+    #     loglevel: info
+
 
   service:
     pipelines:
       traces: # here, we add the receivers and exporters accordingly
           exporters:
             - otlp
-            - logging
+            # - debug
           processors:
             - memory_limiter
             - batch
