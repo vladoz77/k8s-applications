@@ -9,28 +9,17 @@ controller:
     controllerValue: "k8s.io/ingress-nginx"
 
   config:
-        #Config log format
-        controller:
-  config:
-        log-format-escape-json: "true"
-        log-format-upstream: '{"time": "$time_iso8601", "remote_addr": "$proxy_protocol_addr", "x_forwarded_for": "$proxy_add_x_forwarded_for", "request_id": "$req_id",
-          "remote_user": "$remote_user", "bytes_sent": $bytes_sent, "request_time": $request_time, "status": $status, "vhost": "$host", "request_proto": "$server_protocol",
-          "path": "$uri", "request_query": "$args", "request_length": $request_length, "duration": $request_time,"method": "$request_method", "http_referrer": "$http_referer",
-          "http_user_agent": "$http_user_agent" }'
-        #Enable opentelemetry
-        # enable-opentelemetry: true
-        # otel-sampler: AlwaysOn
-        # otel-sampler-ratio: "0.1"
-        # otlp-collector-host: otel-collector.tracing.svc.cluster.local
-        # otlp-collector-port: "4317"
-        # opentelemetry-config: "/etc/nginx/opentelemetry.toml"
-        # opentelemetry-operation-name: "HTTP $request_method $service_name $uri"
-        # opentelemetry-trust-incoming-span: "true"
-        # otel-max-queuesize: "2048"
-        # otel-schedule-delay-millis: "5000"
-        # otel-max-export-batch-size: "512"
-        # otel-service-name: "nginx"
-        # otel-sampler-parent-based: "true"
+    # Print access log to file instead of stdout
+    # Separating acces logs from the rest
+    # access-log-path: "/data/access.log"
+    log-format-escape-json: "true"
+    log-format-upstream: '{"source": "nginx", "time": $msec, "resp_body_size": $body_bytes_sent, "request_host": "$http_host", "request_address": "$remote_addr", "request_length": $request_length, "request_method": "$request_method", "uri": "$request_uri", "status": $status,  "user_agent": "$http_user_agent", "resp_time": $request_time, "upstream_addr": "$upstream_addr", "trace_id": "$opentelemetry_trace_id", "span_id": "$opentelemetry_span_id"}'
+    # Open Telemetry
+    enable-opentelemetry: "true"
+    otlp-collector-host: tracing-tempo-distributor.tracing.svc.cluster.local
+    otlp-service-name: nginx-internal
+    
+    
 
   affinity:
     podAntiAffinity:
@@ -45,10 +34,10 @@ controller:
 
   replicaCount: 1
   minAvailable: 1
-  resources:
-    requests:
-      cpu: 100m
-      memory: 90Mi
+  # resources:
+  #   requests:
+  #     cpu: 100m
+  #     memory: 90Mi
 
   service:
     enabled: true
