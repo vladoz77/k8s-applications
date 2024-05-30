@@ -38,7 +38,12 @@ server:
       mountPath: /rules/alert-rules
     - name: alertmanager-rules
       mountPath: /rules/alertmanager-rules
-
+  service:
+    enabled: true
+    annotations:
+      prometheus.io/scrape: "true"
+      prometheus.io/port: "8880"
+  
   ingress:
     enabled: true
     annotations:
