@@ -1,4 +1,4 @@
-replicaCount: 1
+replicaCount: 2
 deployment:
   enabled: false
 statefulset:
@@ -10,8 +10,10 @@ fullnameOverride: vmagent
 annotations:
    configmap.reloader.stakater.com/reload: vmagent-config
 
-# extraArgs:
-#   promscrape.cluster.replicationFactor: 2
+extraArgs:
+  promscrape.cluster.replicationFactor: 1
+  promscrape.cluster.memberLabel: vmagent_instance
+  
   # promscrape.cluster.memberURLTemplate: http://vmagent.dev.local-%d:8429/targets
 
 # resources: 

@@ -5,8 +5,8 @@ serviceAccount:
 
 server:
   fullnameOverride: vmsingle
-  # extraArgs:
-  #   dedup.minScrapeInterval: 10s
+  extraArgs:
+    dedup.minScrapeInterval: 10s
   statefulSet:
     service:
       annotations:
