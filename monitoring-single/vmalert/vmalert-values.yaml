@@ -8,15 +8,18 @@ server:
   annotations:
    configmap.reloader.stakater.com/reload: "record-rules-config,alert-rules-config"
   datasource:
-    url:  "http://vmsingle.monitoring-test.svc.cluster.local:8428"
+    url:  "http://vmsingle.monitoring.svc.cluster.local:8428"
   remote:
     write:
-      url: "http://vmsingle.monitoring-test.svc.cluster.local:8428"
+      url: "http://vmsingle.monitoring.svc.cluster.local:8428"
   notifier:
     alertmanager:
-      url: http://vmalert-alertmanager.monitoring-test.svc.cluster.local:9093
+      url: http://vmalert-alertmanager.monitoring.svc.cluster.local:9093
   extraArgs:
-    rule: /rules/*.yaml
+    rule: 
+      - /rules/recording-rules/*.yaml
+      - /rules/alertmanager-rules/*.yaml
+      - /rules/alert-rules/*.yaml
   extraVolumes:
     - name: record-rules
       configMap:
@@ -24,13 +27,30 @@ server:
     - name: alert-rules
       configMap:
         name: alert-rules-config
+    - name: alertmanager-rules
+      configMap:
+        name: alertmanager-rules
+
   extraVolumeMounts:
     - name: record-rules
-      mountPath: /rules/record-rules.yaml
-      subPath: record-rules.yaml
+      mountPath: /rules/recording-rules
     - name: alert-rules
-      mountPath: /rules/alert-rules.yaml
-      subPath: alert-rules.yaml
+      mountPath: /rules/alert-rules
+    - name: alertmanager-rules
+      mountPath: /rules/alertmanager-rules
+
+  ingress:
+    enabled: true
+    annotations:
+      cert-manager.io/cluster-issuer: ca-issuer
+    hosts:
+    - name: vmalert.dev.local
+      path: /
+      port: 8880
+    tls:
+    - secretName: vmalert-tls
+      hosts:
+        - vmalert.dev.local
 
 alertmanager:
   enabled: true
