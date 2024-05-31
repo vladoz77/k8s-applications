@@ -1,0 +1,29 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: vmsingle
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io/background
+  labels:
+    app: loki
+spec:
+  project: default
+  sources:
+  - repoURL: https://github.com/vladoz77/argocd.git
+    targetRevision: HEAD 
+    ref: myRepo
+  - repoURL: https://victoriametrics.github.io/helm-charts/ 
+    chart: victoria-metrics-single
+    targetRevision: 0.9.19
+    helm:
+      valueFiles:
+        - $myRepo/monitoring-single/vmsingle/vm-single-my.yaml
+  destination:
+    server: "https://kubernetes.default.svc"
+    namespace: monitoring
+  syncPolicy:
+    automated: {}
+    syncOptions:
+      - CreateNamespace=true
+      - PruneLast=true
