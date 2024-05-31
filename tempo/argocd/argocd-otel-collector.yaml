@@ -12,7 +12,7 @@ spec:
   source:
     chart: opentelemetry-collector
     repoURL:  https://open-telemetry.github.io/opentelemetry-helm-charts
-    targetRevision: 0.88.0
+    targetRevision: 0.89.0
     helm:
       valuesObject:
         fullnameOverride: otel-collector
@@ -41,22 +41,18 @@ spec:
               endpoint: tempo-distributor:4317
               tls:
                 insecure: true
-            # debug:
-            #     loglevel: info
           service:
             pipelines:
+              metrics: null
               traces: # here, we add the receivers and exporters accordingly
                   exporters:
                     - otlp
-                    # - debug
                   processors:
                     - memory_limiter
                     - batch
                   receivers:
                     - otlp
                     - jaeger
-              metrics: null
-              logs: null
   destination:
     server: "https://kubernetes.default.svc"
     namespace: tempo
