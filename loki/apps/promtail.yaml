@@ -1,0 +1,24 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: promtail
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+  labels:
+    app: loki
+spec:
+  project: default
+  source:
+    repoURL: 'https://github.com/vladoz77/argocd.git'
+    path: loki/promtail
+    targetRevision: HEAD
+    directory:
+      recurse: true
+      jsonnet: {}
+  destination:
+    server: 'https://kubernetes.default.svc'
+    namespace: loki
+  syncPolicy:
+    syncOptions:
+      - CreateNamespace=true
