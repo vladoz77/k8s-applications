@@ -1,0 +1,32 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: vmalert-alertmanager
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+  labels:
+    app: vmalert-alertmanager
+spec:
+  project: default
+  sources:
+  - repoURL: https://github.com/vladoz77/argocd.git
+    targetRevision: HEAD 
+    ref: myRepo
+  - repoURL: https://victoriametrics.github.io/helm-charts/ 
+    chart: victoria-metrics-alert
+    targetRevision: 0.9.8
+    helm:
+      valueFiles:
+        - $myRepo/monitoring-single/vmalert/vmalert-values.yaml
+  - repoURL: https://github.com/vladoz77/argocd.git
+    targetRevision: HEAD 
+    path: monitoring-single/vmalert/rules
+  destination:
+    server: "https://kubernetes.default.svc"
+    namespace: monitoring
+  syncPolicy:
+    automated: {}
+    syncOptions:
+      - CreateNamespace=true
+      - PruneLast=true
