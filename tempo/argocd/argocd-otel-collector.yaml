@@ -3,6 +3,10 @@ kind: Application
 metadata:
   name: otel-collector
   namespace: argocd
+  # finalizers:
+  #    - resources-finalizer.argocd.argoproj.io
+  labels:
+    app: otel-collector
 spec:
   project: default
   source:
@@ -10,7 +14,7 @@ spec:
     repoURL:  https://open-telemetry.github.io/opentelemetry-helm-charts
     targetRevision: 0.88.0
     helm:
-      values: |
+      valuesObject:
         fullnameOverride: otel-collector
         mode: deployment
         image:
@@ -57,5 +61,7 @@ spec:
     server: "https://kubernetes.default.svc"
     namespace: tempo
   syncPolicy:
+    automated: {}
     syncOptions:
-    - CreateNamespace=true
+      - CreateNamespace=true
+      - PruneLast=true

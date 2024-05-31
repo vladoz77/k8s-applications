@@ -56,5 +56,7 @@ spec:
     server: "https://kubernetes.default.svc"
     namespace: tempo
   syncPolicy:
+    automated: {}
     syncOptions:
-    - CreateNamespace=true
+      - CreateNamespace=true
+      - PruneLast=true
