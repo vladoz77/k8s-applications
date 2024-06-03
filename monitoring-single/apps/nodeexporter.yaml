@@ -1,0 +1,29 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: node-exporter
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+  labels:
+    app: node-exporter
+spec:
+  project: default
+  sources:
+  - repoURL: https://prometheus-community.github.io/helm-charts 
+    chart: prometheus-node-exporter
+    targetRevision: 4.29.0
+    helm:
+      parameters:
+        - name: nameOverride
+          value: node-exporter
+        - name: fullnameOverride
+          value: node-exporter
+  destination:
+    server: "https://kubernetes.default.svc"
+    namespace: monitoring
+  syncPolicy:
+    automated: {}
+    syncOptions:
+      - CreateNamespace=true
+      - PruneLast=true
