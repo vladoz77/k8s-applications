@@ -1,54 +1,37 @@
 nameOverride: minio
 fullnameOverride: minio
 
-# Get root user/password from secret
-existingSecret: minio-secret
+mode: distributed
+auth:
+  rootUser: admin
+  rootPassword: password
 
-mountPath: "/data"
-# Number of drives attached to a node
-drivesPerNode: 1
-# Number of MinIO containers running
-replicas: 2
-# Number of expanded MinIO clusters
-pools: 1
+defaultBuckets: loki, tempo
 
-persistence:
-  enabled: true
-  storageClass: local-path
-  accessMode: ReadWriteOnce
-  size: 5Gi
+extraEnvVars:
+  - name: MINIO_PROMETHEUS_URL
+    value: vmsingle.monitoring.svc.cluster.local:8428
 
-resources:
-  requests:
-    memory: 1Gi
+statefulset:
+  # statefulset.replicaCount Number of pods per zone (only for MinIO&reg; distributed mode). Should be even and `>= 4`
+  replicaCount: 2
+  # statefulset.zones Number of zones (only for MinIO&reg; distributed mode)
+  zones: 1
+  # statefulset.drivesPerNode Number of drives attached to every node (only for MinIO&reg; distributed mode)
+  drivesPerNode: 2
+
+service:
+  annotations:
+    prometheus.io/port: '9000'
+    prometheus.io/scrape: 'true'
+    prometheus.io/path: '/minio/v2/metrics/cluster'
 
 ingress:
   enabled: true
-  ingressClassName: traefik
+  hostname: minio-test.dev.local
   annotations:
     cert-manager.io/cluster-issuer: ca-issuer
-  path: /
-  hosts:
-    - minio.home.local
-  tls:
-    - secretName: minio-tls
-      hosts:
-        - minio.home.local
-
-consoleIngress:
-  enabled: true
-  ingressClassName: traefik
-  annotations:
-    cert-manager.io/cluster-issuer: ca-issuer
-  path: /
-  hosts:
-    - minio-console.home.local
-  tls:
-    - secretName: minio-console-tls
-      hosts:
-        - minio-console.home.local
-  
-
-
-
-
+  extraTls:
+    - hosts:
+      - minio-test.dev.local
+      secretName: minio-test-tls

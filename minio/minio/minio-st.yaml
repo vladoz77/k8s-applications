@@ -108,6 +108,8 @@ spec:
               value: "public"
             - name: MINIO_PROMETHEUS_URL
               value: http://vmsingle.monitoring.svc.cluster.local:8428
+            - name: CONSOLE_PROMETHEUS_JOB_ID
+              value: minio
           ports:
             - name: minio-api
               containerPort: 9000
