@@ -44,12 +44,12 @@ datasources:
       url: http://loki-gateway.loki.svc
       version: 1
       jsonData:
-      derivedFields:
-          # NGINX traces integration
-        - datasourceUid: tempo
-          matcherRegex: '"trace_id": "(\w+)"'
-          name: TraceID
-          url: ${__value.raw}
+        derivedFields:
+            # NGINX traces integration
+          - datasourceUid: tempo
+            matcherRegex: '"trace_id": "(\w+)"'
+            name: TraceID
+            url: ${__value.raw}
     - name: Tempo
       uid: tempo
       type: tempo
