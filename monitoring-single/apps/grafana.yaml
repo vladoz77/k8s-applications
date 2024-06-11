@@ -19,9 +19,9 @@ spec:
     helm:
       valueFiles:
         - $myRepo/monitoring-single/grafana/grafana-values.yaml
-  - repoURL: https://github.com/vladoz77/argocd.git
-    targetRevision: HEAD 
-    path: monitoring-single/grafana/manifests
+  # - repoURL: https://github.com/vladoz77/argocd.git
+  #   targetRevision: HEAD 
+  #   path: monitoring-single/grafana/manifests
   destination:
     server: "https://kubernetes.default.svc"
     namespace: monitoring
