@@ -6,7 +6,7 @@ metadata:
   finalizers:
     - resources-finalizer.argocd.argoproj.io/background
   labels:
-    app: loki
+    app: vmsingle
 spec:
   project: default
   sources:
