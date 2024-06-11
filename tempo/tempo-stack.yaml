@@ -1,0 +1,23 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: tempo-stack
+  namespace: argocd
+  finalizers:
+     - resources-finalizer.argocd.argoproj.io
+  labels: 
+    app: tempo-stack
+spec:
+  project: default
+  sources:
+  - repoURL: 'https://github.com/vladoz77/argocd.git'
+    path: tempo/apps
+    targetRevision: HEAD
+  destination:
+    server: 'https://kubernetes.default.svc'
+    namespace: tempo
+  syncPolicy:
+    automated: {}
+    syncOptions:
+      - CreateNamespace=true
+      - PruneLast=true

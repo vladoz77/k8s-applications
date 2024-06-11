@@ -3,55 +3,20 @@ kind: Application
 metadata:
   name: tempo
   namespace: argocd
+  finalizers:
+     - resources-finalizer.argocd.argoproj.io
 spec:
   project: default
-  source:
-    chart: tempo-distributed
-    repoURL:  https://grafana.github.io/helm-charts 
-    targetRevision: 1.7.3
-    helm:  
-      values: |
-        fullnameOverride: tempo
-
-        traces:
-          otlp:
-            grpc:
-              enabled: true
-            http:
-              enabled: true
-
-        # Configure S3 backend
-        storage:
-          trace:
-            backend: s3
-            s3:
-              bucket: tempo
-              endpoint: minio-svc.minio.svc.cluster.local:9000
-              access_key: admin
-              secret_key: password
-              insecure: true
-
-        # Configure distributor
-        distributor:
-          config:
-            log_received_spans:
-              enabled: true
-
-
-        # Disable Minio server installation
-        minio:
-          enabled: false
-
-
-        metricsGenerator:
-          enabled: true
-          config:
-            storage:
-              path: /var/tempo/wal
-              wal:
-              remote_write_flush_deadline: 1m
-              remote_write:
-              - url: http://vmsingle.monitoring.svc:8428/api/v1/write
+  sources:
+    - repoURL: https://github.com/vladoz77/argocd.git
+      targetRevision: HEAD
+      ref: repo
+    - repoURL:  https://grafana.github.io/helm-charts
+      chart: tempo-distributed
+      targetRevision: 1.7.3
+      helm:
+        valueFiles:
+          - $repo/tempo/tempo/tempo-values.yaml
   destination:
     server: "https://kubernetes.default.svc"
     namespace: tempo
