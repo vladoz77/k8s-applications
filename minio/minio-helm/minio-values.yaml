@@ -10,15 +10,17 @@ defaultBuckets: loki, tempo
 
 extraEnvVars:
   - name: MINIO_PROMETHEUS_URL
-    value: vmsingle.monitoring.svc.cluster.local:8428
+    value: http://vmsingle.monitoring.svc.cluster.local:8428
+  - name: MINIO_PROMETHEUS_JOB_ID
+    value: minio
 
 statefulset:
   # statefulset.replicaCount Number of pods per zone (only for MinIO&reg; distributed mode). Should be even and `>= 4`
-  replicaCount: 2
+  replicaCount: 1
   # statefulset.zones Number of zones (only for MinIO&reg; distributed mode)
   zones: 1
   # statefulset.drivesPerNode Number of drives attached to every node (only for MinIO&reg; distributed mode)
-  drivesPerNode: 2
+  drivesPerNode: 4
 
 service:
   annotations:
