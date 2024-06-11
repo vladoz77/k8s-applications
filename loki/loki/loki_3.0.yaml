@@ -63,7 +63,7 @@ loki:
       chunks: loki
     type: s3
     s3:
-      endpoint: minio-svc.minio.svc.cluster.local:9000
+      endpoint: minio.minio.svc.cluster.local:9000
       secretAccessKey: password
       accessKeyId: admin
       s3ForcePathStyle: true
