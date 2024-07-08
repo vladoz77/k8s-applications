@@ -123,11 +123,11 @@ spec:
             - name: PROVISIONER_NAME
               value: cluster.local/nfs-provisioner
             - name: NFS_SERVER
-              value: 192.168.57.100
+              value: 192.168.59.100
             - name: NFS_PATH
               value: /var/nfs
       volumes:
         - name: nfs-provisioner-root
           nfs:
-            server: 192.168.57.100
+            server: 192.168.59.100
             path: /var/nfs
