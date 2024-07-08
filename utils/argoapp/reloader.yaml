@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: nfs-provisioner
+  name: reloader
   namespace: argocd
   labels:
     app: utilits
@@ -11,7 +11,7 @@ spec:
     namespace: kube-system
     server: 'https://kubernetes.default.svc'
   source:
-    path: utils/nfs-subdir-provision/manifest
+    path: utils/reloader/manifests
     repoURL: 'https://github.com/vladoz77/argocd'
     targetRevision: HEAD
     directory:
