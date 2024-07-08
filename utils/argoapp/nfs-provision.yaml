@@ -1,17 +1,17 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: nginx-ingress
+  name: nfs-provisioner
   namespace: argocd
   labels:
     app: utilits
 spec:
   destination:
     name: ''
-    namespace: ingress-nginx
+    namespace: kube-system
     server: 'https://kubernetes.default.svc'
   source:
-    path: utils/ingress
+    path: utils/nfs-subdir-provision/manifest
     repoURL: 'https://github.com/vladoz77/argocd'
     targetRevision: HEAD
     directory:

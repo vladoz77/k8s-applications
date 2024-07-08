@@ -112,7 +112,7 @@ spec:
       serviceAccountName: nfs-provisioner
       containers:
         - name: nfs-provisioner
-          image: "registry.k8s.io/sig-storage/nfs-provisioner:v4.0.2"
+          image: "registry.k8s.io/sig-storage/nfs-subdir-external-provisioner:v4.0.2"
           imagePullPolicy: IfNotPresent
           securityContext:
             {}
