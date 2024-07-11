@@ -415,7 +415,7 @@ config:
         source_labels: [__meta_kubernetes_service_label_k8s_app]
         regex:
         - calico-kube-controllers
-        - calico-typha
+        - calico-typha-metrics
         - calico-felix
       - action: keep
         source_labels: [__meta_kubernetes_endpoint_port_name]
