@@ -415,6 +415,21 @@ config:
           - calico-kube-controllers-metrics
         replacement: $1
         action: keep
+      - source_labels: [__meta_kubernetes_pod_container_port_name]
+        regex: calico-typha
+        action: drop
+      - source_labels: [__meta_kubernetes_pod_node_name]
+        target_label: node
+      - source_labels: [__meta_kubernetes_namespace]
+        target_label: namespace
+      - source_labels: [__meta_kubernetes_service_name]
+        target_label: service
+      - source_labels: [__meta_kubernetes_pod_name]
+        target_label: pod
+      - source_labels: [__meta_kubernetes_pod_container_name]
+        target_label: container
+      - source_labels: [__meta_kubernetes_service_name]
+        target_label: job
     
     # - job_name: 'typha_metrics'
     #   scrape_interval: 5s
@@ -426,9 +441,9 @@ config:
     #     regex: typha-metrics-svc
     #     replacement: $1
     #     action: keep
-    #   - source_labels: [__meta_kubernetes_pod_container_port_name]
-    #     regex: calico-typha
-    #     action: drop
+      # - source_labels: [__meta_kubernetes_pod_container_port_name]
+      #   regex: calico-typha
+      #   action: drop
     
     # - job_name: 'kube_controllers_metrics'
     #   scrape_interval: 5s
