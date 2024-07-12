@@ -403,33 +403,34 @@ config:
     #     target_label: pod_name
 
     #Calico
-    - job_name: Calico
-      honor_labels: true
+    - job_name: calico
+      scheme: http
       kubernetes_sd_configs:
-        - role: endpoints
-          namespaces:
-            names:
-            - calico-system
+      - role: endpoints
       relabel_configs:
-      - action: keep
-        source_labels: [__meta_kubernetes_service_label_k8s_app]
-        regex:
-        - calico-kube-controllers
-        - calico-typha
-        - calico-felix
-      - action: keep
-        source_labels: [__meta_kubernetes_endpoint_port_name]
-        regex: metrics-port
+      - source_labels: [__meta_kubernetes_service_name]
+        regex: 
+          - felix-metrics-svc
+          - calico-typha-metrics  
+          - calico-kube-controllers-metrics
+        replacement: $1
+        action: keep
+      - source_labels: [__meta_kubernetes_pod_container_port_name]
+        regex: calico-typha
+        action: drop
       - source_labels: [__meta_kubernetes_pod_node_name]
         target_label: node
       - source_labels: [__meta_kubernetes_namespace]
         target_label: namespace
+      - source_labels: [__meta_kubernetes_service_name]
+        target_label: service
       - source_labels: [__meta_kubernetes_pod_name]
         target_label: pod
       - source_labels: [__meta_kubernetes_pod_container_name]
         target_label: container
       - source_labels: [__meta_kubernetes_service_name]
         target_label: job
+    
 
     # Autodiscover endpoint with annotaions
     - job_name: kubernetes-endpoints
@@ -465,7 +466,7 @@ config:
         target_label: namespace
       - source_labels: [__meta_kubernetes_pod_node_name]
         target_label: node
-      - source_labels: [__meta_kubernetes_pod_label_app_kubernetes_io_name]
+      - source_labels: [__meta_kubernetes_service_name]
         target_label: job
     
     # Autodiscover pod with annotaions
@@ -504,7 +505,7 @@ config:
           target_label: namespace
         - source_labels: [__meta_kubernetes_pod_node_name]
           target_label: node
-        - source_labels: [__meta_kubernetes_pod_label_app_kubernetes_io_name]
+        - source_labels: [__meta_kubernetes_pod_label_app]
           target_label: job
 
    
