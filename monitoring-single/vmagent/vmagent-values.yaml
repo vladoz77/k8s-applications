@@ -410,7 +410,7 @@ config:
       relabel_configs:
       - source_labels: [__meta_kubernetes_service_name]
         regex: 
-          - felix-metrics-svc
+          - calico-felix-metrics
           - calico-typha-metrics  
           - calico-kube-controllers-metrics
         replacement: $1
