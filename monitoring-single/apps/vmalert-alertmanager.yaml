@@ -18,10 +18,10 @@ spec:
     targetRevision: 0.9.8
     helm:
       valueFiles:
-        - $myRepo/monitoring-single/vmalert/vmalert-values.yaml
+        - $myRepo/monitoring-single/vmalert-alertmanager/vmalert-values.yaml
   - repoURL: https://github.com/vladoz77/argocd.git
     targetRevision: HEAD 
-    path: monitoring-single/vmalert/rules
+    path: monitoring-single/vmalert-alertmanager/rules
   destination:
     server: "https://kubernetes.default.svc"
     namespace: monitoring
