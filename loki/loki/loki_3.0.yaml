@@ -7,7 +7,7 @@ loki:
   
   # Common config
   commonConfig:
-    replication_factor: 1
+    replication_factor: 3
 
   # Ingester config
   ingester:
@@ -86,7 +86,7 @@ loki:
 # Configuration for the write
 write:
   # Number of replicas for the write
-  replicas: 1
+  replicas: 3
   persistence:
     # -- Size of persistent disk
     size: 10Gi
@@ -96,7 +96,7 @@ write:
 # Configuration for the read
 read:
   # Number of replicas for the read
-  replicas: 1
+  replicas: 3
   persistence:
     # -- Size of persistent disk
     size: 10Gi
@@ -106,7 +106,7 @@ read:
 # Configuration for the backend
 backend:
   # Number of replicas for the backend
-  replicas: 1
+  replicas: 2
   persistence:
     # -- Size of persistent disk
     size: 10Gi
