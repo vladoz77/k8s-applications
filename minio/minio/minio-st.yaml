@@ -6,23 +6,6 @@ metadata:
   labels:
     app.kubernetes.io/name: minio
 spec:
-  volumeClaimTemplates:
-        - metadata: 
-            name: data-0
-          spec:
-            accessModes: ["ReadWriteOnce"]
-            storageClassName: local-path
-            resources:
-              requests:
-                storage: 5Gi
-        - metadata: 
-            name: data-1
-          spec:
-            accessModes: ["ReadWriteOnce"]
-            storageClassName: local-path
-            resources:
-              requests:
-                storage: 5Gi
   selector:
     matchLabels:
       app.kubernetes.io/name: minio
@@ -64,14 +47,19 @@ spec:
             - sh
             - -c
             - |
-              chown 1001:1001 /data-0/data
-              chown 1001:1001 /data-1/data
+                if [ ! -d /data-0/data ]; then
+                  mkdir /data-0/data
+                  chown 1001:1001 /data-0/data
+                fi
+                if [ ! -d /data-1/data ]; then
+                  mkdir /data-1/data
+                  chown 1001:1001 /data-1/data
+                fi
           volumeMounts:
             - name: data-0
               mountPath: /data-0/data
             - name: data-1
               mountPath: /data-1/data
-    
       containers:
         - name: minio
           image: docker.io/bitnami/minio:2024.4.6
@@ -108,7 +96,7 @@ spec:
               value: "public"
             - name: MINIO_PROMETHEUS_URL
               value: http://vmsingle.monitoring.svc.cluster.local:8428
-            - name: CONSOLE_PROMETHEUS_JOB_ID
+            - name: MINIO_PROMETHEUS_JOB_ID
               value: minio
           ports:
             - name: minio-api
@@ -143,13 +131,20 @@ spec:
               mountPath: /data-0/data
             - name: data-1
               mountPath: /data-1/data
-  
-      # volumes:
-      #   - name:  data-0
-      #     hostPath:
-      #       path: /data-0/data
-      #       type: DirectoryOrCreate
-      #   - name:  data-1
-      #     hostPath:
-      #       path: /data-1/data
-      #       type: DirectoryOrCreate
+  volumeClaimTemplates:
+    - metadata: 
+        name: data-0
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        storageClassName: local-path
+        resources:
+          requests:
+            storage: 10Gi
+    - metadata: 
+        name: data-1
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        storageClassName: local-path
+        resources:
+          requests:
+            storage: 10Gi

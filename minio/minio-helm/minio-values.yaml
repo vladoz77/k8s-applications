@@ -16,7 +16,7 @@ extraEnvVars:
 
 statefulset:
   # statefulset.replicaCount Number of pods per zone (only for MinIO&reg; distributed mode). Should be even and `>= 4`
-  replicaCount: 3
+  replicaCount: 2
   # statefulset.zones Number of zones (only for MinIO&reg; distributed mode)
   zones: 1
   # statefulset.drivesPerNode Number of drives attached to every node (only for MinIO&reg; distributed mode)
@@ -30,14 +30,13 @@ service:
 
 ingress:
   enabled: true
-  hostname: minio.dev.local
+  hostname: minio-console.dev.local
   annotations:
     cert-manager.io/cluster-issuer: ca-issuer
   extraTls:
     - hosts:
-      - minio.dev.local
+      - minio-console.dev.local
       secretName: minio-tls
 
 persistence:
   storageClass: local-path
-  mountPath: /minio/data

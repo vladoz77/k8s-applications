@@ -11,9 +11,9 @@ spec:
   tls:
     - secretName: minio-console-tls
       hosts:
-        - minio-console.home.local
+        - minio-console.dev.local
   rules:
-  - host: minio-console.home.local
+  - host: minio-console.dev.local
     http:
       paths:
       - pathType: Prefix
@@ -24,23 +24,23 @@ spec:
             port: 
               number: 9001
 
----
-apiVersion: networking.k8s.io/v1
-kind: Ingress
-metadata:
-  name: minio-ingress
-  labels:
-    app.kubernetes.io/name: minio
-  namespace: minio
-spec:
-  rules:
-  - host: minio.home.local
-    http:
-      paths:
-      - pathType: Prefix
-        path: "/"
-        backend:
-          service:
-            name: minio-svc
-            port: 
-              number: 9000
+# ---
+# apiVersion: networking.k8s.io/v1
+# kind: Ingress
+# metadata:
+#   name: minio-ingress
+#   labels:
+#     app.kubernetes.io/name: minio
+#   namespace: minio
+# spec:
+#   rules:
+#   - host: minio.home.local
+#     http:
+#       paths:
+#       - pathType: Prefix
+#         path: "/"
+#         backend:
+#           service:
+#             name: minio-svc
+#             port: 
+#               number: 9000

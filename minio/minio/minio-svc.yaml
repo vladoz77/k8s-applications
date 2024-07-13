@@ -19,10 +19,10 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: minio-svc
+  name: minio
   namespace: minio
   labels:
-    app.kubernetes.io/name: minio-svc
+    app.kubernetes.io/name: minio
   annotations:
     prometheus.io/port: '9000'
     prometheus.io/scrape: 'true'
@@ -43,7 +43,7 @@ metadata:
   name: minio-console
   namespace: minio
   labels:
-    app.kubernetes.io/name: minio-svc
+    app.kubernetes.io/name: minio
 spec:
   type: ClusterIP
   ports:
