@@ -11,7 +11,7 @@ annotations:
    configmap.reloader.stakater.com/reload: vmagent-config
 
 extraArgs:
-  promscrape.cluster.replicationFactor: 2
+  promscrape.cluster.replicationFactor: 2 
   promscrape.cluster.memberLabel: vmagent_instance
   
   # promscrape.cluster.memberURLTemplate: http://vmagent.dev.local-%d:8429/targets
