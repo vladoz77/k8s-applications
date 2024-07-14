@@ -5,20 +5,21 @@ serviceAccount:
 
 server:
   fullnameOverride: vmsingle
-  # extraArgs:
-  #   dedup.minScrapeInterval: 10s
+  extraArgs:
+    # dedup.minScrapeInterval: 10s
+    search.maxQueueDuration: 10
   statefulSet:
     service:
       annotations:
         prometheus.io/scrape: "true"
         prometheus.io/port: "8428"
-  resources:
-    limits:
-      cpu: 500m
-      memory: 512Mi
-    requests:
-      cpu: 500m
-      memory: 512Mi
+  # resources:
+  #   limits:
+  #     cpu: 500m
+  #     memory: 512Mi
+  #   requests:
+  #     cpu: 500m
+  #     memory: 512Mi
   ingress:
     enabled: true
     annotations: 

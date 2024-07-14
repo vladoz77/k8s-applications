@@ -18,10 +18,10 @@ annotations:
   # promscrape.cluster.memberURLTemplate: http://vmagent.dev.local-%d:8429/targets
 resources:
   limits:
-    cpu: 100m
+    cpu: 200m
     memory: 200Mi
   requests:
-    cpu: 100m
+    cpu: 200m
     memory: 200Mi
 
 extraVolumeMounts:
