@@ -7,7 +7,6 @@ server:
   fullnameOverride: vmsingle
   extraArgs:
     # dedup.minScrapeInterval: 10s
-    search.maxQueueDuration: 10
   statefulSet:
     service:
       annotations:
