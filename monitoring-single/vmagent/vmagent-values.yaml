@@ -4,6 +4,7 @@ deployment:
 statefulset:
   enabled: true
   clusterMode: true
+  replicationFactor: 1
 
 nameOverride: vmagent
 fullnameOverride: vmagent
@@ -17,13 +18,12 @@ annotations:
   
   # promscrape.cluster.memberURLTemplate: http://vmagent.dev.local-%d:8429/targets
 
-resources: 
-  limits:
-    cpu: 100m
-    memory: 128Mi
-  requests:
-    cpu: 100m
-    memory: 64Mi
+limits:
+  cpu: 100m
+  memory: 128Mi
+requests:
+  cpu: 100m
+  memory: 128Mi
 
 extraVolumeMounts:
 - name: etcd-tls-volume
