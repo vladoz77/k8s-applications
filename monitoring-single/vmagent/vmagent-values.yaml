@@ -10,20 +10,20 @@ fullnameOverride: vmagent
 annotations:
    configmap.reloader.stakater.com/reload: vmagent-config
 
-extraArgs:
-  promscrape.cluster.replicationFactor: 2 
-  promscrape.cluster.memberLabel: vmagent_instance
-  promscrape.cluster.name: vmagent-cluster
+# extraArgs:
+#   promscrape.cluster.replicationFactor: 2 
+#   promscrape.cluster.memberLabel: vmagent_instance
+#   promscrape.cluster.name: vmagent-cluster
   
   # promscrape.cluster.memberURLTemplate: http://vmagent.dev.local-%d:8429/targets
 
-# resources: 
-#   limits:
-#     cpu: 100m
-#     memory: 128Mi
-#   requests:
-#     cpu: 100m
-#     memory: 64Mi
+resources: 
+  limits:
+    cpu: 100m
+    memory: 128Mi
+  requests:
+    cpu: 100m
+    memory: 64Mi
 
 extraVolumeMounts:
 - name: etcd-tls-volume
