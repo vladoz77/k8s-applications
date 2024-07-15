@@ -5,20 +5,26 @@ serviceAccount:
 
 server:
   fullnameOverride: vmsingle
+  persistentVolume:
+    storageClass: longhorn
+    size: 10Gi
   extraArgs:
-    # dedup.minScrapeInterval: 10s
+    dedup.minScrapeInterval: 30s
+  
   statefulSet:
     service:
       annotations:
         prometheus.io/scrape: "true"
         prometheus.io/port: "8428"
-  # resources:
-  #   limits:
-  #     cpu: 500m
-  #     memory: 512Mi
-  #   requests:
-  #     cpu: 500m
-  #     memory: 512Mi
+  
+  resources:
+    limits:
+      cpu: 500m
+      memory: 512Mi
+    requests:
+      cpu: 500m
+      memory: 512Mi
+
   ingress:
     enabled: true
     annotations: 

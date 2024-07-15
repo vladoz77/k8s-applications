@@ -62,7 +62,7 @@ persistence:
 
 config:
   global:
-    scrape_interval: 15s
+    scrape_interval: 30s
   # scrape_config_files:
   #     - /custom-configs/*.yml
   scrape_configs:
