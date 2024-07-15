@@ -14,7 +14,8 @@ helm install kube-state-metrics prometheus-community/kube-state-metrics -n monit
 helm install node-exporter prometheus-community/prometheus-node-exporter -n monitoring 
 
 #Install vmalert and alertmanager
-helm install vmalert vm/victoria-metrics-alert  -f vmalert/vmalert-values.yaml -n monitoring
+k apply -f vmalert-alertmanager/rules
+helm install vmalert vm/victoria-metrics-alert  -f vmalert-alertmanager/vmalert-values.yaml    -n monitoring
 
 #Install grafana
 helm install grafana grafana/grafana -n monitoring -f grafana/grafana-values.yaml

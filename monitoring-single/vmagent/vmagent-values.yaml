@@ -59,6 +59,7 @@ ingress:
 persistence:
   enabled: true
   size: 10Gi
+  storageClassName: longhorn
 
 config:
   global:
