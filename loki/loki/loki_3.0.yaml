@@ -91,7 +91,7 @@ write:
     # -- Size of persistent disk
     size: 10Gi
     # -- Storage class to be used.
-    # storageClass: longhorn
+    storageClass: longhorn
 
 # Configuration for the read
 read:
@@ -101,17 +101,18 @@ read:
     # -- Size of persistent disk
     size: 10Gi
     # -- Storage class to be used.
-    # storageClass: longhorn
+    storageClass: longhorn
 
 # Configuration for the backend
 backend:
   # Number of replicas for the backend
-  replicas: 2
+  replicas: 1
   persistence:
     # -- Size of persistent disk
     size: 10Gi
     # -- Storage class to be used.
-    # storageClass: longhorn
+    storageClass: longhorn
+
   extraVolumeMounts: 
     - name: rules-volume
       mountPath: /etc/loki/rules/fake/loki-rules.yaml
