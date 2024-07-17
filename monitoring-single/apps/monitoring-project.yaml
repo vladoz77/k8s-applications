@@ -5,7 +5,7 @@ metadata:
   namespace: argocd
 spec:
   sourceRepos:
-  - https://github.com/vladoz77/argocd.git
+  - '*'
   destinations:
   - namespace: monitoring
     server: https://kubernetes.default.svc
