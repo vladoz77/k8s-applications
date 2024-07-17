@@ -8,7 +8,7 @@ metadata:
   labels:
     app: loki
 spec:
-  project: default
+  project: logging
   source:
     repoURL: 'https://github.com/vladoz77/argocd.git'
     path: loki/promtail
