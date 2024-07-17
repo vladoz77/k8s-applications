@@ -1,11 +1,10 @@
-# resources:
-#   limits:
-#     cpu: 100m
-#     memory: 300Mi
-#   requests:
-#     cpu: 100m
-#     memory: 200Mi
-
+resources:
+  limits:
+    cpu: 100m
+    memory: 300Mi
+  requests:
+    cpu: 100m
+    memory: 200Mi
 
 adminUser: admin
 adminPassword: password

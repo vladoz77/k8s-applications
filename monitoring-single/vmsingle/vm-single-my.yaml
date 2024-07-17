@@ -8,8 +8,8 @@ server:
   persistentVolume:
     storageClass: longhorn
     size: 10Gi
-  extraArgs:
-    dedup.minScrapeInterval: 30s
+  # extraArgs:
+  #   dedup.minScrapeInterval: 30s
   
   statefulSet:
     service:
@@ -22,8 +22,8 @@ server:
       cpu: 500m
       memory: 512Mi
     requests:
-      cpu: 500m
-      memory: 512Mi
+      cpu: 1000m
+      memory: 1024Mi
 
   ingress:
     enabled: true
