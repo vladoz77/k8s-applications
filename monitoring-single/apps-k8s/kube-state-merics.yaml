@@ -1,21 +1,21 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: monitoring-stack
+  name: kube-state-metrics
   namespace: argocd
   finalizers:
     - resources-finalizer.argocd.argoproj.io
   labels:
-    app: monitoring-stack
+    app: kube-state-metrics
 spec:
-  project: default
+  project: monitoring
   sources:
-  - repoURL: 'https://github.com/vladoz77/argocd.git'
-    path: monitoring-single/apps-k8s
-    targetRevision: HEAD
+  - repoURL: https://prometheus-community.github.io/helm-charts 
+    chart: kube-state-metrics
+    targetRevision: 5.19.0
   destination:
     server: "https://kubernetes.default.svc"
-    namespace: loki
+    namespace: monitoring
   syncPolicy:
     automated: {}
     syncOptions:

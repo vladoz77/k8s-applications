@@ -18,7 +18,7 @@ spec:
     targetRevision: 0.9.19
     helm:
       valueFiles:
-        - $myRepo/monitoring-single/vmsingle/vm-single-my.yaml
+        - $myRepo/monitoring-single/vmsingle/vm-single-k3s.yaml
   destination:
     server: "https://kubernetes.default.svc"
     namespace: monitoring

@@ -18,7 +18,7 @@ spec:
     targetRevision: 7.3.11 
     helm:
       valueFiles:
-        - $myRepo/monitoring-single/grafana/grafana-values.yaml
+        - $myRepo/monitoring-single/grafana/grafana-k3s.yaml
   # - repoURL: https://github.com/vladoz77/argocd.git
   #   targetRevision: HEAD 
   #   path: monitoring-single/grafana/manifests

@@ -1,0 +1,32 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: grafana
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+  labels:
+    app: grafana
+spec:
+  project: monitoring
+  sources:
+  - repoURL: https://github.com/vladoz77/argocd.git
+    targetRevision: HEAD 
+    ref: myRepo
+  - repoURL: https://grafana.github.io/helm-charts
+    chart: grafana
+    targetRevision: 7.3.11 
+    helm:
+      valueFiles:
+        - $myRepo/monitoring-single/grafana/grafana-k8s.yaml
+  # - repoURL: https://github.com/vladoz77/argocd.git
+  #   targetRevision: HEAD 
+  #   path: monitoring-single/grafana/manifests
+  destination:
+    server: "https://kubernetes.default.svc"
+    namespace: monitoring
+  syncPolicy:
+    automated: {}
+    syncOptions:
+      - CreateNamespace=true
+      - PruneLast=true
