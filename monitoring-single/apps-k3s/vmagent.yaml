@@ -18,7 +18,7 @@ spec:
     targetRevision: 0.10.8
     helm:
       valueFiles:
-        - $myRepo/monitoring-single/vmagent/vmagent-k3s.yaml
+        - $myRepo/monitoring-single/vmagent/vmagent-k3s-ha.yaml
   destination:
     server: "https://kubernetes.default.svc"
     namespace: monitoring
