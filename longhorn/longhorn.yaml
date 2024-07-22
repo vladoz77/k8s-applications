@@ -1,0 +1,22 @@
+defaultSettings:
+  defaultDataPath: /mnt/data
+  defaultReplicaCount: 1
+
+longhornManager:
+  log:
+    format: json
+    
+
+longhornUI:
+  replicas: 1
+
+ingress:
+  enabled: true
+  host: longhorn-ui.dev.local
+  tls: true
+  tlsSecret: longhorn-tls
+  path: /
+  annotations:
+    cert-manager.io/cluster-issuer: ca-issuer
+
+
