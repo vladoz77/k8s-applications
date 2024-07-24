@@ -1,6 +1,6 @@
 defaultSettings:
   defaultDataPath: /mnt/data
-  defaultReplicaCount: 1
+  defaultReplicaCount: 2
 
 longhornManager:
   log:
@@ -12,7 +12,9 @@ longhornUI:
 
 ingress:
   enabled: true
+  ingressClassName: nginx
   host: longhorn-ui.dev.local
+  secureBackends: true
   tls: true
   tlsSecret: longhorn-tls
   path: /
