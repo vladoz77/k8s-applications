@@ -1,10 +1,13 @@
 defaultSettings:
   defaultDataPath: /mnt/data
-  defaultReplicaCount: 2
 
 longhornManager:
   log:
     format: json
+
+persistence:
+  defaultClass: true
+  defaultClassReplicaCount: 2
     
 
 longhornUI:
