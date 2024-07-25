@@ -1,5 +1,7 @@
 defaultSettings:
-  defaultDataPath: /mnt/data
+  createDefaultDiskLabeledNodes: true
+  priorityClass: system-node-critical
+  deletingConfirmationFlag: true
 
 longhornManager:
   log:
