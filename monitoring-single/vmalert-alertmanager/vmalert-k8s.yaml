@@ -1,0 +1,72 @@
+serviceAccount:
+  create: false
+server:
+  image:
+    tag: ""
+  nameOverride: vmalert
+  fullnameOverride: vmalert
+  annotations:
+   configmap.reloader.stakater.com/reload: "record-rules-config,alert-rules-config"
+  datasource:
+    url:  "http://vmselect.monitoring.svc.cluster.local:8481/select/0/prometheus/"
+  remote:
+    write:
+      url: "http://vminsert.monitoring.svc.cluster.local:8480/insert/0/prometheus/"
+  notifier:
+    alertmanager:
+      url: http://vmalert-alertmanager.monitoring.svc.cluster.local:9093
+  extraArgs:
+    rule: 
+      - /rules/recording-rules/*.yaml
+      - /rules/alertmanager-rules/*.yaml
+      - /rules/alert-rules/*.yaml
+  extraVolumes:
+    - name: record-rules
+      configMap:
+        name: record-rules-config
+    - name: alert-rules
+      configMap:
+        name: alert-rules-config
+    - name: alertmanager-rules
+      configMap:
+        name: alertmanager-rules
+
+  extraVolumeMounts:
+    - name: record-rules
+      mountPath: /rules/recording-rules
+    - name: alert-rules
+      mountPath: /rules/alert-rules
+    - name: alertmanager-rules
+      mountPath: /rules/alertmanager-rules
+  service:
+    enabled: true
+    annotations:
+      prometheus.io/scrape: "true"
+      prometheus.io/port: "8880"
+  
+  ingress:
+    enabled: true
+    annotations:
+      cert-manager.io/cluster-issuer: ca-issuer
+    hosts:
+    - name: vmalert.dev.local
+      path: /
+      port: 8880
+    tls:
+    - secretName: vmalert-tls
+      hosts:
+        - vmalert.dev.local
+
+alertmanager:
+  enabled: true
+  tag: v0.25.0
+  persistentVolume:
+    enabled: true
+    size: 50Mi
+  configMap: ""
+  ingress:
+    enabled: true
+    hosts: 
+    - name: alert.dev.local
+      path: /
+      port: web

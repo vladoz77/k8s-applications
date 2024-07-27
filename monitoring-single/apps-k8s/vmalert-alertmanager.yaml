@@ -18,7 +18,7 @@ spec:
     targetRevision: 0.9.8
     helm:
       valueFiles:
-        - $myRepo/monitoring-single/vmalert-alertmanager/vmalert-values.yaml
+        - $myRepo/monitoring-single/vmalert-alertmanager/vmalert-k8s.yaml
   - repoURL: https://github.com/vladoz77/argocd.git
     targetRevision: HEAD 
     path: monitoring-single/vmalert-alertmanager/rules
