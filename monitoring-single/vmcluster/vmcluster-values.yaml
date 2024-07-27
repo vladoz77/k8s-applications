@@ -1,49 +1,50 @@
 vmselect:
   enabled: true
-  replicaCount: 2
+  replicaCount: 3
   name: vmselect
   fullnameOverride: vmselect
   extraArgs:
-    replicationFactor: 2
-    dedup.minScrapeInterval: 10s
+    replicationFactor: 3
+    dedup.minScrapeInterval: 30s
   podAnnotations:
     prometheus.io/scrape: "true"
     prometheus.io/port: "8481"
-  # resources:
-  #   limits:
-  #     cpu: 50m
-  #     memory: 64Mi
-  #   requests:
-  #     cpu: 50m
-  #     memory: 64Mi
+  resources:
+    limits:
+      cpu: 50m
+      memory: 64Mi
+    requests:
+      cpu: 50m
+      memory: 64Mi
 
 vminsert:
   enabled: true
   name: vminsert
   fullnameOverride: vminsert
-  replicaCount: 2
+  replicaCount: 3
   extraArgs:
-    replicationFactor: 2
+    replicationFactor: 3
   podAnnotations:
     prometheus.io/scrape: "true"
     prometheus.io/port: "8480"
-  # resources:
-  #   limits:
-  #     cpu: 50m
-  #     memory: 64Mi
-  #   requests:
-  #     cpu: 50m
-  #     memory: 64Mi
+  resources:
+    limits:
+      cpu: 50m
+      memory: 64Mi
+    requests:
+      cpu: 50m
+      memory: 64Mi
 
 vmstorage:
   enabled: true
   name: vmstorage
-  replicaCount: 2
+  replicaCount: 3
   fullnameOverride: vmstorage
   podAnnotations:
     prometheus.io/scrape: "true"
     prometheus.io/port: "8482"
   persistentVolume:
     enabled: true
+    storageClass: longhorn-db
     mountPath: /storage
     size: 8Gi

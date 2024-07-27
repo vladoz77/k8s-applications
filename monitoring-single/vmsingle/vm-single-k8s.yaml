@@ -6,10 +6,10 @@ serviceAccount:
 server:
   fullnameOverride: vmsingle
   persistentVolume:
-    storageClass: longhorn
+    storageClass: longhorn-db
     size: 10Gi
-  # extraArgs:
-  #   dedup.minScrapeInterval: 30s
+  extraArgs:
+    dedup.minScrapeInterval: 30s
   
   statefulSet:
     service:
