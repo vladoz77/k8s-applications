@@ -36,7 +36,7 @@ extraVolumes:
    
 
 remoteWriteUrls: 
-  - "http://vminsert.moniring.svc.cluster.local:8480/insert/0/prometheus/"
+  - "http://vminsert.monitoring.svc.cluster.local:8480/insert/0/prometheus/"
 
 service:
   enabled: true
@@ -59,7 +59,7 @@ ingress:
 persistence:
   enabled: true
   size: 1Gi
-  storageClassName: longhorn
+  storageClassName: longhorn-data
 
 config:
   global:
