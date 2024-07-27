@@ -3,8 +3,8 @@ serviceAccount:
 server:
   image:
     tag: ""
-  nameOverride: vmalert
-  fullnameOverride: vmalert
+  nameOverride: vmrules
+  fullnameOverride: vmrules
   annotations:
    configmap.reloader.stakater.com/reload: "record-rules-config,alert-rules-config"
   datasource:
@@ -49,13 +49,13 @@ server:
     annotations:
       cert-manager.io/cluster-issuer: ca-issuer
     hosts:
-    - name: vmalert.dev.local
+    - name: vmrules.dev.local
       path: /
       port: 8880
     tls:
     - secretName: vmalert-tls
       hosts:
-        - vmalert.dev.local
+        - vmrules.dev.local
 
 alertmanager:
   enabled: false
