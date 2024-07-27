@@ -33,7 +33,7 @@ datasources:
     datasources:
     - name: VictoriaMetrics
       type: prometheus
-      url:   http://vmsingle.monitoring.svc.cluster.local:8428
+      url:   http://vmselect.monitoring.svc.cluster.local:8481/select/0/prometheus/
       access: proxy
       isDefault: true
       editable: true
