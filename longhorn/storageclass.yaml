@@ -26,5 +26,5 @@ parameters:
   numberOfReplicas: "2"
   staleReplicaTimeout: "2880"
   fsType: "ext4"
-  diskSelector: "data"
-  nodeSelector: "hdd"
+  diskSelector: "hdd"
+  nodeSelector: "data"
