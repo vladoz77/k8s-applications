@@ -11,7 +11,7 @@ adminPassword: password
 
 persistence:
   enabled: true
-  storageClassName: longhorn
+  storageClassName: longhorn-data
   size: 1Gi
 
 ingress:
