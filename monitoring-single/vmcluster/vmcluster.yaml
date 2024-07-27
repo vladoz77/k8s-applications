@@ -1,6 +1,6 @@
 vmselect:
   enabled: true
-  replicaCount: 3
+  replicaCount: 2
   name: vmselect
   fullnameOverride: vmselect
   extraArgs:
@@ -21,7 +21,7 @@ vminsert:
   enabled: true
   name: vminsert
   fullnameOverride: vminsert
-  replicaCount: 3
+  replicaCount: 2
   extraArgs:
     replicationFactor: 3
   podAnnotations:
