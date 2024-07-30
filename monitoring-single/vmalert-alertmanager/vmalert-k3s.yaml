@@ -58,15 +58,15 @@ server:
         - vmalert.dev.local
 
 alertmanager:
-  enabled: true
-  tag: v0.25.0
-  persistentVolume:
-    enabled: true
-    size: 50Mi
-  configMap: ""
-  ingress:
-    enabled: true
-    hosts: 
-    - name: alert.dev.local
-      path: /
-      port: web
+  enabled: false
+  # tag: v0.25.0
+  # persistentVolume:
+  #   enabled: true
+  #   size: 50Mi
+  # configMap: ""
+  # ingress:
+  #   enabled: true
+  #   hosts: 
+  #   - name: alert.dev.local
+  #     path: /
+  #     port: web
