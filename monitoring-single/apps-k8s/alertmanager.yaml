@@ -1,0 +1,23 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: alertmanager
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+  labels:
+    app: alertmanager
+spec:
+  project: monitoring
+  sources:
+  - repoURL: https://github.com/vladoz77/argocd.git
+    targetRevision: HEAD 
+    path: monitoring-single/alertmanager/manifests
+  destination:
+    server: "https://kubernetes.default.svc"
+    namespace: monitoring
+  syncPolicy:
+    automated: {}
+    syncOptions:
+      - CreateNamespace=true
+      - PruneLast=true
