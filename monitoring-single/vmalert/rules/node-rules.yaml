@@ -21,6 +21,7 @@ data:
       # Disk is probably reading too much data (> 50 MB/s)
       - alert: HostUnusualDiskReadRate
         expr: sum by (instance) (rate(node_disk_read_bytes_total[2m])) / 1024 / 1024 > 50
+        for: 5m
         labels:
           severity: warning
         annotations:
