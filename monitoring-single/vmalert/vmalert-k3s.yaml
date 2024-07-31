@@ -17,27 +17,21 @@ server:
       url: http://alertmanager.monitoring.svc.cluster.local:9093
   extraArgs:
     rule: 
-      - /rules/recording-rules/*.yaml
       - /rules/alertmanager-rules/*.yaml
-      - /rules/alert-rules/*.yaml
+      - /rules/node-rules/*.yaml
   extraVolumes:
-    - name: record-rules
-      configMap:
-        name: record-rules-config
-    - name: alert-rules
-      configMap:
-        name: alert-rules-config
     - name: alertmanager-rules
       configMap:
         name: alertmanager-rules
+    - name: node-rules
+      configMap:
+        name: node-rules
 
   extraVolumeMounts:
-    - name: record-rules
-      mountPath: /rules/recording-rules
-    - name: alert-rules
-      mountPath: /rules/alert-rules
     - name: alertmanager-rules
       mountPath: /rules/alertmanager-rules
+    - name: node-rules
+      mountPath: /rules/node-rules
   service:
     enabled: true
     annotations:
