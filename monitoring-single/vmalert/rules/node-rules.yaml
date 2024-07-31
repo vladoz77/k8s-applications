@@ -26,7 +26,7 @@ data:
           severity: warning
         annotations:
           summary: Host unusual disk read rate (instance {{ $labels.instance }})
-          description: "Disk is probably reading too much data (> 50 MB/s)\n 
+          description: "Disk is probably reading too much data (> 50 MB/s)\n"
 
   node-rules.yaml: |
     groups:
