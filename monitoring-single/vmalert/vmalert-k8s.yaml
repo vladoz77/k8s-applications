@@ -14,7 +14,7 @@ server:
       url: "http://vminsert.monitoring.svc.cluster.local:8480/insert/0/prometheus/"
   notifier:
     alertmanager:
-      url: http://vmalert-alertmanager.monitoring.svc.cluster.local:9093
+      url: http://alertmanager.monitoring.svc.cluster.local:9093
   extraArgs:
     rule: 
       - /rules/recording-rules/*.yaml
