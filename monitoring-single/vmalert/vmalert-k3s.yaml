@@ -6,7 +6,7 @@ server:
   nameOverride: vmalert
   fullnameOverride: vmalert
   annotations:
-   configmap.reloader.stakater.com/reload: "record-rules-config,alert-rules-config"
+   reloader.stakater.com/auto: "true"
   datasource:
     url:  "http://vmsingle.monitoring.svc.cluster.local:8428"
   remote:

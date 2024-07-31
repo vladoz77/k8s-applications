@@ -8,6 +8,7 @@ data:
     groups:
     - name: node.alert
       rules:
+      # Node memory is filling up (< 10% left)
       - alert: HostOutOfMemory
         expr: node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes * 100 < 10
         for: 2m
@@ -16,6 +17,15 @@ data:
         annotations:
           summary: Host out of memory (instance {{ $labels.instance }})
           description: "Node memory is filling up (< 10% left)\n"
+      
+      # Disk is probably reading too much data (> 50 MB/s)
+      - alert: HostUnusualDiskReadRate
+        expr: (sum by (instance) (rate(node_disk_read_bytes_total[2m])) / 1024 / 1024 > 50
+        labels:
+          severity: warning
+        annotations:
+          summary: Host unusual disk read rate (instance {{ $labels.instance }})
+          description: "Disk is probably reading too much data (> 50 MB/s)\n 
 
   node-rules.yaml: |
     groups:
