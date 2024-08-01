@@ -19,6 +19,8 @@ server:
     rule: 
       - /rules/alertmanager-rules/*.yaml
       - /rules/node-rules/*.yaml
+      - /rules/kubernetes-rules/*.yaml
+
   extraVolumes:
     - name: alertmanager-rules
       configMap:
@@ -26,12 +28,18 @@ server:
     - name: node-rules
       configMap:
         name: node-rules
+    - name: kubernetes-rules
+      configMap:
+        name: kubernetes-rules
 
   extraVolumeMounts:
     - name: alertmanager-rules
       mountPath: /rules/alertmanager-rules
     - name: node-rules
       mountPath: /rules/node-rules
+    - name: kubernetes-rules
+      mountPath: /rules/kubernetes-rules
+  
   service:
     enabled: true
     annotations:
