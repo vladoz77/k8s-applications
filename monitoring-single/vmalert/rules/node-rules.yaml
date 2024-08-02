@@ -36,7 +36,7 @@ data:
           severity: warning
         annotations:
           summary: Host out of inodes (instance {{ $labels.instance }})
-          description: "Disk is almost running out of available inodes (< 10% left)\n  node = {{ $lbels.node }}\n value = {{ $value }}"
+          description: "Disk is almost running out of available inodes (< 10% left)\n  node = {{ $labels.node }}\n value = {{ $value }}"
 
 
       # Host unusual disk write rate
