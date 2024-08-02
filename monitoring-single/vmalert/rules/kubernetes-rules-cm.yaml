@@ -19,49 +19,6 @@ data:
             summary: Kubernetes Node not ready (instance {{ $labels.instance }})
             description: "Node {{ $labels.node }} has been unready for a long time"
         
-<<<<<<< HEAD
-=======
-        #  Kubernetes Node memory pressure
-        - alert: KubernetesNodeMemoryPressure
-          expr: kube_node_status_condition{condition="MemoryPressure",status="true"} == 1
-          for: 2m
-          labels:
-            severity: critical
-            type: kubernetes
-          annotations:
-            summary: Kubernetes Node memory pressure (instance {{ $labels.instance }})
-            description: "Node {{ $labels.node }} has MemoryPressure condition"
-
-        # Kubernetes Node disk pressure
-        - alert: KubernetesNodeDiskPressure
-          expr: kube_node_status_condition{condition="DiskPressure",status="true"} == 1
-          for: 2m
-          labels:
-            severity: critical
-          annotations:
-            summary: Kubernetes Node disk pressure (instance {{ $labels.instance }})
-            description: "Node {{ $labels.node }} has DiskPressure condition"
-
-        # Kubernetes Node network unavailable
-        - alert: KubernetesNodeNetworkUnavailable
-          expr: kube_node_status_condition{condition="NetworkUnavailable",status="true"} == 1
-          for: 2m
-          labels:
-            severity: critical
-          annotations:
-            summary: Kubernetes Node network unavailable (instance {{ $labels.instance }})
-            description: "Node {{ $labels.node }} has NetworkUnavailable condition"
-        
-        # Kubernetes Node out of pod capacity
-        - alert: KubernetesNodeOutOfPodCapacity
-          expr: sum by (node) ((kube_pod_status_phase{phase="Running"} == 1) + on(uid) group_left(node) (0 * kube_pod_info{pod_template_hash=""})) / sum by (node) (kube_node_status_allocatable{resource="pods"}) * 100 > 90
-          for: 2m
-          labels:
-            severity: warning
-          annotations:
-            summary: Kubernetes Node out of pod capacity (instance {{ $labels.instance }})
-            description: "Node {{ $labels.node }} is out of pod capacity\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"
->>>>>>> 236e4dfa34903a574cd9060229dfd7d7c1760c76
 
         # Kubernetes Container oom killer
         - alert: KubernetesContainerOomKiller
