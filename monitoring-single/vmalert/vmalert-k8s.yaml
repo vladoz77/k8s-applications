@@ -20,6 +20,7 @@ server:
       - /rules/alertmanager-rules/*.yaml
       - /rules/node-rules/*.yaml
       - /rules/kubernetes-rules/*.yaml
+      - /rules/minio-rules/*.yaml
 
   extraVolumes:
     - name: alertmanager-rules
@@ -31,6 +32,9 @@ server:
     - name: kubernetes-rules
       configMap:
         name: kubernetes-rules
+    - name: minio-rules
+      configMap:
+        name: minio-rules
 
   extraVolumeMounts:
     - name: alertmanager-rules
@@ -39,6 +43,8 @@ server:
       mountPath: /rules/node-rules
     - name: kubernetes-rules
       mountPath: /rules/kubernetes-rules
+    - name: minio-rules
+      mountPath: /rules/minio-rules
       
   service:
     enabled: true
