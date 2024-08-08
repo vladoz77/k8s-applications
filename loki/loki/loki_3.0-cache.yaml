@@ -88,13 +88,13 @@ loki:
     chunk_cache:
       enabled: true
       host: chunk-cache.loki.svc
-      service: memcached
+      service: memcache
       batch_size: 256
       parallelism: 10
     results_cache:
       enabled: true
       host: result-cache.loki.svc
-      service: memcached
+      service: memcache
       default_validity: 12h
 
 # Configuration for the write
