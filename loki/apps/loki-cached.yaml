@@ -1,0 +1,32 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: loki
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+  labels:
+    app: loki
+spec:
+  project: logging
+  sources:
+  - repoURL: https://github.com/vladoz77/argocd.git
+    targetRevision: loki-memcached 
+    ref: myRepo
+  - repoURL: https://grafana.github.io/helm-charts
+    chart: loki
+    targetRevision: 6.5.2
+    helm:
+      valueFiles:
+        - $myRepo/loki/loki/loki_3.0-cache.yaml
+  - repoURL: 'https://github.com/vladoz77/argocd.git'
+    path: loki/loki/rules
+    targetRevision: loki-memcached
+  destination:
+    server: "https://kubernetes.default.svc"
+    namespace: loki
+  syncPolicy:
+    automated: {}
+    syncOptions:
+      - CreateNamespace=true
+      - PruneLast=true
