@@ -91,7 +91,12 @@ write:
     # -- Size of persistent disk
     size: 5Gi
     # -- Storage class to be used.
-    storageClass: longhorn
+    storageClass: longhorn-data
+  service:
+    annotations:
+      # Prometheus scrape config
+      prometheus.io/port: '3100'
+      prometheus.io/scrape: 'true'
 
 # Configuration for the read
 read:
@@ -101,17 +106,27 @@ read:
     # -- Size of persistent disk
     size: 5Gi
     # -- Storage class to be used.
-    storageClass: longhorn
+    storageClass: longhorn-data
+  service:
+    annotations:
+      # Prometheus scrape config
+      prometheus.io/port: '3100'
+      prometheus.io/scrape: 'true'
 
 # Configuration for the backend
 backend:
   # Number of replicas for the backend
-  replicas: 1
+  replicas: 2
   persistence:
     # -- Size of persistent disk
     size: 5Gi
     # -- Storage class to be used.
-    storageClass: longhorn
+    storageClass: longhorn-data
+  service:
+    annotations:
+      # Prometheus scrape config
+      prometheus.io/port: '3100'
+      prometheus.io/scrape: 'true'
 
   extraVolumeMounts: 
     - name: rules-volume
