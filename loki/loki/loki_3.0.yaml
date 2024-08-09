@@ -92,6 +92,11 @@ write:
     size: 5Gi
     # -- Storage class to be used.
     storageClass: longhorn
+  service:
+    annotations:
+      # Prometheus scrape config
+      prometheus.io/port: '3100'
+      prometheus.io/scrape: 'true'
 
 # Configuration for the read
 read:
@@ -102,6 +107,11 @@ read:
     size: 5Gi
     # -- Storage class to be used.
     storageClass: longhorn
+  service:
+    annotations:
+      # Prometheus scrape config
+      prometheus.io/port: '3100'
+      prometheus.io/scrape: 'true'
 
 # Configuration for the backend
 backend:
@@ -112,6 +122,11 @@ backend:
     size: 5Gi
     # -- Storage class to be used.
     storageClass: longhorn
+  service:
+    annotations:
+      # Prometheus scrape config
+      prometheus.io/port: '3100'
+      prometheus.io/scrape: 'true'
 
   extraVolumeMounts: 
     - name: rules-volume
