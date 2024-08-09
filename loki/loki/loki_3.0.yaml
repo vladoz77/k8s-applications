@@ -116,7 +116,7 @@ read:
 # Configuration for the backend
 backend:
   # Number of replicas for the backend
-  replicas: 1
+  replicas: 2
   persistence:
     # -- Size of persistent disk
     size: 5Gi
