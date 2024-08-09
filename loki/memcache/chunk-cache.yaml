@@ -1,7 +1,7 @@
 nameOverride: chunk-cache
 extraEnvVars:
   - name: MEMCACHED_CACHE_SIZE
-    value: "512"
+    value: "128"
   - name: MEMCACHED_MAX_CONNECTIONS
     value: "1024"
   - name: MEMCACHED_MAX_ITEM_SIZE
