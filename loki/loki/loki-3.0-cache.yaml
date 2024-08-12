@@ -65,14 +65,14 @@ loki:
       max_concurrent: 16
     query_range:
       align_queries_with_step: true
-    query_scheduler:
-      max_outstanding_requests_per_tenant: 32768
       results_cache:
         cache:
           default_validity: 12h
           memcached_client:
             addresses: 'dns+results-cache-memcached.loki.svc.cluster.local:11211'
             timeout: 500ms
+    query_scheduler:
+      max_outstanding_requests_per_tenant: 32768
     ruler:
       alertmanager_url: http://vmalert-alertmanager.monitoring.svc.cluster.local:9093
       remote_write:
