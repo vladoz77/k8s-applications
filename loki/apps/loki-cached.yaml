@@ -11,17 +11,17 @@ spec:
   project: logging
   sources:
   - repoURL: https://github.com/vladoz77/argocd.git
-    targetRevision: loki-memcached 
+    targetRevision: loki-monitoring-test
     ref: myRepo
   - repoURL: https://grafana.github.io/helm-charts
     chart: loki
-    targetRevision: 6.5.2
+    targetRevision: 6.10.0
     helm:
       valueFiles:
-        - $myRepo/loki/loki/loki_3.0-cache.yaml
+        - $myRepo/loki/loki/loki-3.0-cache.yaml
   - repoURL: 'https://github.com/vladoz77/argocd.git'
     path: loki/loki/rules
-    targetRevision: loki-memcached
+    targetRevision: loki-monitoring-test
   destination:
     server: "https://kubernetes.default.svc"
     namespace: loki

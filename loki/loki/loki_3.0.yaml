@@ -85,6 +85,7 @@ loki:
 
 # Configuration for the write
 write:
+
   # Number of replicas for the write
   replicas: 3
   persistence:
@@ -97,6 +98,12 @@ write:
       # Prometheus scrape config
       prometheus.io/port: '3100'
       prometheus.io/scrape: 'true'
+    storageClass: longhorn
+  podAnnotations:
+    # Prometheus scrape config
+    prometheus.io/port: '3100'
+    prometheus.io/scrape: 'true'
+      
 
 # Configuration for the read
 read:
@@ -112,6 +119,11 @@ read:
       # Prometheus scrape config
       prometheus.io/port: '3100'
       prometheus.io/scrape: 'true'
+    storageClass: longhorn
+  podAnnotations:
+    # Prometheus scrape config
+    prometheus.io/port: '3100'
+    prometheus.io/scrape: 'true'
 
 # Configuration for the backend
 backend:
@@ -127,6 +139,11 @@ backend:
       # Prometheus scrape config
       prometheus.io/port: '3100'
       prometheus.io/scrape: 'true'
+    storageClass: longhorn
+  podAnnotations:
+    # Prometheus scrape config
+    prometheus.io/port: '3100'
+    prometheus.io/scrape: 'true'
 
   extraVolumeMounts: 
     - name: rules-volume
