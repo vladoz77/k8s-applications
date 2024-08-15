@@ -1,5 +1,6 @@
 namespaceOverride: ingress-nginx
 controller:
+  replicaCount: 2
   # opentelemetry:
   #   enabled: true
   ingressClassResource:

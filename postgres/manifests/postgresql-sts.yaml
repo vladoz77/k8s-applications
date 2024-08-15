@@ -85,7 +85,7 @@ spec:
       name: db
     spec:
       accessModes: [ "ReadWriteOnce" ]
-      # storageClassName: nfs-client
+      storageClassName: longhorn-db
       resources:
         requests:
           storage: 5Gi

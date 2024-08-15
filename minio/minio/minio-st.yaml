@@ -19,24 +19,23 @@ spec:
       labels:
         app.kubernetes.io/name: minio
     spec:
-      
-      # affinity:
-      #   nodeAffinity:
-      #     requiredDuringSchedulingIgnoredDuringExecution:
-      #       nodeSelectorTerms:
-      #       - matchExpressions:
-      #         - key: minio
-      #           operator: In
-      #           values:
-      #           - "true"
-      #   podAntiAffinity:
-      #     preferredDuringSchedulingIgnoredDuringExecution:
-      #       - podAffinityTerm:
-      #           labelSelector:
-      #             matchLabels:
-      #               app.kubernetes.io/name: minio
-      #           topologyKey: kubernetes.io/hostname
-      #         weight: 1
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: minio
+                operator: In
+                values:
+                - "true"
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - podAffinityTerm:
+                labelSelector:
+                  matchLabels:
+                    app.kubernetes.io/name: minio
+                topologyKey: kubernetes.io/hostname
+              weight: 1
       securityContext:
         fsGroup: 1001
       initContainers:
@@ -47,19 +46,19 @@ spec:
             - sh
             - -c
             - |
-                if [ ! -d /data-0/data ]; then
-                  mkdir /data-0/data
-                  chown 1001:1001 /data-0/data
+                if [ ! -d /mnt/minio-disk-01 ]; then
+                  mkdir /mnt/minio-disk-01
+                  chown 1001:1001 /mnt/minio-disk-01
                 fi
-                if [ ! -d /data-1/data ]; then
-                  mkdir /data-1/data
-                  chown 1001:1001 /data-1/data
+                if [ ! -d /mnt/minio-disk-02 ]; then
+                  mkdir /mnt/minio-disk-02
+                  chown 1001:1001 /mnt/minio-disk-02
                 fi
           volumeMounts:
             - name: data-0
-              mountPath: /data-0/data
+              mountPath: /mnt/minio-disk-01
             - name: data-1
-              mountPath: /data-1/data
+              mountPath: /mnt/minio-disk-02
       containers:
         - name: minio
           image: docker.io/bitnami/minio:2024.7.13
@@ -73,7 +72,7 @@ spec:
             - name: MINIO_DISTRIBUTED_MODE_ENABLED
               value: "yes"
             - name: MINIO_DISTRIBUTED_NODES
-              value: "minio-{0...1}.minio-headless.minio.svc.cluster.local:9000/data-{0...1}/data"
+              value: "minio-{0...1}.minio-headless.minio.svc.cluster.local:9000/mnt/minio-disk-0{1...2}"
             - name: MINIO_SCHEME
               value: "http"
             - name: MINIO_FORCE_NEW_KEYS
@@ -95,7 +94,7 @@ spec:
             - name: MINIO_PROMETHEUS_AUTH_TYPE
               value: "public"
             - name: MINIO_PROMETHEUS_URL
-              value: http://vmsingle.monitoring.svc.cluster.local:8428
+              value: http://vmselect.monitoring.svc.cluster.local:8481/select/0/prometheus
             - name: MINIO_PROMETHEUS_JOB_ID
               value: minio
           ports:
@@ -128,9 +127,9 @@ spec:
             requests: {}
           volumeMounts:
             - name: data-0
-              mountPath: /data-0/data
+              mountPath: /mnt/minio-disk-01
             - name: data-1
-              mountPath: /data-1/data
+              mountPath: /mnt/minio-disk-02
   volumeClaimTemplates:
     - metadata: 
         name: data-0
