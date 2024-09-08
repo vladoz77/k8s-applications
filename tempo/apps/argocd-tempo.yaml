@@ -6,7 +6,7 @@ metadata:
   finalizers:
      - resources-finalizer.argocd.argoproj.io
 spec:
-  project: default
+  project: tracing
   sources:
     - repoURL: https://github.com/vladoz77/argocd.git
       targetRevision: HEAD
