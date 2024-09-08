@@ -1,0 +1,17 @@
+namespaceOverride: redis
+fullnameOverride: redis
+
+global:
+  storageClass: longhorn-db
+  redis:
+    password: password
+
+image:
+  registry: docker.io
+  repository: bitnami/redis
+
+metrics:
+  enabled: true
+  image:
+    registry: docker.io
+    repository: bitnami/redis-exporter
