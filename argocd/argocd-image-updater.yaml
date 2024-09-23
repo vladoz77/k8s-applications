@@ -9,8 +9,9 @@ volumes:
 - name: nexus-ca-certs
   secret:
     secretName: nexus-ca-certs
-registries:
-    - name: nexus
+config:
+  registries:
+    - name: docker.home.local
+      prefix: docker.home.local
       api_url: https://docker.home.local
-      ping: no
       credentials: pullsecret:argocd/nexus-secret

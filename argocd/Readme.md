@@ -14,11 +14,11 @@ helm upgrade --install argocd argo/argo-cd -n argocd  -f my-argocd-values.yaml
 # Add cred to repo for argocd-imge-updater
 kubectl create secret docker-registry nexus-secret -n argocd \
  --docker-server=https://docker.home.local \
- --docker-username=admin \
+ --docker-username='admin' \
  --docker-password='!QAZ2wsx'
 
  # Get repo ca certificate
 kubectl create secret generic -n argocd nexus-ca-certs --from-file=nexus-ca.pem=/etc/docker/certs.d/docker.home.local/ca.crt
 
 # Install argocd image-updater
-helm install argocd-image-update argo/argocd-image-updater -n argocd -f argocd-image-updater.yaml
+helm upgrade --install argocd-image-update argo/argocd-image-updater -n argocd -f argocd-image-updater.yaml
