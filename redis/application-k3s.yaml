@@ -1,0 +1,38 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: redis
+  namespace: argocd
+spec:
+  project: default
+  source:
+    chart: redis
+    repoURL: https://charts.bitnami.com/bitnami
+    targetRevision: 20.1.4
+    helm:
+      valuesObject:
+        namespaceOverride: redis
+        fullnameOverride: redis
+        global:
+          storageClass: local-path
+          redis:
+            password: password
+        image:
+          registry: docker.io
+          repository: bitnami/redis
+        replica:
+          replicaCount: 1
+        metrics:
+          enabled: true
+          image:
+            registry: docker.io
+            repository: bitnami/redis-exporter
+  destination:
+    server: "https://kubernetes.default.svc"
+    namespace: redis
+  syncPolicy:
+    syncOptions:
+    - CreateNamespace=true
+    automated:
+      prune: true
+
