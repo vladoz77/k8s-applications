@@ -9,3 +9,4 @@ spec:
   ports:
   - port: 5432
     targetPort: psql
+    nodePort: 32543
