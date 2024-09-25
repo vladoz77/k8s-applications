@@ -1,0 +1,65 @@
+global:
+  imageRegistry: ""
+  storageClass: local-path
+nameOverride: harbor
+
+externalURL: https://reg.dev.local
+adminPassword: password
+
+logLevel: debug
+
+ipFamily:
+  ipv6:
+    enabled: false
+
+ingress:
+  core:
+    ingressClassName: nginx
+    hostname: reg.dev.local
+    annotations:
+      ingress.kubernetes.io/ssl-redirect: "true"
+      ingress.kubernetes.io/proxy-body-size: "0"
+      nginx.ingress.kubernetes.io/ssl-redirect: "true"
+      nginx.ingress.kubernetes.io/proxy-body-size: "0"
+      cert-manager.io/cluster-issuer: ca-issuer
+    secrets: harbor-tls
+
+persistence:
+  enabled: true
+  persistentVolumeClaim:
+    registry:
+      size: 5Gi
+    jobservice:
+      size: 1Gi
+    trivy:
+      size: 5Gi
+
+portal:
+  networkPolicy:
+    enabled: false
+
+core:
+  networkPolicy:
+    enabled: false
+
+jobservice:
+  networkPolicy:
+    enabled: false
+
+registry:
+  networkPolicy:
+    enabled: false
+
+trivy:
+  networkPolicy:
+    enabled: false
+
+exporter:
+  networkPolicy:
+    enabled: false
+
+postgresql:
+  enabled: true
+
+redis:
+  enabled: true
