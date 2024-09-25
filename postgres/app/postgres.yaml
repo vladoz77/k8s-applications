@@ -10,11 +10,10 @@ metadata:
 spec:
   project: default
   source:
-    path: postgres/manifests
+    path: postgres/postgresql-kustomize/overlays/k3s
     repoURL: 'https://github.com/vladoz77/argocd'
     targetRevision: HEAD
-    directory:
-      recurse: false
+
   destination:
     server: "https://kubernetes.default.svc"
     namespace: db
