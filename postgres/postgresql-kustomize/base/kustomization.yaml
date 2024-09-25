@@ -13,3 +13,6 @@ secretGenerator:
   - password=secret
 
 namespace: db
+
+generatorOptions:
+  disableNameSuffixHash: true
