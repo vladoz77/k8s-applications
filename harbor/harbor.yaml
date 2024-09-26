@@ -12,6 +12,8 @@ ipFamily:
   ipv6:
     enabled: false
 
+exposureType: ingress
+
 ingress:
   core:
     ingressClassName: nginx
@@ -22,7 +24,7 @@ ingress:
       nginx.ingress.kubernetes.io/ssl-redirect: "true"
       nginx.ingress.kubernetes.io/proxy-body-size: "0"
       cert-manager.io/cluster-issuer: ca-issuer
-    secrets: harbor-tls
+    tls: true
 
 persistence:
   enabled: true
@@ -59,7 +61,19 @@ exporter:
     enabled: false
 
 postgresql:
-  enabled: true
+  enabled: false
+
+externalDatabase:
+  host: postgresql-svc.db.svc.cluster.local
+  port: 5432
+  user: harbor
+  password: "harbor"
+  coreDatabase: "harbor"
 
 redis:
-  enabled: true
+  enabled: false
+
+externalRedis:
+  host: redis-master
+  port: 6379
+  password: "password"
