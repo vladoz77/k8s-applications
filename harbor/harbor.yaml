@@ -1,6 +1,6 @@
 global:
   imageRegistry: ""
-  storageClass: local-path
+  defaultStorageClass: local-path
 nameOverride: harbor
 
 externalURL: https://reg.dev.local
@@ -37,26 +37,36 @@ persistence:
       size: 5Gi
 
 portal:
+  replicaCount: 1
+  resourcesPreset: none
   networkPolicy:
     enabled: false
 
 core:
+  replicaCount: 1
+  resourcesPreset: none
   networkPolicy:
     enabled: false
 
 jobservice:
+  replicaCount: 1
+  resourcesPreset: none
   networkPolicy:
     enabled: false
 
 registry:
+  replicaCount: 1
+  resourcesPreset: none
   networkPolicy:
     enabled: false
 
 trivy:
+  resourcesPreset: none
   networkPolicy:
     enabled: false
 
 exporter:
+  resourcesPreset: none
   networkPolicy:
     enabled: false
 
@@ -77,3 +87,7 @@ externalRedis:
   host: redis-master
   port: 6379
   password: "password"
+
+metrics:
+   enabled: true
+   path: /metrics
