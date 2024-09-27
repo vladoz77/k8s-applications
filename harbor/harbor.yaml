@@ -6,7 +6,7 @@ nameOverride: harbor
 externalURL: https://reg.dev.local
 adminPassword: password
 
-logLevel: debug
+logLevel: info
 
 ipFamily:
   ipv6:
