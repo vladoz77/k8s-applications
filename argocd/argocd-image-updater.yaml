@@ -5,13 +5,23 @@ volumeMounts:
   - mountPath: /etc/ssl/certs/nexus-ca.pem
     name: nexus-ca-certs
     subPath: nexus-ca.pem
+  - mountPath: /etc/ssl/certs/harbor-ca.pem
+    name: harbor-ca-certs
+    subPath: harbor-ca.pem
 volumes: 
-- name: nexus-ca-certs
-  secret:
-    secretName: nexus-ca-certs
+  - name: nexus-ca-certs
+    secret:
+      secretName: nexus-ca-certs
+  - name: harbor-ca-certs
+    secret:
+      secretName: harbor-ca-certs
 config:
   registries:
     - name: docker.home.local
       prefix: docker.home.local
       api_url: https://docker.home.local
       credentials: pullsecret:argocd/nexus-secret
+    - name: reg.dev.local
+      prefix: reg.dev.local
+      api_url: https://reg.dev.local
+      credentials: pullsecret:argocd/harbor-secret
