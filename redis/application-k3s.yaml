@@ -2,7 +2,7 @@ apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
   name: redis
-  namespace: harbor
+  namespace: argocd
 spec:
   project: default
   source:
@@ -11,7 +11,6 @@ spec:
     targetRevision: 20.1.4
     helm:
       valuesObject:
-        namespaceOverride: redis
         fullnameOverride: redis
         global:
           storageClass: local-path
@@ -29,7 +28,7 @@ spec:
             repository: bitnami/redis-exporter
   destination:
     server: "https://kubernetes.default.svc"
-    namespace: redis
+    namespace: harbor
   syncPolicy:
     syncOptions:
     - CreateNamespace=true
