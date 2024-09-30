@@ -100,7 +100,7 @@ spec:
     secretName: pgadmin-tls
   ingressClassName: nginx
   rules:
-  - host: pgadmin.home.local
+  - host: pgadmin.dev.local
     http:
       paths:
       - backend:
