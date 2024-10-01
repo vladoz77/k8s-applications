@@ -1,6 +1,6 @@
 global:
   imageRegistry: ""
-  defaultStorageClass: local-path
+  defaultStorageClass: longhorn-data
 nameOverride: harbor
 
 externalURL: https://reg.dev.local
@@ -30,14 +30,23 @@ persistence:
   enabled: true
   persistentVolumeClaim:
     registry:
-      size: 5Gi
+      size: 20Gi
+      accessModes:
+        - ReadWriteOnce 
     jobservice:
       size: 1Gi
+      accessModes:
+        - ReadWriteOnce 
     trivy:
       size: 5Gi
+      accessModes:
+        - ReadWriteOnce 
 
 portal:
   replicaCount: 1
+  podAnnotations:
+    prometheus.io/port: "8001"
+    prometheus.io/scrape: "true"
   resourcesPreset: none
   networkPolicy:
     enabled: false
@@ -45,17 +54,26 @@ portal:
 core:
   replicaCount: 1
   resourcesPreset: none
+  podAnnotations:
+    prometheus.io/port: "8001"
+    prometheus.io/scrape: "true"
   networkPolicy:
     enabled: false
 
 jobservice:
   replicaCount: 1
+  podAnnotations:
+    prometheus.io/port: "8001"
+    prometheus.io/scrape: "true"
   resourcesPreset: none
   networkPolicy:
     enabled: false
 
 registry:
   replicaCount: 1
+  podAnnotations:
+    prometheus.io/port: "8001"
+    prometheus.io/scrape: "true"
   resourcesPreset: none
   networkPolicy:
     enabled: false
