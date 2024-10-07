@@ -1,0 +1,48 @@
+fullnameOverride: authentik
+
+global:
+  image:
+    repository: ghcr.io/goauthentik/server
+    tag: ""
+
+authentik:
+  log_level: info
+  secret_key: fWQcmeVjo5YBLkztkyrbkQfoOJN2judnnFoq239v8biFkcOJ/MRKtS6iYdrPA2C8/r3kpHWV3qBOL8MU
+  email:
+    host: smtp.gmail.com
+    port: 465
+    username: vladozz23@gmail.com
+    password: irjckbsajihmbpjq
+    use_ssl: true
+    from: authentik@gmail.com
+    
+  postgresql:
+    host: postgresql-svc.db.svc
+    name: authentik-db
+    user: authentik
+    password: password
+
+
+
+server:
+  replicas: 1
+  metrics:
+    enabled: true
+    service:
+      annotations: {}
+  ingress:
+    enabled: true
+    annotations: 
+      cert-manager.io/cluster-issuer: ca-issuer
+    hosts:
+        - auth.dev.local
+    tls:
+      - secretName: authentik-tls
+        hosts:
+          - auth.dev.local
+
+postgresql:
+  enabled: false
+
+redis:
+  enabled: true
