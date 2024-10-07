@@ -1,7 +1,7 @@
 helm install longhorn longhorn/longhorn -f longhorn.yaml -n longhorn-system --create-namespace
 
 # Add node labels
-k annotate nodes node01 node.longhorn.io/default-node-tags='["data"]' 
+k annotate nodes node01 node.longhorn.io/default-node-tags='["data","db"]' 
 k annotate nodes node02 node.longhorn.io/default-node-tags='["data","db"]' 
 k annotate nodes node03 node.longhorn.io/default-node-tags='["db","data"]' 
 
