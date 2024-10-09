@@ -1,0 +1,111 @@
+global:
+  imageRegistry: ""
+  defaultStorageClass: local-path
+nameOverride: harbor
+
+externalURL: https://reg.dev.local
+adminPassword: password
+
+logLevel: info
+
+ipFamily:
+  ipv6:
+    enabled: false
+
+exposureType: ingress
+
+ingress:
+  core:
+    ingressClassName: nginx
+    hostname: reg.dev.local
+    annotations:
+      ingress.kubernetes.io/ssl-redirect: "true"
+      ingress.kubernetes.io/proxy-body-size: "0"
+      nginx.ingress.kubernetes.io/ssl-redirect: "true"
+      nginx.ingress.kubernetes.io/proxy-body-size: "0"
+      cert-manager.io/cluster-issuer: ca-issuer
+    tls: true
+
+persistence:
+  enabled: true
+  persistentVolumeClaim:
+    registry:
+      size: 20Gi
+      accessModes:
+        - ReadWriteOnce 
+    jobservice:
+      size: 1Gi
+      accessModes:
+        - ReadWriteOnce 
+    trivy:
+      size: 5Gi
+      accessModes:
+        - ReadWriteOnce 
+
+portal:
+  replicaCount: 1
+  podAnnotations:
+    prometheus.io/port: "8001"
+    prometheus.io/scrape: "true"
+  resourcesPreset: none
+  networkPolicy:
+    enabled: false
+
+core:
+  replicaCount: 1
+  resourcesPreset: none
+  podAnnotations:
+    prometheus.io/port: "8001"
+    prometheus.io/scrape: "true"
+  networkPolicy:
+    enabled: false
+
+jobservice:
+  replicaCount: 1
+  podAnnotations:
+    prometheus.io/port: "8001"
+    prometheus.io/scrape: "true"
+  resourcesPreset: none
+  networkPolicy:
+    enabled: false
+
+registry:
+  replicaCount: 1
+  podAnnotations:
+    prometheus.io/port: "8001"
+    prometheus.io/scrape: "true"
+  resourcesPreset: none
+  networkPolicy:
+    enabled: false
+
+trivy:
+  resourcesPreset: none
+  networkPolicy:
+    enabled: false
+
+exporter:
+  resourcesPreset: none
+  networkPolicy:
+    enabled: false
+
+postgresql:
+  enabled: false
+
+externalDatabase:
+  host: postgresql-svc.db.svc.cluster.local
+  port: 5432
+  user: harbor
+  password: "harbor"
+  coreDatabase: "harbor"
+
+redis:
+  enabled: false
+
+externalRedis:
+  host: redis-master
+  port: 6379
+  password: "password"
+
+metrics:
+   enabled: true
+   path: /metrics

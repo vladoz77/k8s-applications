@@ -18,7 +18,7 @@ spec:
     targetRevision: 23.0.4
     helm:
       valueFiles:
-        - $myRepo/harbor/harbor.yaml
+        - $myRepo/harbor/harbor-k3s.yaml
   destination:
     server: "https://kubernetes.default.svc"
     namespace: harbor

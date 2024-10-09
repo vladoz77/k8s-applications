@@ -1,0 +1,29 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: harbor
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io/background
+  labels:
+    app: vmagent
+spec:
+  project: default
+  sources:
+  - repoURL: https://github.com/vladoz77/argocd.git
+    targetRevision: HEAD 
+    ref: myRepo
+  - repoURL: https://charts.bitnami.com/bitnami
+    chart: harbor
+    targetRevision: 23.0.4
+    helm:
+      valueFiles:
+        - $myRepo/harbor/harbor-k8s.yaml
+  destination:
+    server: "https://kubernetes.default.svc"
+    namespace: harbor
+  syncPolicy:
+    automated: {}
+    syncOptions:
+      - CreateNamespace=true
+      - PruneLast=true
