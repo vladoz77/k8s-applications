@@ -27,6 +27,17 @@ controller:
           prometheus.io/scrape: "true"
           prometheus.io/port: "8082"
 
+dex:
+  volumes:
+  - name: auth-ca-certs
+    secret:
+      secretName: auth-ca-certs
+  volumeMounts:
+  - mountPath: /etc/ssl/certs/auth-ca.pem
+    name: auth-ca-certs
+    subPath: auth-ca.pem
+
+
 server:
   certificate:
     enabled: true
@@ -47,7 +58,7 @@ server:
   ingress:
     enabled: true
     annotations:
-      nginx.ingress.kubernetes.io/ssl-redirect: "false"
+      nginx.ingress.kubernetes.io/ssl-redirect: "true"
     hostname: argocd.dev.local
     path: /
     pathType: Prefix

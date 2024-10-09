@@ -22,3 +22,10 @@ kubectl create secret generic -n argocd harbor-ca-certs --from-file=nexus-ca.pem
 
 # Install argocd image-updater
 helm upgrade --install argocd-image-update argo/argocd-image-updater -n argocd -f argocd-image-updater.yaml
+
+# Config oauth CA
+# Get ca
+k get secrets -n auth authentik-tls -o json | jq '.data."ca.crt"' | base64 -di > /tmp/auth-ca.crt
+
+# Create secret
+kubectl create secret generic -n argocd auth-ca-certs --from-file=auth-ca.pem=/tmp/auth-ca.crt
