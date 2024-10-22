@@ -1,0 +1,12 @@
+fullnameOverride: vpa
+
+admissionController:
+  enabled: false
+recommender:
+  enabled: true
+  # extraArgs:
+  #   prometheus-address: |
+  #     http://prometheus-operated.observability.svc.cluster.local:9090
+  #   storage: prometheus
+updater:
+  enabled: false

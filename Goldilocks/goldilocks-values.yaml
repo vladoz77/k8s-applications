@@ -1,0 +1,21 @@
+fullnameOverride: goldilocks
+
+controller:
+  enabled: true
+  replicaCount: 1
+
+dashboard:
+  enabled: true
+  replicaCount: 1
+  ingress:
+    enabled: true
+    # ingressClassName:
+    hosts:
+      - host: vpa.dev.local
+        paths:
+          - path: /
+            type: ImplementationSpecific
+    tls: []
+    #  - secretName: chart-example-tls
+    #    hosts:
+    #      - chart-example.local
