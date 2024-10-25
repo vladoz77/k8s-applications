@@ -1,0 +1,2 @@
+nameOverride: node-exporter
+fullnameOverride: node-exporter
