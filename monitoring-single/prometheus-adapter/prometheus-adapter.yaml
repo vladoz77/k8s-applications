@@ -19,3 +19,12 @@ rules:
         as: "${1}_per_second"
       metricsQuery: 'sum(rate(<<.Series>>{<<.LabelMatchers>>}[1m])) by (<<.GroupBy>>)'
 
+    - seriesQuery: 'http_requests_total'
+      resources:
+         template: <<.Resource>>
+      name:
+        matches: "^(.*)_total"
+        as: ""
+      metricsQuery: 'sum(rate(<<.Series>>{<<.LabelMatchers>>}[1m])) by (<<.GroupBy>>)'
+
+    
