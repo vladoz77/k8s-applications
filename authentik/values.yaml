@@ -4,10 +4,14 @@ global:
   image:
     repository: ghcr.io/goauthentik/server
     tag: ""
+  
+    
 
 authentik:
   log_level: info
   secret_key: fWQcmeVjo5YBLkztkyrbkQfoOJN2judnnFoq239v8biFkcOJ/MRKtS6iYdrPA2C8/r3kpHWV3qBOL8MU
+  
+  
   email:
     host: smtp.gmail.com
     port: 465
@@ -26,6 +30,35 @@ authentik:
 
 server:
   replicas: 1
+
+  # env:
+  #   - name: AUTHENTIK_STORAGE__MEDIA__BACKEND
+  #     value: s3
+  #   - name: AUTHENTIK_STORAGE__MEDIA__S3__ACCESS_KEY
+  #     value: admin
+  #   - name: AUTHENTIK_STORAGE__MEDIA__S3__SECRET_KEY
+  #     value: password
+  #   - name: AUTHENTIK_STORAGE__MEDIA__S3__BUCKET_NAME
+  #     value: authentik-media
+  #   - name: AUTHENTIK_STORAGE__MEDIA__S3__ENDPOINT
+  #     value: http://minio.minio.svc.cluster.local:9000
+  #   - name: AUTHENTIK_STORAGE__MEDIA__S3__CUSTOM_DOMAIN
+  #     value: http://minio.minio.svc.cluster.local:9000/authentik-media
+  #   - name: AUTHENTIK_STORAGE__MEDIA__S3__SECURE_URLS
+  #     value: "false"
+  #   - name: AUTHENTIK_STORAGE__MEDIA__S3__USE_SSL
+  #     value: "false"
+  
+  volumeMounts:
+    - name: media-volume
+      mountPath: /media
+
+
+  volumes: 
+    - name: media-volume
+      persistentVolumeClaim:
+        claimName: media-folder-pvc
+
   metrics:
     enabled: true
     service:
@@ -46,3 +79,18 @@ postgresql:
 
 redis:
   enabled: true
+
+additionalObjects: 
+  - apiVersion: v1
+    kind: PersistentVolumeClaim
+    metadata:
+      name: media-folder-pvc
+      namespace: auth
+    spec:
+      accessModes:
+        - ReadWriteOnce
+      volumeMode: Filesystem
+      resources:
+        requests:
+          storage: 8Gi
+      storageClassName: local-path
