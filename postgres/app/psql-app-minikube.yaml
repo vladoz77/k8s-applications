@@ -10,7 +10,7 @@ metadata:
 spec:
   project: default
   source:
-    path: postgres/postgresql-kustomize/overlays/k3s
+    path: postgres/postgresql-kustomize/overlays/minikube
     repoURL: 'https://github.com/vladoz77/argocd'
     targetRevision: HEAD
 
