@@ -77,3 +77,6 @@ repoServer:
       annotations:
         prometheus.io/scrape: "true"
         prometheus.io/port: "8084"
+
+dex:
+  enabled: false
