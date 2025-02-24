@@ -17,30 +17,38 @@ loki:
           insecure: true
           s3forcepathstyle: true
           secret_access_key: password
+
     server:
       grpc_listen_port: 9095
       http_listen_port: 3100
       http_server_read_timeout: 600s
       http_server_write_timeout: 600s
+
     chunk_store_config:
       chunk_cache_config:
         memcached:
           batch_size: 256
           parallelism: 10
         memcached_client:
-          addresses: 'dns+memcached.loki.svc.cluster.local:11211'
+          addresses: 'dns+chunk-cache-memcached.loki.svc.cluster.local:11211'
+    
     frontend:
+      max_outstanding_per_tenant: 2048
       scheduler_address: ""
       tail_proxy_url: ""
+    
     frontend_worker:
       scheduler_address: ""
+    
     index_gateway:
       mode: simple
+    
     ingester:
       chunk_encoding: snappy
       chunk_idle_period: 2h
       chunk_target_size: 1536000
       max_chunk_age: 2h
+    
     limits_config:
       ingestion_burst_size_mb: 30
       ingestion_rate_mb: 20
@@ -54,25 +62,35 @@ loki:
       reject_old_samples_max_age: 168h
       split_queries_by_interval: 15m
       volume_enabled: true
+    
     memberlist:
       join_members:
       - loki-memberlist
+    
     pattern_ingester:
       enabled: false
+    
     querier:
       engine:
         max_look_back_period: 300
-      max_concurrent: 16
+      max_concurrent: 20
+    
     query_range:
+      parallelise_shardable_queries: false
       align_queries_with_step: true
       results_cache:
         cache:
           default_validity: 12h
           memcached_client:
-            addresses: 'dns+results-cache-memcached.loki.svc.cluster.local:11211'
+            addresses: 'dns+result-cache-memcached.loki.svc.cluster.local:11211'
             timeout: 500ms
+    
     query_scheduler:
-      max_outstanding_requests_per_tenant: 32768
+      max_outstanding_requests_per_tenant: 2048
+      grpc_client_config:
+        max_send_msg_size: 33554432 
+        max_recv_msg_size: 33554432
+    
     ruler:
       alertmanager_url: http://vmalert-alertmanager.monitoring.svc.cluster.local:9093
       remote_write:
@@ -87,8 +105,10 @@ loki:
         type: local
       wal:
         dir: /var/loki/loki-wal
+    
     runtime_config:
       file: /etc/loki/runtime-config/runtime-config.yaml
+    
     schema_config:
       configs:
       - from: "2024-04-01"
@@ -100,9 +120,6 @@ loki:
         store: tsdb
     
     storage_config:
-      boltdb_shipper:
-        index_gateway_client:
-          server_address: dns+loki-backend-headless.loki.svc.cluster.local:9095
       hedging:
         at: 250ms
         max_per_second: 20
@@ -114,8 +131,7 @@ loki:
         memcached:
           batch_size: 100
           parallelism: 100
-        memcached_client:
-          addresses: 'dns+index-cache-memcached.loki.svc.cluster.local:11211'
+    
     tracing:
       enabled: false
 

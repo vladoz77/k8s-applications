@@ -7,5 +7,4 @@ helm install loki grafana/loki -n loki --create-namespace -f loki-single-s3.yaml
 3. Install memcached
 helm repo add bitnami https://charts.bitnami.com/bitnami
 helm install -n loki chunk-cache bitnami/memcached 
-helm install -n loki query-cache bitnami/memcached 
-helm install -n loki index-cache bitnami/memcached 
+helm install -n loki result-cache bitnami/memcached 
