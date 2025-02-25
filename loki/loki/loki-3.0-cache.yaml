@@ -34,11 +34,6 @@ loki:
     
     frontend:
       max_outstanding_per_tenant: 2048
-      scheduler_address: ""
-      tail_proxy_url: ""
-    
-    frontend_worker:
-      scheduler_address: ""
     
     index_gateway:
       mode: simple
@@ -68,7 +63,7 @@ loki:
       - loki-memberlist
     
     pattern_ingester:
-      enabled: false
+      enabled: true
     
     querier:
       engine:
