@@ -1,19 +1,22 @@
 nameOverride: alloy
 namespaceOverride: loki
 
+configReloader:
+  enabled: false
+
 controller:
   type: 'daemonset'
   replicas: 1
   volumes:
     extra:
     - hostPath:
-      path: /var/lib/docker/containers
+        path: /var/lib/docker/containers
       name: containers
     - hostPath:
-      path: /var/log/pods
+        path: /var/log/pods
       name: pods
     - hostPath:
-      path: /var/log/journal
+        path: /var/log/journal
       name: journal
 
 alloy:
@@ -35,22 +38,20 @@ alloy:
         format = "logfmt"
       }
 
-      loki.process "journal" {
-        forward_to = [loki.write.loki.receiver]
-
-        stage.match {
-          selector = "{job=\"systemd-journal\"}"
-
-          stage.regex {
-            expression = ".*source=\"(?P<source>[a-zA-Z]+)\".*"
+      loki.write "loki" {
+          endpoint {
+              url = "http://loki-gateway.loki.svc.cluster.local/loki/api/v1/push"
           }
+      }
 
-          stage.labels {
-            values = {
-              source = null,
-            }
+      loki.source.journal "journal" {
+          max_age       = "12h0m0s"
+          path          = "/var/log/journal"
+          relabel_rules = discovery.relabel.journal.rules
+          forward_to    = [loki.write.loki.receiver]
+          labels        = {
+            job = "systemd-journal",
           }
-        }
       }
 
       discovery.relabel "journal" {
@@ -67,18 +68,13 @@ alloy:
         }
       }
 
-      loki.source.journal "journal" {
-          max_age       = "12h0m0s"
-          path          = "/var/log/journal"
-          relabel_rules = discovery.relabel.journal.rules
-          forward_to    = [loki.process.journal.receiver]
-          labels        = {
-            job = "systemd-journal",
-          }
-      }
-
       discovery.kubernetes "kubernetes_pods" {
               role = "pod"
+      }
+
+      loki.source.kubernetes "kubernetes_pods" {
+          targets    = discovery.relabel.kubernetes_pods.output
+          forward_to = [loki.write.loki.receiver]
       }
 
       discovery.relabel "kubernetes_pods" {
@@ -133,18 +129,4 @@ alloy:
 
       local.file_match "kubernetes_pods" {
               path_targets = discovery.relabel.kubernetes_pods.output
-      }
-      loki.source.kubernetes "kubernetes_pods" {
-          targets    = discovery.relabel.kubernetes_pods.output
-          forward_to = [loki.process.process.receiver]
-      }
-
-      loki.process "process" {
-          forward_to = [loki.write.loki.receiver]
-      }
-
-      loki.write "loki" {
-          endpoint {
-              url = "http://loki-gateway.loki.svc.cluster.local/loki/api/v1/push"
-          }
       }
