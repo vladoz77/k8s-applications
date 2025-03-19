@@ -45,10 +45,13 @@ loki:
           s3forcepathstyle: true
           secret_access_key: password
     frontend:
+      max_outstanding_per_tenant: 2048
       scheduler_address: ""
       tail_proxy_url: ""
+    
     frontend_worker:
       scheduler_address: ""
+    
     index_gateway:
       mode: simple
     ingester:
@@ -74,7 +77,8 @@ loki:
       join_members:
       - loki-memberlist
     pattern_ingester:
-      enabled: true
+      enabled: false
+    
     querier:
       engine:
         max_look_back_period: 300

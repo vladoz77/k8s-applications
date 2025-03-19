@@ -2,7 +2,7 @@ nameOverride: argocd
 fullnameOverride: argocd
 
 crds:
-  keep: false
+  keep: trueJ
 
 global:
   domain: argocd.dev.local
@@ -19,7 +19,7 @@ configs:
       connectors:
       - config:
           issuer: https://auth.dev.local/application/o/argocd/
-          clientID: hmiKeM1I8KaKRHhCd2UMY0ZwkY3SoEiLiwAzxsX1
+          clientID: RBmL0vBCXBQ6CUhEfGphFgWTtRJrW66enAJvOhet
           clientSecret: $dex.authentik.clientSecret
           insecureEnableGroups: true
           scopes:
@@ -35,7 +35,7 @@ configs:
     # htpasswd -nbBC 10 "" $ARGO_PWD | tr -d ':\n' | sed 's/$2y/$2a/'
     argocdServerAdminPassword: "$2a$10$S6gJky57fHflfWp7RC7Y6OLTN1I6VMRelH/jsNP3DCxOyVf5JVf9a"
     extra:
-      dex.authentik.clientSecret: "akd0VU9HUmFJUjI5SDZ1a1FZQWtJZUp6cVN4ems3WG90dXFQeU94aGUyV01rZ0JJZEJSTVBSeXA4OHFrWmEwRGgwNXltbkYxWXRhVGRzNFFDY3I2TXVKOWhVMDVEQ09YaDlSeGlZZzJYY3NrNWVJRG1YSjgzOXJtYmNFM1dQZzI="
+      dex.authentik.clientSecret: "UDBud0JtbGhpTnhDWDBUS2tJNHFNT1F1RjJPRjVkdEU5R3BxV3hTT2FDYlo5STF3eTVsaEhnVzJ5ZUNiNXRrdEM1bXZlc2taTU1sTEdsTG16N25GSlBqVUloeGRYV0pPRXA2V0NhOHdWZFRxdnVWcXdSQ3JiV3huZ1h1aEtZczI="
   rbac:
     create: true
     # Need create groups ArgocdAdmins and ArgocdViewers in OIDC Provider
