@@ -1,3 +1,11 @@
+1. Install node-exporter 
+    ```bash
+    helm upgrade --install -n monitoring node-exporter prometheus-community/prometheus-node-exporter -f node-exporter/node-exporter.yaml --create-namespace
+    ```
+
+
+
+
 #Install vmsingle
 helm install vmsingle vm/victoria-metrics-single -f vmsingle/vm-single-my.yaml -n monitoring --create-namespace
 
