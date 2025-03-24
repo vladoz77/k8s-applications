@@ -1,11 +1,8 @@
 replicaCount: 1
 deployment:
-  enabled: false
-statefulset:
   enabled: true
-  clusterMode: true
-  # -- replication factor for vmagent in cluster mode
-  replicationFactor: 1
+statefulset:
+  enabled: false
 
 nameOverride: vmagent
 fullnameOverride: vmagent
@@ -24,12 +21,10 @@ annotations:
 # - name: etcd-tls-volume
 #   mountPath: /tls/etcd-tls
 
-
 # extraVolumes:
 # - name: etcd-tls-volume
 #   secret:
 #     secretName: etcd-ca
-
 
 remoteWrite:
 - url: "http://vmsingle.monitoring.svc.cluster.local:8428/api/v1/write"
@@ -55,6 +50,7 @@ ingress:
 persistence:
   enabled: true
   size: 1Gi
+  storageClassName: standard
 
 config:
   global:
@@ -292,34 +288,6 @@ config:
       - __meta_kubernetes_pod_node_name
       target_label: node
 
-  #Node-exporter    
-  # - job_name: node-exporter
-  #   honor_labels: true
-  #   kubernetes_sd_configs:
-  #       - role: endpoints
-  #         namespaces:
-  #           names:
-  #           - monitoring
-  #   relabel_configs:
-  #     - source_labels: [__meta_kubernetes_service_label_app_kubernetes_io_name]
-  #       regex: node-exporter
-  #       action: keep
-  #     - action: keep
-  #       source_labels: [__meta_kubernetes_endpoint_port_name]
-  #       regex: metrics
-  #     - source_labels: [__meta_kubernetes_pod_name]
-  #       target_label: pod
-  #     - source_labels: [__meta_kubernetes_pod_container_name]
-  #       target_label: container
-  #     - source_labels: [__meta_kubernetes_namespace]
-  #       target_label: namespace
-  #     - source_labels: [__meta_kubernetes_service_name]
-  #       target_label: service
-  #     - source_labels: [__meta_kubernetes_service_name]
-  #       target_label: job
-  #     - source_labels: [__meta_kubernetes_endpoint_node_name]
-  #       target_label: node
-
   #Kube-state-metrics
   - job_name: kube-state-metrics
     honor_labels: true
@@ -412,9 +380,6 @@ config:
       target_label: node
     - source_labels: [ __meta_kubernetes_service_name ]
       target_label: job
-    - source_labels:
-      - __meta_kubernetes_namespace
-      target_label: namespace
 
   # Autodiscover pod with annotaions
   - job_name: "kubernetes-pods"

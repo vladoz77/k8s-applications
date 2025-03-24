@@ -3,23 +3,40 @@
     helm upgrade --install -n monitoring node-exporter prometheus-community/prometheus-node-exporter -f node-exporter/node-exporter.yaml --create-namespace
     ```
 
+2. Install kube-state-metrics
+
+```bash
+helm upgrade --install -n monitoring kube-state-metrics prometheus-community/kube-state-metrics -f kube-state-metrics/kube-state-metrics.yaml --create-namespace
+```
+
+3. Install vmsingle or vmcluster
+
+```bash
+helm install vmsingle vm/victoria-metrics-single -f vmsingle/vmsingle.yaml -n monitoring --create-namespace
+```
+
+```bash
+helm install vmcluster -n monitoring vm/victoria-metrics-cluster -f vmcluster/vmcluster.yaml
+```
+4. Install vmagent
+
+```bash
+helm install vmagent vm/victoria-metrics-agent  -f vmagent/vmagent.yaml -n monitoring
+```
+
+5. Install grafana
+
+```bash
+helm install grafana grafana/grafana -n monitoring -f grafana/grafana.yaml
+```
+
+*get password*
+```bash
+kubectl get secret --namespace monitoring grafana -o jsonpath="{.data.admin-password}" | base64 --decode ; echo
+```
 
 
 
-#Install vmsingle
-helm install vmsingle vm/victoria-metrics-single -f vmsingle/vm-single-my.yaml -n monitoring --create-namespace
-
-# Or instal vmcluster
-helm install vmcluster -n monitoring vm/victoria-metrics-cluster -f vmcluster/vmcluster-values.yaml
-
-#Install vmagent
-helm install vmagent vm/victoria-metrics-agent  -f vmagent/vmagent-values.yaml -n monitoring
-
-# Install kube-state-metrics
-helm install kube-state-metrics prometheus-community/kube-state-metrics -n monitoring
-
-#Install node exporter
-helm install node-exporter prometheus-community/prometheus-node-exporter -n monitoring 
 
 #Install vmalert and alertmanager
 k apply -f vmalert-alertmanager/rules

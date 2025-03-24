@@ -1,15 +1,20 @@
-replicaCount: 1
+replicaCount: 2
 deployment:
   enabled: false
 statefulset:
   enabled: true
   clusterMode: true
-  replicationFactor: 1
+  replicationFactor: 2
 
 nameOverride: vmagent
 fullnameOverride: vmagent
 annotations:
   configmap.reloader.stakater.com/reload: vmagent-config
+
+extraArgs:
+  promscrape.cluster.memberLabel: vmagent_instance
+  promscrape.cluster.name: vmagent-cluster
+  promscrape.cluster.memberURLTemplate: http://vmagent.dev.local-%d:8429/targets
 
 resources:
   limits:
@@ -28,8 +33,8 @@ extraVolumes:
   secret:
     secretName: etcd-ca
 
-remoteWrite:
-- url: "http://vmsingle.monitoring.svc.cluster.local:8428/api/v1/write"
+remoteWriteUrls:
+- "http://vminsert.monitoring.svc.cluster.local:8480/insert/0/prometheus/"
 
 service:
   enabled: true
@@ -52,7 +57,7 @@ ingress:
 persistence:
   enabled: true
   size: 1Gi
-  storageClassName: longhorn
+  storageClassName: longhorn-data
 
 config:
   global:
