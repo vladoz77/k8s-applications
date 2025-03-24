@@ -2,7 +2,7 @@ nameOverride: alloy
 namespaceOverride: loki
 
 configReloader:
-  enabled: false
+  enabled: true
 
 controller:
   type: 'daemonset'
