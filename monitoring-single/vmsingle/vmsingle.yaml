@@ -28,6 +28,6 @@ server:
 
 persistentVolume:
   enabled: true
-  storageClass: standard
+  storageClass: yc-network-hdd
   mountPath: /storage
   size: 16Gi

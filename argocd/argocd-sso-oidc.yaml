@@ -1,0 +1,106 @@
+nameOverride: argocd
+fullnameOverride: argocd
+
+crds:
+  keep: false
+
+global:
+  domain: argocd.dev.local
+  logging:
+    format: json
+    level: info
+
+configs:
+  cm:
+    application.resourceTrackingMethod: annotation
+    controller.diff.server.side: "true"
+    oidc.config: |
+      name: Authentik
+      issuer: https://auth.dev.local/application/o/argocd/
+      clientID: hmiKeM1I8KaKRHhCd2UMY0ZwkY3SoEiLiwAzxsX1
+      clientSecret: $dex.authentik.clientSecret
+      requestedScopes: ["openid", "profile", "email", "groups"]
+      requestedIDTokenClaims: {"groups": {"essential": true}}
+      logoutURL: https://auth.dev.local/application/o/argocd/end-session/
+  params:
+    server.insecure: true
+  secret:
+    # htpasswd -nbBC 10 "" $ARGO_PWD | tr -d ':\n' | sed 's/$2y/$2a/'
+    argocdServerAdminPassword: "$2a$10$S6gJky57fHflfWp7RC7Y6OLTN1I6VMRelH/jsNP3DCxOyVf5JVf9a"
+    extra:
+      dex.authentik.clientSecret: "akd0VU9HUmFJUjI5SDZ1a1FZQWtJZUp6cVN4ems3WG90dXFQeU94aGUyV01rZ0JJZEJSTVBSeXA4OHFrWmEwRGgwNXltbkYxWXRhVGRzNFFDY3I2TXVKOWhVMDVEQ09YaDlSeGlZZzJYY3NrNWVJRG1YSjgzOXJtYmNFM1dQZzI="
+  rbac:
+    create: true
+    # Need create groups ArgocdAdmins and ArgocdViewers in OIDC Provider
+    policy.csv: |
+      g, ArgoCD Admins, role:admin
+      g, ArgoCD Viewers, role:readonly
+
+controller:
+  replicas: 1
+  metrics:
+    enabled: true
+    service:
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8082"
+
+# if we have oauth cert
+dex:
+  enabled: true
+
+server:
+  certificate:
+    enabled: true
+    domain: argocd.dev.local
+    renewBefore: 360h
+    duration: 9125h
+    issuer:
+      group: cert-manager.io
+      kind: ClusterIssuer
+      name: ca-issuer
+    privateKey:
+      algorithm: RSA
+      encoding: PKCS8
+      size: 4096
+      rotationPolicy: Always
+    usages:
+    - server auth
+  ingress:
+    enabled: true
+    annotations:
+      nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    hostname: argocd.dev.local
+    path: /
+    pathType: Prefix
+    tls: true
+  metrics:
+    enabled: true
+    service:
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8083"
+  volumes:
+  - name: auth-ca-certs
+    secret:
+      secretName: auth-ca-certs
+  volumeMounts:
+  - mountPath: /etc/ssl/certs/auth-ca.pem
+    name: auth-ca-certs
+    subPath: auth-ca.pem
+
+repoServer:
+  volumes:
+  - name: ca-certs
+    secret:
+      secretName: ca-certs
+  volumeMounts:
+  - mountPath: /etc/ssl/certs/ca.pem
+    name: ca-certs
+    subPath: ca.pem
+  metrics:
+    enabled: true
+    service:
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8084"

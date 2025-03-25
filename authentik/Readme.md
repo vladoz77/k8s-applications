@@ -10,7 +10,7 @@
 
 3. Install authentik with helm
     ```bash
-    helm upgrade --install authentik goauthentik/authentik -f values.yaml -n auth --create-namespace
+    helm upgrade --install authentik goauthentik/authentik -f authentik.yaml -n authentik --create-namespace
     ```
 
 4. After the installation is complete, access authentik

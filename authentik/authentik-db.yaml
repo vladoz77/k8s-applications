@@ -4,14 +4,11 @@ global:
   image:
     repository: ghcr.io/goauthentik/server
     tag: ""
-  
-    
 
 authentik:
   log_level: info
   secret_key: fWQcmeVjo5YBLkztkyrbkQfoOJN2judnnFoq239v8biFkcOJ/MRKtS6iYdrPA2C8/r3kpHWV3qBOL8MU
-  
-  
+
   email:
     host: smtp.gmail.com
     port: 465
@@ -19,14 +16,12 @@ authentik:
     password: irjckbsajihmbpjq
     use_ssl: true
     from: authentik@gmail.com
-    
+
   postgresql:
     host: postgresql-svc.db.svc
     name: authentik-db
     user: authentik
     password: password
-
-
 
 server:
   replicas: 1
@@ -48,16 +43,15 @@ server:
   #     value: "false"
   #   - name: AUTHENTIK_STORAGE__MEDIA__S3__USE_SSL
   #     value: "false"
-  
+
   volumeMounts:
-    - name: media-volume
-      mountPath: /media
+  - name: media-volume
+    mountPath: /media
 
-
-  volumes: 
-    - name: media-volume
-      persistentVolumeClaim:
-        claimName: media-folder-pvc
+  volumes:
+  - name: media-volume
+    persistentVolumeClaim:
+      claimName: media-folder-pvc
 
   metrics:
     enabled: true
@@ -65,14 +59,14 @@ server:
       annotations: {}
   ingress:
     enabled: true
-    annotations: 
+    annotations:
       cert-manager.io/cluster-issuer: ca-issuer
     hosts:
-        - auth.dev.local
+    - auth.dev.local
     tls:
-      - secretName: authentik-tls
-        hosts:
-          - auth.dev.local
+    - secretName: authentik-tls
+      hosts:
+      - auth.dev.local
 
 postgresql:
   enabled: false
@@ -80,17 +74,16 @@ postgresql:
 redis:
   enabled: true
 
-additionalObjects: 
-  - apiVersion: v1
-    kind: PersistentVolumeClaim
-    metadata:
-      name: media-folder-pvc
-      namespace: auth
-    spec:
-      accessModes:
-        - ReadWriteOnce
-      volumeMode: Filesystem
-      resources:
-        requests:
-          storage: 8Gi
-      storageClassName: local-path
+additionalObjects:
+- apiVersion: v1
+  kind: PersistentVolumeClaim
+  metadata:
+    name: media-folder-pvc
+    namespace: auth
+  spec:
+    accessModes:
+    - ReadWriteOnce
+    volumeMode: Filesystem
+    resources:
+      requests:
+        storage: 8Gi
