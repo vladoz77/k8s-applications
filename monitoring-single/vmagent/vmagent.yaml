@@ -50,7 +50,7 @@ ingress:
 persistence:
   enabled: true
   size: 1Gi
-  storageClassName: yc-network-hdd
+  storageClassName: standard
 
 config:
   global:
