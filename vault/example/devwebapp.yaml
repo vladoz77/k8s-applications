@@ -1,0 +1,22 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: devwebapp
+  namespace: default
+  labels:
+    app: devwebapp
+  annotations:
+    vault.hashicorp.com/agent-inject: "true"
+    vault.hashicorp.com/agent-inject-status: "update"
+    vault.hashicorp.com/tls-skip-verify: "true"
+    vault.hashicorp.com/role: "secret-app"
+    vault.hashicorp.com/agent-inject-secret-credentials.txt: "secret/database"
+    # vault.hashicorp.com/tls-secret: "vault-server-tls"
+    # vault.hashicorp.com/ca-cert: "/vault/tls/vault.ca"
+    # vault.hashicorp.com/client-cert: "/vault/tls/vault.crt"
+    # vault.hashicorp.com/client-key: "/vault/tls/vault.key"
+spec:
+  serviceAccountName: secret-sa
+  containers:
+  - name: devwebapp
+    image: jweissig/app:0.0.1
