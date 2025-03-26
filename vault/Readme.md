@@ -19,7 +19,7 @@ helm install vault hashicorp/vault -f vault-ha-tls.yaml -n vault
 4. Initialize vault-0 with one key
 
 ```bash
-k exec -n vault vault-0 -- vault operator init -key-shares=1 -key-threshold=1
+k exec -n vault vault-0 -- vault operator init -key-shares=1 -key-threshold=1 -format=json > cluster-keys.json
 ```
 
 
