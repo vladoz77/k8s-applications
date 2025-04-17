@@ -77,10 +77,10 @@ kubectl exec -n vault -it vault-0 -- /bin/sh
 vault login 
 ```
 
-3. Enable kv-v2 secrets at the path internal.
+3. Enable kv-v2 secrets at the path secret.
 
 ```bash
-vault secrets enable -path=internal kv-v2
+vault secrets enable -path=secret kv-v2
 ```
 
 4. Create a secret at path `secret/database` with a `username` and `password`.
@@ -159,4 +159,6 @@ k apply -f example/devwebapp.yaml
 k logs pods/devwebapp -c vault-agent-init
 k logs -n vault pods/vault-0
 ```
+
+
 

@@ -9,6 +9,9 @@ injector:
   logLevel: info
   logFormat: "json"
 server:
+  image:
+    repository: "hashicorp/vault"
+    tag: "1.18.1"
   logLevel: info
   logFormat: json
   resources:
@@ -75,13 +78,21 @@ server:
             leader_client_key_file = "/vault/userconfig/vault-ha-tls/tls.key"
           }
         }
+        seal "transit" {
+          address = "http://192.168.59.1:8200"
+          disable_renewal = "false"
+          token = "hvs.CAESIDKitT3FUTw7I9d3MkqbTFRyCk3hw3Bq6EiW6inMzNayGh4KHGh2cy5RdGkxdm5NbERhVElmcERQa1NTcVZxRW0"
+          key_name = "autounseal"
+          mount_path = "transit/"
+          tls_skip_verify = "true"
+        }
         disable_mlock = true
         service_registration "kubernetes" {}
   dataStorage:
     enabled: true
     size: 10Gi
     mountPath: "/vault/data"
-    storageClass: standard
+    storageClass: local-path
     accessMode: ReadWriteOnce
   ingress:
     enabled: true
