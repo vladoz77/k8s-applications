@@ -108,8 +108,6 @@ vault token create -orphan -policy="autounseal" \
 
 ```bash
 vault unwrap -field=token $(cat wrapping-token.txt)
-
-hvs.CAESIErEuLhua677_F9Uma0cZ30bpWn1-WafzoQmTGRDxKyaGh4KHGh2cy5VenI2RGw4cHJBVElTUm9MNUYwaUhUNlY
 ```
 
 
@@ -118,7 +116,7 @@ hvs.CAESIErEuLhua677_F9Uma0cZ30bpWn1-WafzoQmTGRDxKyaGh4KHGh2cy5VenI2RGw4cHJBVElT
 1. Создадим секрет с токеном который создали в предыдущем этапе
 
 ```bash
-kubectl create secret generic -n vault vault-auto-unseal-secret --from-literal "VAULT_AUTO_UNSEAL_TOKEN=hvs.CAESIErEuLhua677_F9Uma0cZ30bpWn1-WafzoQmTGRDxKyaGh4KHGh2cy5VenI2RGw4cHJBVElTUm9MNUYwaUhUNlY"
+kubectl create secret generic -n vault vault-auto-unseal-secret --from-literal "VAULT_AUTO_UNSEAL_TOKEN=<token>"
 ```
 
 2. Отредактируем helm `values.yaml`
