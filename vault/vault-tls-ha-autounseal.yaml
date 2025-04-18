@@ -25,6 +25,10 @@ server:
     VAULT_CACERT: /vault/userconfig/vault-ha-tls/ca.crt
     VAULT_TLSCERT: /vault/userconfig/vault-ha-tls/tls.crt
     VAULT_TLSKEY: /vault/userconfig/vault-ha-tls/tls.key
+  extraSecretEnvironmentVars:
+  - envName: VAULT_TOKEN
+    secretName: vault-auto-unseal-secret
+    secretKey: VAULT_AUTO_UNSEAL_TOKEN
   volumes:
   - name: vault-ha-tls
     secret:
@@ -77,6 +81,14 @@ server:
             leader_client_cert_file = "/vault/userconfig/vault-ha-tls/tls.crt"
             leader_client_key_file = "/vault/userconfig/vault-ha-tls/tls.key"
           }
+        }
+        seal "transit" {
+          address = "http://192.168.59.1:8200"
+          disable_renewal = "false"
+          token = "hvs.CAESIDKitT3FUTw7I9d3MkqbTFRyCk3hw3Bq6EiW6inMzNayGh4KHGh2cy5RdGkxdm5NbERhVElmcERQa1NTcVZxRW0"
+          key_name = "autounseal"
+          mount_path = "transit/"
+          tls_skip_verify = "true"
         }
         disable_mlock = true
         service_registration "kubernetes" {}
