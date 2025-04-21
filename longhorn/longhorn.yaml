@@ -10,11 +10,9 @@ longhornManager:
     prometheus.io/port: '9500'
     prometheus.io/scrape: 'true'
 
-
 persistence:
   defaultClass: true
-  defaultClassReplicaCount: 2
-    
+  defaultClassReplicaCount: 1
 
 longhornUI:
   replicas: 2
@@ -29,5 +27,3 @@ ingress:
   path: /
   annotations:
     cert-manager.io/cluster-issuer: ca-issuer
-
-
