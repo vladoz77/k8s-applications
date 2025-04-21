@@ -1,0 +1,33 @@
+defaultSettings:
+  createDefaultDiskLabeledNodes: true
+  priorityClass: system-node-critical
+  deletingConfirmationFlag: true
+
+defaultBackupStore:
+  backupTarget: s3://longhorn-backup@us-west-1/
+  backupTargetCredentialSecret: minio-credentials
+  pollInterval: 300
+
+longhornManager:
+  log:
+    format: json
+  serviceAnnotations:
+    prometheus.io/port: '9500'
+    prometheus.io/scrape: 'true'
+
+persistence:
+  defaultClass: false
+
+longhornUI:
+  replicas: 2
+
+ingress:
+  enabled: true
+  ingressClassName: nginx
+  host: longhorn-ui.dev.local
+  secureBackends: true
+  tls: true
+  tlsSecret: longhorn-tls
+  path: /
+  annotations:
+    cert-manager.io/cluster-issuer: ca-issuer

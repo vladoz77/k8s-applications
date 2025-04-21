@@ -22,12 +22,30 @@ k annotate nodes node02 node03  node.longhorn.io/default-disks-config='[{"name":
 ## 3. Create secret for minio backup
 
 ```bash
-echo -n <URL> | base64
-echo -n <Access Key> | base64
-echo -n <Secret Key> | base64
---------------------------------------------------------
+export AWS_ACCESS_KEY_ID="<your-aws-access-key-id>"
+export AWS_SECRET_ACCESS_KEY="<your-aws-secret-access-key>"
+export AWS_ENDPOINT="http://minio.minio.svc.cluster.local:9000"
 ```
 
+```bash
+kubectl create secret generic minio-credentials \
+    --from-literal=AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID} \
+    --from-literal=AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY} \
+    --from-literal=AWS_ENDPOINTS=${AWS_ENDPOINT} \
+    -n longhorn-system
+```
 ## 4. update longhorn
 
+If we use helm, you need add this string to `values.yaml`
+
+```yaml
+defaultBackupStore:
+  backupTarget: s3://longhorn-backup@us-west-1/
+  backupTargetCredentialSecret: minio-credentials
+  pollInterval: 300
+```
+
+If you use UI  go to **settings** - **Backup target**
+
 ![alt text](image.png)
+
