@@ -85,7 +85,6 @@ server:
         seal "transit" {
           address = "http://192.168.59.1:8200"
           disable_renewal = "false"
-          token = "hvs.CAESIDKitT3FUTw7I9d3MkqbTFRyCk3hw3Bq6EiW6inMzNayGh4KHGh2cy5RdGkxdm5NbERhVElmcERQa1NTcVZxRW0"
           key_name = "autounseal"
           mount_path = "transit/"
           tls_skip_verify = "true"

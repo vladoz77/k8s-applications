@@ -45,6 +45,12 @@ k get all -n vault
 k exec -n vault vault-0 -- vault operator init -key-shares=1 -key-threshold=1 -format=json > cluster-keys.json
 ```
 
+Если настройка с использование secret transit то команда следующаа
+
+```bash
+k exec -n vault vault-0 -- vault operator init -format=json > cluster-keys.json
+```
+
 5. Display the unseal key found in cluster-keys.json.
 
 ```bash
