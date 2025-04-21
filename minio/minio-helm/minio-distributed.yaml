@@ -9,10 +9,10 @@ auth:
 defaultBuckets: loki, tempo
 
 extraEnvVars:
-  - name: MINIO_PROMETHEUS_URL
-    value: http://vmsingle.monitoring.svc.cluster.local:8428
-  - name: MINIO_PROMETHEUS_JOB_ID
-    value: minio
+- name: MINIO_PROMETHEUS_URL
+  value: http://vmsingle.monitoring.svc.cluster.local:8428
+- name: MINIO_PROMETHEUS_JOB_ID
+  value: minio
 
 statefulset:
   # statefulset.replicaCount Number of pods per zone (only for MinIO&reg; distributed mode). Should be even and `>= 4`
@@ -34,9 +34,13 @@ ingress:
   annotations:
     cert-manager.io/cluster-issuer: ca-issuer
   extraTls:
-    - hosts:
-      - minio-console.dev.local
-      secretName: minio-tls
+  - hosts:
+    - minio-console.dev.local
+    secretName: minio-tls
+
+apiIngress:
+  enabled: true
+  hostname: minio.dev.local
 
 persistence:
   storageClass: local-path

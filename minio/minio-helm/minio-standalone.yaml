@@ -31,6 +31,9 @@ ingress:
   - hosts:
     - minio-console.dev.local
     secretName: minio-tls
+apiIngress:
+  enabled: true
+  hostname: minio.dev.local
 
 persistence:
-  storageClass: standard
+  storageClass: local-path
