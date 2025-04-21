@@ -1,0 +1,111 @@
+global:
+  enabled: true
+  tlsDisable: false
+  namespace: vault
+injector:
+  enabled: true
+  metrics:
+    enabled: true
+  logLevel: info
+  logFormat: "json"
+server:
+  image:
+    repository: "hashicorp/vault"
+    tag: "1.18.1"
+  logLevel: info
+  logFormat: json
+  resources:
+    requests:
+      memory: 256Mi
+      cpu: 250m
+    limits:
+      memory: 256Mi
+      cpu: 250m
+  extraEnvironmentVars:
+    VAULT_CACERT: /vault/userconfig/vault-ha-tls/ca.crt
+    VAULT_TLSCERT: /vault/userconfig/vault-ha-tls/tls.crt
+    VAULT_TLSKEY: /vault/userconfig/vault-ha-tls/tls.key
+  extraSecretEnvironmentVars:
+  - envName: VAULT_TOKEN
+    secretName: vault-auto-unseal-secret
+    secretKey: VAULT_AUTO_UNSEAL_TOKEN
+  volumes:
+  - name: vault-ha-tls
+    secret:
+      defaultMode: 420
+      secretName: vault-tls
+  volumeMounts:
+  - mountPath: /vault/userconfig/vault-ha-tls
+    name: vault-ha-tls
+    readOnly: true
+  standalone:
+    enabled: false
+  affinity: ""
+  ha:
+    enabled: true
+    replicas: 3
+    raft:
+      enabled: true
+      setNodeId: true
+      config: |
+        cluster_name = "vault"
+        ui = true
+        listener "tcp" {
+           tls_disable = 0
+           address = "[::]:8200"
+           cluster_address = "[::]:8201"
+           tls_cert_file = "/vault/userconfig/vault-ha-tls/tls.crt"
+           tls_key_file  = "/vault/userconfig/vault-ha-tls/tls.key"
+           tls_client_ca_file = "/vault/userconfig/vault-ha-tls/ca.crt"
+        }
+        storage "raft" {
+           path = "/vault/data"
+           retry_join {
+            leader_tls_servername = "vault"
+            leader_api_addr = "https://vault-0.vault-internal:8200"
+            leader_ca_cert_file = "/vault/userconfig/vault-ha-tls/ca.crt"
+            leader_client_cert_file = "/vault/userconfig/vault-ha-tls/tls.crt"
+            leader_client_key_file = "/vault/userconfig/vault-ha-tls/tls.key"
+          }
+          retry_join {
+            leader_tls_servername = "vault"
+            leader_api_addr = "https://vault-1.vault-internal:8200"
+            leader_ca_cert_file = "/vault/userconfig/vault-ha-tls/ca.crt"
+            leader_client_cert_file = "/vault/userconfig/vault-ha-tls/tls.crt"
+            leader_client_key_file = "/vault/userconfig/vault-ha-tls/tls.key"
+          }
+          retry_join {
+            leader_tls_servername = "vault"
+            leader_api_addr = "https://vault-2.vault-internal:8200"
+            leader_ca_cert_file = "/vault/userconfig/vault-ha-tls/ca.crt"
+            leader_client_cert_file = "/vault/userconfig/vault-ha-tls/tls.crt"
+            leader_client_key_file = "/vault/userconfig/vault-ha-tls/tls.key"
+          }
+        }
+        seal "transit" {
+          address = "http://192.168.59.1:8200"
+          disable_renewal = "false"
+          key_name = "autounseal"
+          mount_path = "transit/"
+          tls_skip_verify = "true"
+        }
+        disable_mlock = true
+        service_registration "kubernetes" {}
+  dataStorage:
+    enabled: true
+    size: 1Gi
+    mountPath: "/vault/data"
+    storageClass: longhorn-data
+    accessMode: ReadWriteOnce
+  ingress:
+    enabled: true
+    annotations:
+      cert-manager.io/cluster-issuer: ca-issuer
+      nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
+    ingressClassName: nginx
+    hosts:
+    - host: vault.dev.local
+    tls:
+    - secretName: vault-ui-tls
+      hosts:
+      - vault.dev.local
