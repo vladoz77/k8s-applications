@@ -3,6 +3,12 @@ global:
   tlsDisable: false
   namespace: vault
 injector:
+  enabled: false
+  metrics:
+    enabled: true
+  logLevel: info
+  logFormat: "json"
+csi:
   enabled: true
   metrics:
     enabled: true
