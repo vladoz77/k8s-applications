@@ -64,13 +64,14 @@ server:
 
 repoServer:
   volumes:
-  - name: ca-certs
-    secret:
-      secretName: ca-certs
+  - name: ca-cert
+    configMap:
+      name: trust-ca
   volumeMounts:
-  - mountPath: /etc/ssl/certs/ca.pem
-    name: ca-certs
-    subPath: ca.pem
+  - name: ca-cert
+    mountPath: /etc/ssl/certs/trust-bundle.pem
+    subPath: trust-bundle.pem
+    readOnly: true
   metrics:
     enabled: true
     service:
