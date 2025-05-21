@@ -109,14 +109,16 @@ vault token create -orphan -policy="autounseal" \
 ```bash
 vault unwrap -field=token $(cat wrapping-token.txt)
 ```
-
+```bash
+export MY_TOKEN=$(cat wrapping-token.txt)
+```
 
 ## Миграция с механизма Shamir на Transit
 
 1. Создадим секрет с токеном который создали в предыдущем этапе
 
 ```bash
-kubectl create secret generic -n vault vault-auto-unseal-secret --from-literal "VAULT_AUTO_UNSEAL_TOKEN=<token>"
+kubectl create secret generic -n vault vault-auto-unseal-secret --from-literal "VAULT_AUTO_UNSEAL_TOKEN=${MY_TOKEN}"
 ```
 
 2. Отредактируем helm `values.yaml`
