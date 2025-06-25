@@ -1,4 +1,4 @@
-## 1. Install minio
+## 1. Install Longhorn
 ```bash
 helm install longhorn longhorn/longhorn -f longhorn.yaml -n longhorn-system --create-namespace
 ```
