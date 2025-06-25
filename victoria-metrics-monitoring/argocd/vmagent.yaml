@@ -1,0 +1,29 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: vmagent
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io/background
+  labels:
+    app: vmagent
+spec:
+  project: monitoring
+  sources:
+  - repoURL: https://github.com/vladoz77/victoria-metrics-monitoring.git
+    targetRevision: HEAD 
+    ref: myRepo
+  - repoURL: https://victoriametrics.github.io/helm-charts/ 
+    chart: victoria-metrics-agent
+    targetRevision: 0.19.0
+    helm:
+      valueFiles:
+        - $myRepo/vmagent/vmagent.yaml
+  destination:
+    server: "https://kubernetes.default.svc"
+    namespace: monitoring
+  syncPolicy:
+    automated: {}
+    syncOptions:
+      - CreateNamespace=true
+      - PruneLast=true

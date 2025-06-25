@@ -11,7 +11,7 @@
 
 ## Install goldilocks
 
-1. Install helm wit values
+1. Install helm with values
    ```bash
    helm upgrade --install goldilocks -n vpa fairwinds-stable/goldilocks -f goldilocks-values.yaml
    ```

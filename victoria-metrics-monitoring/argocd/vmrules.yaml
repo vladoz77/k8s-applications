@@ -1,0 +1,32 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: vmrules
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io/background
+  labels:
+    app: vmrules
+spec:
+  project: monitoring
+  sources:
+  - repoURL: https://github.com/vladoz77/victoria-metrics-monitoring.git
+    targetRevision: HEAD 
+    ref: myRepo
+  - repoURL: https://victoriametrics.github.io/helm-charts/ 
+    chart: victoria-metrics-alert
+    targetRevision: 0.9.8
+    helm:
+      valueFiles:
+        - $myRepo/vmrules/vmrules.yaml
+  - repoURL: https://github.com/vladoz77/victoria-metrics-monitoring.git
+    targetRevision: HEAD 
+    path: vmrules/rules
+  destination:
+    server: "https://kubernetes.default.svc"
+    namespace: monitoring
+  syncPolicy:
+    automated: {}
+    syncOptions:
+      - CreateNamespace=true
+      - PruneLast=true

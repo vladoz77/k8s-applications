@@ -1,0 +1,29 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: vmcluster
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io/background
+  labels:
+    app: vmcluster
+spec:
+  project: monitoring
+  sources:
+  - repoURL: https://github.com/vladoz77/victoria-metrics-monitoring.git
+    targetRevision: HEAD 
+    ref: myRepo
+  - repoURL: https://victoriametrics.github.io/helm-charts/ 
+    chart: victoria-metrics-cluster
+    targetRevision: 0.21.0
+    helm:
+      valueFiles:
+        - $myRepo/vmcluster/vmcluster.yaml
+  destination:
+    server: "https://kubernetes.default.svc"
+    namespace: monitoring
+  syncPolicy:
+    automated: {}
+    syncOptions:
+      - CreateNamespace=true
+      - PruneLast=true

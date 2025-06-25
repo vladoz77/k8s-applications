@@ -1,0 +1,52 @@
+nameOverride: certificate-exporter
+fullnameOverride: certificate-exporter
+namespaceOverride: monitoring
+
+image:
+   registry: docker.io
+   repository: enix/x509-certificate-exporter
+   tag: ""
+
+secretsExporter:
+  enabled: true
+  podAnnotations:
+    prometheus.io/port: "9793"
+    prometheus.io/scrape: "true"
+
+
+hostPathsExporter:
+  podAnnotations:
+    prometheus.io/port: "9793"
+    prometheus.io/scrape: "true"
+  nodeSelector:
+    node-role.kubernetes.io/control-plane: ""
+  tolerations:
+  - effect: NoSchedule
+    key: node-role.kubernetes.io/control-plane
+    operator: Exists
+  daemonSets:
+    nodes:
+      watchFiles:
+      - /var/lib/kubelet/pki/kubelet-client-current.pem
+      - /etc/kubernetes/pki/apiserver.crt
+      - /etc/kubernetes/pki/apiserver-etcd-client.crt
+      - /etc/kubernetes/pki/apiserver-kubelet-client.crt
+      - /etc/kubernetes/pki/ca.crt
+      - /etc/kubernetes/pki/front-proxy-ca.crt
+      - /etc/kubernetes/pki/front-proxy-client.crt
+      - /etc/kubernetes/pki/etcd/ca.crt
+      - /etc/kubernetes/pki/etcd/healthcheck-client.crt
+      - /etc/kubernetes/pki/etcd/peer.crt
+      - /etc/kubernetes/pki/etcd/server.crt
+      watchKubeconfFiles:
+      - /etc/kubernetes/controller-manager.conf
+      - /etc/kubernetes/scheduler.conf
+
+service:
+  create: false
+prometheusServiceMonitor:
+  create: false
+prometheusRules:
+  create: false
+
+  

@@ -1,0 +1,61 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: alertmanager-templates
+  namespace: monitoring
+data:
+  default.tmpl: |
+    {{ define "email.html" }}
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <title>Alert Notification</title>
+        <style>
+            body { font-family: Arial, sans-serif; }
+            .alert { border-left: 4px solid #e74c3c; padding: 10px; margin: 10px 0; background: #f9f9f9; }
+            .resolved { border-left-color: #2ecc71; }
+            table { border-collapse: collapse; width: 100%; }
+            th, td { padding: 8px; text-align: left; border-bottom: 1px solid #ddd; }
+            th { background-color: #f2f2f2; }
+        </style>
+    </head>
+    <body>
+        <h2>{{ .Status | toUpper }} - {{ .CommonLabels.alertname }}</h2>
+        
+        {{ if eq .Status "firing" }}
+        <p><strong>⚠️ Active Alerts:</strong> {{ len .Alerts }}</p>
+        {{ else }}
+        <p><strong>✅ Resolved Alerts:</strong> {{ len .Alerts }}</p>
+        {{ end }}
+
+        <h3>Details:</h3>
+        <table>
+            <tr>
+                <th>Severity</th>
+                <th>Alert Name</th>
+                <th>Instance</th>
+                <th>Summary</th>
+            </tr>
+            {{ range .Alerts }}
+            <tr>
+                <td>{{ .Labels.severity }}</td>
+                <td>{{ .Labels.alertname }}</td>
+                <td>{{ .Labels.instance }}</td>
+                <td>{{ .Annotations.summary }}</td>
+            </tr>
+            {{ end }}
+        </table>
+
+        {{ if eq .Status "firing" }}
+        <h3>Description:</h3>
+        <div class="alert">
+            {{ range .Alerts }}
+            <p>{{ .Annotations.description }}</p>
+            {{ end }}
+        </div>
+        {{ end }}
+
+        <p><small>Alert generated at {{ .StartsAt.Format "2006-01-02 15:04:05 UTC" }}</small></p>
+    </body>
+    </html>
+    {{ end }}

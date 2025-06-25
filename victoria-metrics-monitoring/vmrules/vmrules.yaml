@@ -1,0 +1,104 @@
+serviceAccount:
+  create: false  # Использовать существующий ServiceAccount вместо создания нового
+
+server:
+  nameOverride: vmrules      # Переопределение базового имени ресурсов
+  fullnameOverride: vmrules  # Полное переопределение имени ресурсов
+  replicaCount: 2            # Количество реплик для отказоустойчивости
+
+  # Настройки источника данных
+  datasource:
+    url: "http://vmselect.monitoring.svc.cluster.local:8481/select/0/prometheus/"  # URL VictoriaMetrics для запросов
+
+  # Настройки отправки метрик
+  remote:
+    write:
+      url: "http://vminsert.monitoring.svc.cluster.local:8480/insert/0/prometheus/"  # Куда отправлять recording rules
+
+  # Настройки Alertmanager
+  notifier:
+    alertmanager:
+      url: http://alertmanager.monitoring.svc.cluster.local:9093  # Куда отправлять алерты
+
+  # Дополнительные параметры
+  extraArgs:
+    evaluationInterval: 1m            # Интервал оценки правил
+    external.url: https://vmrules.dev.local  # Внешний URL для ссылок в алертах
+    rule: 
+      - /rules/*/*.yaml               # Где искать файлы с правилами
+
+  # Распределение подов по нодам
+  affinity:
+    podAntiAffinity:  
+      requiredDuringSchedulingIgnoredDuringExecution:
+        - labelSelector:
+            matchExpressions:
+            - key: app
+              operator: In
+              values: [vmrules]
+          topologyKey: kubernetes.io/hostname  # Размещать на разных нодах
+
+  # Ограничения ресурсов
+  resources:
+    requests:
+      cpu: 15m    # Минимальное количество CPU (0.015 ядра)
+      memory: 25M # Минимальный объем памяти (25 МБ)
+    limits:
+      cpu: 30m    # Максимальное количество CPU (0.03 ядра)
+      memory: 100M # Максимальный объем памяти (100 МБ)
+
+  # Дополнительные тома с правилами
+  extraVolumes:
+    - name: alertmanager-rules  # Правила для Alertmanager
+      configMap:
+        name: alertmanager-rules
+    - name: node-rules         # Правила для Node мониторинга
+      configMap:
+        name: node-rules
+    - name: kubernetes-rules   # Правила для Kubernetes
+      configMap:
+        name: kubernetes-rules
+    - name: minio-rules        # Правила для MinIO
+      configMap:
+        name: minio-rules
+    - name: certificate-exporter-rules
+      configMap:
+        name: certificate-exporter-rules
+
+  # Монтирование томов с правилами
+  extraVolumeMounts:
+    - name: alertmanager-rules
+      mountPath: /rules/alertmanager-rules
+    - name: node-rules
+      mountPath: /rules/node-rules
+    - name: kubernetes-rules
+      mountPath: /rules/kubernetes-rules
+    - name: minio-rules
+      mountPath: /rules/minio-rules
+    - name: certificate-exporter-rules
+      mountPath: /rules/certificate-exporter-rules
+      
+  # Настройки сервиса
+  service:
+    enabled: true  # Создавать сервис
+    annotations:
+      prometheus.io/scrape: "true"  # Разрешить сбор метрик
+      prometheus.io/port: "8880"    # Порт для сбора метрик
+  
+  # Настройки Ingress
+  ingress:
+    enabled: true  # Включить Ingress
+    annotations:
+      cert-manager.io/cluster-issuer: ca-issuer  # Использовать cert-manager для TLS
+    hosts:
+    - name: vmrules.dev.local  # Доменное имя
+      path: /                  # Базовый путь
+      port: 8880               # Порт сервиса
+    tls:
+    - secretName: vmalert-tls  # Секрет с TLS сертификатом
+      hosts:
+        - vmrules.dev.local    # Домены для сертификата
+
+# Отключение встроенного Alertmanager
+alertmanager:
+  enabled: false  # Используем внешний Alertmanager

@@ -109,9 +109,7 @@ vault token create -orphan -policy="autounseal" \
 ```bash
 vault unwrap -field=token $(cat wrapping-token.txt)
 ```
-```bash
-export MY_TOKEN=$(cat wrapping-token.txt)
-```
+
 
 ## Миграция с механизма Shamir на Transit
 

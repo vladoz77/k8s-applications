@@ -1,0 +1,22 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: monitoring
+  namespace: argocd
+spec:
+  sourceRepos:
+  - https://github.com/vladoz77/victoria-metrics-monitoring.git
+  - https://victoriametrics.github.io/helm-charts/ 
+  - https://prometheus-community.github.io/helm-charts
+  - https://grafana.github.io/helm-charts
+  destinations:
+  - namespace: monitoring
+    server: https://kubernetes.default.svc
+  namespaceResourceWhitelist:
+  - group: '*'
+    kind: '*'
+  clusterResourceWhitelist:
+  - group: '*'
+    kind: '*'
+  orphanedResources:
+    warn: true
