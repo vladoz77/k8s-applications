@@ -1,14 +1,21 @@
-https://cert-manager.io/docs/
-
-# Create self-signed cluster issure
+> Docs https://cert-manager.io/docs/
+> 
+0. Install cert-manager
+```bash
+kubectl apply -f manifests/
+```
+1. Create self-signed cluster issure
+```yaml
 apiVersion: cert-manager.io/v1
 kind: ClusterIssuer
 metadata:
   name: selfsigned-cluster-issuer
 spec:
   selfSigned: {}
+```
 
-# Create CA cert
+2. Create CA cert
+```yaml
 apiVersion: cert-manager.io/v1
 kind: Certificate
 metadata:
@@ -25,8 +32,10 @@ spec:
     name: selfsigned-issuer
     kind: ClusterIssuer
     group: cert-manager.io
+```
 
-# Create CA Issure 
+3. Create CA Issure
+```yaml
 apiVersion: cert-manager.io/v1
 kind: Issuer
 metadata:
@@ -35,8 +44,10 @@ metadata:
 spec:
   ca:
     secretName: root-secret
+```
 
-# Create cert
+4. Create cert
+```yaml
 apiVersion: cert-manager.io/v1
 kind: Certificate
 metadata:
@@ -50,3 +61,4 @@ spec:
     name: [issuer-name]
     kind: Issuer
     group: cert-manager.io
+```
