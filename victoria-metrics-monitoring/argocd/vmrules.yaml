@@ -10,7 +10,7 @@ metadata:
 spec:
   project: monitoring
   sources:
-  - repoURL: https://github.com/vladoz77/victoria-metrics-monitoring.git
+  - repoURL: https://github.com/vladoz77/k8s-applications.git
     targetRevision: HEAD 
     ref: myRepo
   - repoURL: https://victoriametrics.github.io/helm-charts/ 
@@ -18,10 +18,10 @@ spec:
     targetRevision: 0.9.8
     helm:
       valueFiles:
-        - $myRepo/vmrules/vmrules.yaml
-  - repoURL: https://github.com/vladoz77/victoria-metrics-monitoring.git
+        - $myRepo/victoria-metrics-monitoring/vmrules/vmrules.yaml
+  - repoURL: https://github.com/vladoz77/k8s-applications.git
     targetRevision: HEAD 
-    path: vmrules/rules
+    path: victoria-metrics-monitoring/vmrules/rules
   destination:
     server: "https://kubernetes.default.svc"
     namespace: monitoring
