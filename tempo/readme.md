@@ -1,8 +1,11 @@
-# Install tempo
+1.Install tempo
+```bash
 helm repo add grafana https://grafana.github.io/helm-charts
 helm install tempo grafana/tempo-distributed -f tempo-values.yml --namespace tracing
+```
 
-# Ingress NGINX traces integration
+2.Ingress NGINX traces integration
+```yaml
 controller:
   config:
     # Open Tracing
@@ -11,8 +14,11 @@ controller:
     zipkin-service-name: nginx-internal
     log-format-escape-json: "true"
     log-format-upstream: '{"source": "nginx", "time": $msec, "resp_body_size": $body_bytes_sent, "request_host": "$http_host", "request_address": "$remote_addr", "request_length": $request_length, "method": "$request_method", "uri": "$request_uri", "status": $status,  "user_agent": "$http_user_agent", "resp_time": $request_time, "upstream_addr": "$upstream_addr", "trace_id": "$opentracing_context_x_b3_traceid", "span_id": "$opentracing_context_x_b3_spanid"}'
+```
 
-# Grafana Configuration
+3.Grafana Configuration
+```yaml
+---
 grafana:
   # Additional data source
   additionalDataSources:
@@ -47,3 +53,4 @@ grafana
     type: tempo
     access: proxy
     url: http://tempo-query-frontend.tracing.svc.cluster.local:3100
+```

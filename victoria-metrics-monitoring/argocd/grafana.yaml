@@ -10,7 +10,7 @@ metadata:
 spec:
   project: monitoring
   sources:
-  - repoURL: https://github.com/vladoz77/victoria-metrics-monitoring.git
+  - repoURL: https://github.com/vladoz77/k8s-applications.git
     targetRevision: HEAD 
     ref: myRepo
   - repoURL: https://grafana.github.io/helm-charts
@@ -18,10 +18,7 @@ spec:
     targetRevision: 8.14.2
     helm:
       valueFiles:
-        - $myRepo/grafana/grafana.yaml
-  # - repoURL: https://github.com/vladoz77/argocd.git
-  #   targetRevision: HEAD 
-  #   path: monitoring-single/grafana/manifests
+        - $myRepo/victoria-metrics-monitoring/grafana/grafana.yaml
   destination:
     server: "https://kubernetes.default.svc"
     namespace: monitoring
