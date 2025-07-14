@@ -77,7 +77,9 @@ Install chart
 
 ```bash
 helm install csi secrets-store-csi-driver/secrets-store-csi-driver \
-    --set syncSecret.enabled=true
+    --set syncSecret.enabled=true \
+    --set enableSecretRotation=true \
+    --set rotationPollInterval=30s
 ```
 
 3. Define a SecretProviderClass resource
