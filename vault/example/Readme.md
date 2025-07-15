@@ -1,18 +1,143 @@
 ## Install Vault with csi provider
 
+0. Create ceritificate file with cert-manager
+
+```yaml
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: vault-cert
+  namespace: vault
+spec:
+  duration: 2160h # 90d
+  renewBefore: 360h # 15d
+  subject:
+    organizations:
+    - home
+  secretName: vault-tls
+  dnsNames:
+  - "*.dev.local"
+  - "*.vault.svc"
+  - "*.vault.svc.cluster.local"
+  - "*.vault-internal"
+  - vault
+  ipAddresses:
+  - 127.0.0.1
+  issuerRef:
+    name: ca-issuer
+    kind: ClusterIssuer
+    group: cert-manager.io
+```
+
 1. Add repo hashicorp
 
 ```bash
 helm repo add hashicorp https://helm.releases.hashicorp.com
 ```
 
-2. Install vault with csi provider enabled
+2. Create values file `vault-single-tls.yaml` for vault and csi provider
+
+```yaml
+global:
+  enabled: true
+  tlsDisable: false
+  namespace: vault
+injector:
+  enabled: false
+  metrics:
+    enabled: true
+  logLevel: info
+  logFormat: "json"
+csi:
+  enabled: true
+  metrics:
+    enabled: true
+  logLevel: info
+  logFormat: "json"
+  volumes:
+  - name: vault-ha-tls
+    secret:
+      defaultMode: 420
+      secretName: vault-tls
+  volumeMounts:
+  - mountPath: /etc/ssl/certs
+    name: vault-ha-tls
+    readOnly: true
+server:
+  image:
+    repository: "hashicorp/vault"
+    tag: "1.18.1"
+  logLevel: info
+  logFormat: json
+  resources:
+    requests:
+      memory: 256Mi
+      cpu: 250m
+    limits:
+      memory: 256Mi
+      cpu: 250m
+  extraEnvironmentVars:
+    VAULT_CACERT: /vault/userconfig/vault-ha-tls/ca.crt
+    VAULT_TLSCERT: /vault/userconfig/vault-ha-tls/tls.crt
+    VAULT_TLSKEY: /vault/userconfig/vault-ha-tls/tls.key
+  volumes:
+  - name: vault-ha-tls
+    secret:
+      defaultMode: 420
+      secretName: vault-tls
+  volumeMounts:
+  - mountPath: /vault/userconfig/vault-ha-tls
+    name: vault-ha-tls
+    readOnly: true
+  standalone:
+    enabled: true
+    config: |-
+      cluster_name = "vault"
+      ui = true
+      listener "tcp" {
+        tls_disable = 0
+        address = "[::]:8200"
+        cluster_address = "[::]:8201"
+        tls_cert_file = "/vault/userconfig/vault-ha-tls/tls.crt"
+        tls_key_file  = "/vault/userconfig/vault-ha-tls/tls.key"
+        tls_client_ca_file = "/vault/userconfig/vault-ha-tls/ca.crt"
+      }
+
+      storage "raft" {
+        path = "/vault/data"
+      }
+
+      telemetry {
+        prometheus_retention_time = "30s"
+        disable_hostname = true
+      }
+  ha:
+    enabled: false
+  affinity: ""
+  dataStorage:
+    enabled: true
+    size: 10Gi
+    mountPath: "/vault/data"
+    storageClass: local-path
+    accessMode: ReadWriteOnce
+  ingress:
+    enabled: true
+    annotations:
+      cert-manager.io/cluster-issuer: ca-issuer
+      nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
+    ingressClassName: nginx
+    hosts:
+    - host: vault.dev.local
+    tls:
+    - secretName: vault-ui-tls
+      hosts:
+      - vault.dev.local
+```
+
+3. Install helm chart
 
 ```bash
-helm install vault hashicorp/vault \
-    --set "server.dev.enabled=true" \
-    --set "injector.enabled=false" \
-    --set "csi.enabled=true"
+helm upgrade --install  vault vault -f vault-single-tls.yaml -n vault
 ```
 
 ## Set a secret in Vault
@@ -96,7 +221,8 @@ Install chart
 helm install csi secrets-store-csi-driver/secrets-store-csi-driver \
     --set syncSecret.enabled=true \
     --set enableSecretRotation=true \
-    --set rotationPollInterval=30s
+    --set rotationPollInterval=30s \
+    -n vault
 ```
 
 3. Define a SecretProviderClass resource
@@ -133,7 +259,7 @@ spec:
 EOF
 ```
 
-5. Next, update the statefullset to reference the new secret:
+5. Next, create the statefullset for our bd:
 
 ```yaml
 apiVersion: apps/v1
@@ -190,7 +316,7 @@ spec:
       name: db
     spec:
       accessModes: [ "ReadWriteOnce" ]
-      storageClassName: longhorn-db
+      storageClassName: local-path
       resources:
         requests:
           storage: 5Gi

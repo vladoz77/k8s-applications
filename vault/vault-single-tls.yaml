@@ -14,6 +14,15 @@ csi:
     enabled: true
   logLevel: info
   logFormat: "json"
+  volumes:
+  - name: vault-ha-tls
+    secret:
+      defaultMode: 420
+      secretName: vault-tls
+  volumeMounts:
+  - mountPath: /etc/ssl/certs
+    name: vault-ha-tls
+    readOnly: true
 server:
   image:
     repository: "hashicorp/vault"
