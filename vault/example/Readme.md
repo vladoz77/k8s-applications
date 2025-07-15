@@ -1,3 +1,20 @@
+## Install Vault with csi provider
+
+1. Add repo hashicorp
+
+```bash
+helm repo add hashicorp https://helm.releases.hashicorp.com
+```
+
+2. Install vault with csi provider enabled
+
+```bash
+helm install vault hashicorp/vault \
+    --set "server.dev.enabled=true" \
+    --set "injector.enabled=false" \
+    --set "csi.enabled=true"
+```
+
 ## Set a secret in Vault
 
 1. Login by root token
@@ -31,14 +48,14 @@ vault auth enable kubernetes
 2. Configure the Kubernetes authentication method to use the location of the Kubernetes API.
 
 ```bash
-vault write auth/kubernetes/config kubernetes_host="https://kubernetes.default.svc.cluster.local:443"
+vault write auth/kubernetes/config kubernetes_host="https://$KUBERNETES_PORT_443_TCP_ADDR:443"
 ```
 
 3. Write out the policy named `postgres-policy` that enables the read capability for secrets at path `kubernetes/postgres`
 
 ```bash
 vault policy write postgres-policy - <<EOF
-path "kubernetes/postgres*" {
+path "kubernetes/data/postgres" {
    capabilities = ["read"]
 }
 EOF
@@ -87,7 +104,7 @@ helm install csi secrets-store-csi-driver/secrets-store-csi-driver \
 Define a SecretProviderClass named `vault-postgres-secret`.
 
 ```bash
-cat > spc-ault-postgres-secret.yaml <<EOF61
+cat > spc-ault-postgres-secret.yaml <<EOF
 apiVersion: secrets-store.csi.x-k8s.io/v1
 kind: SecretProviderClass
 metadata:

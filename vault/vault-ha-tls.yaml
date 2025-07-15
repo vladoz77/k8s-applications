@@ -3,6 +3,12 @@ global:
   tlsDisable: false
   namespace: vault
 injector:
+  enabled: false
+  metrics:
+    enabled: true
+  logLevel: info
+  logFormat: "json"
+csi:
   enabled: true
   metrics:
     enabled: true
@@ -80,6 +86,10 @@ server:
         }
         disable_mlock = true
         service_registration "kubernetes" {}
+        telemetry {
+          prometheus_retention_time = "30s"
+          disable_hostname = true
+        }
   dataStorage:
     enabled: true
     size: 10Gi
