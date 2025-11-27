@@ -1,132 +1,118 @@
-# Основные параметры развертывания
-replicaCount: 3                     # Количество реплик VMAgent
-mode: statefulSet                   # Режим развертывания (StatefulSet вместо Deployment)
+replicaCount: 1
+mode: statefulSet
 
-# Конфигурация StatefulSet
+rbac:
+  create: true
+
 statefulSet:
-  clusterMode: true                 # Включение кластерного режима работы
-  replicationFactor: 1              # Фактор репликации данных между экземплярами
+  clusterMode: false
+  replicationFactor: 1
 
-# Настройки именования
-nameOverride: vmagent               # Переопределение базового имени ресурсов
-fullnameOverride: vmagent           # Переопределение полного имени ресурсов
+nameOverride: vmagent
+fullnameOverride: vmagent
 
-# Аннотации
 annotations:
-  configmap.reloader.stakater.com/reload: vmagent-config  # Автоматическая перезагрузка при изменении ConfigMap
+  configmap.reloader.stakater.com/reload: vmagent-config
 
-# Дополнительные аргументы командной строки
 extraArgs:
-  promscrape.cluster.memberLabel: vmagent_instance  # Метка для идентификации экземпляров в кластере
+  envflag.enable: true
+  envflag.prefix: VM_
+  loggerFormat: json
+  httpListenAddr: :8429
+  graphiteListenAddr: ":2003"
+  # promscrape.cluster.memberLabel: vmagent_instance
 
-# Ограничения ресурсов
 resources:
   limits:
-    cpu: 100m                      # Максимальное количество CPU (0.1 ядра)
-    memory: 200Mi                  # Максимальный объем памяти
+    cpu: 100m
   requests:
-    cpu: 20m                       # Гарантированное количество CPU (0.02 ядра)
-    memory: 100Mi                  # Гарантированный объем памяти
+    cpu: 20m
+    memory: 100Mi
 
-# Монтирование дополнительных томов
 extraVolumeMounts:
-- name: etcd-tls-volume            # Том для TLS-сертификатов etcd
-  mountPath: /tls/etcd-tls         # Путь монтирования
-  readonly: true                   # Только для чтения
-- name: ca-bundle                  # Том для CA-сертификатов
-  mountPath: /etc/ssl/certs/trust-bundle.pem  # Путь монтирования
-  subPath: trust-bundle.pem        # Подпуть в томе
-  readOnly: true                   # Только для чтения
+- name: etcd-tls-volume
+  mountPath: /tls/etcd-tls
 
-# Определение дополнительных томов
 extraVolumes:
-- name: etcd-tls-volume            # Том с TLS-сертификатами etcd
+- name: etcd-tls-volume
   secret:
-    secretName: etcd-ca            # Имя секрета с сертификатами
-- name: ca-bundle                  # Том с CA-сертификатами
-  configMap:
-    name: trust-ca                 # Имя ConfigMap с CA-сертификатами
+    secretName: etcd-secrets
 
-# Настройки отправки метрик
 remoteWrite:
-  - url: "http://vminsert.monitoring.svc.cluster.local:8480/insert/0/prometheus/"  # URL для отправки метрик
+- url: "http://vmsingle.monitoring.svc.cluster.local.:8428/api/v1/write"
 
-# Конфигурация Service
 service:
-  enabled: true                    # Включение создания Service
+  enabled: true
   annotations:
-    prometheus.io/scrape: "true"   # Аннотация для автоматического обнаружения Prometheus
-    prometheus.io/port: "8429"     # Порт, который нужно сканировать
+    prometheus.io/scrape: "true"
+    prometheus.io/port: "8429"
 
-# Конфигурация Ingress
 ingress:
-  enabled: true                    # Включение Ingress
+  enabled: true
   annotations:
-    cert-manager.io/cluster-issuer: ca-issuer  # Использование cert-manager для TLS
+    cert-manager.io/cluster-issuer: ca-issuer
   hosts:
-  - name: vmagent.dev.local        # Доменное имя
-    path: /                        # Путь
-    port: http                     # Порт
+  - name: vmagent.dev.local
+    path: /
+    port: http
   tls:
-  - secretName: vmagent-tls        # Имя секрета с TLS-сертификатом
+  - secretName: vmagent-tls
     hosts:
-    - vmagent.dev.local            # Домены для этого сертификата
+    - vmagent.dev.local
 
-# Политики размещения подов
 affinity:
-  podAntiAffinity:                 # Анти-аффинити для распределения подов
+  podAntiAffinity:
     requiredDuringSchedulingIgnoredDuringExecution:
-      - labelSelector:
-          matchExpressions:
-          - key: app               # По метке app
-            operator: In
-            values: [vmagent]
-        topologyKey: kubernetes.io/hostname  # Размещать на разных нодах
+    - labelSelector:
+        matchExpressions:
+        - key: app
+          operator: In
+          values: [ vmagent ]
+      topologyKey: kubernetes.io/hostname
 
-# Настройки постоянного хранилища
 persistence:
-  enabled: true                    # Включение PersistentVolume
-  size: 1Gi                       # Размер тома
-  storageClassName: longhorn-data  # Класс хранилища
+  enabled: true
+  size: 1Gi
+  storageClassName: local-path
 
-# Основная конфигурация сбора метрик
 config:
   global:
-    scrape_interval: 10s          # Интервал сбора метрик по умолчанию
+    scrape_interval: 15s
 
-  # Список конфигураций сбора метрик
   scrape_configs:
+
   # Конфигурация для сбора метрик etcd
   - job_name: etcd
-    honor_labels: true             # Не перезаписывать оригинальные метки
+    honor_labels: true
     kubernetes_sd_configs:
-    - role: pod                    # Обнаружение через Kubernetes Pods
+    - role: pod
       namespaces:
         names:
-        - kube-system              # Только в namespace kube-system
-    scheme: https                  # Использовать HTTPS
-    tls_config:                    # Настройки TLS
-      insecure_skip_verify: true   # Не проверять сертификат
-      cert_file: /tls/etcd-tls/server.crt  # Путь к сертификату
-      key_file: /tls/etcd-tls/server.key    # Путь к ключу
-      ca_file: /etc/ssl/certs/trust-bundle.pem  # Путь к CA
-    relabel_configs:               # Правила переименования меток
-    - source_labels: [__meta_kubernetes_pod_label_component]
-      regex: etcd                  # Фильтр по метке component=etcd
-      action: keep                 # Оставлять только etcd
-    - source_labels: [__address__]
-      regex: (.+?)(\\:\\d+)?       # Регулярка для адреса
-      replacement: $1:2379         # Заменять порт на 2379
+        - kube-system
+    scheme: https
+    tls_config:
+      # Настройки TLS
+      insecure_skip_verify: true
+      cert_file: /tls/etcd-tls/server.crt
+      key_file: /tls/etcd-tls/server.key
+      ca_file: /tls/etcd-tls/ca.crt
+    relabel_configs:
+    # Правила переименования меток
+    - source_labels: [ __meta_kubernetes_pod_label_component ]
+      regex: etcd
+      action: keep
+    - source_labels: [ __address__ ]
+      regex: (.+?)(\\:\\d+)?
+      replacement: $1:2379
       action: replace
       target_label: __address__
-    # Далее аналогичные правила для добавления меток
-    - source_labels: [__meta_kubernetes_pod_name]
+    - source_labels: [ __meta_kubernetes_pod_name ]
       target_label: pod
-    - source_labels: [__meta_kubernetes_pod_container_name]
+    - source_labels: [ __meta_kubernetes_pod_container_name ]
       target_label: container
-    - source_labels: [__meta_kubernetes_namespace]
+    - source_labels: [ __meta_kubernetes_namespace ]
       target_label: namespace
-    - source_labels: [__meta_kubernetes_pod_node_name]
+    - source_labels: [ __meta_kubernetes_pod_node_name ]
       target_label: node
 
   # Конфигурация для сбора метрик kube-apiserver
@@ -219,10 +205,6 @@ config:
     - action: drop
       source_labels: [ id, pod ]
       regex: .+;
-
-  # Остальные конфигурации (kube-proxy, kube-controller-manager, kube-scheduler, Calico, 
-  # kube-state-metrics, node-exporter) имеют аналогичную структуру с небольшими вариациями
-  # в зависимости от особенностей каждого компонента
 
   # Конфигурация для сбора метрик kube-proxy
   - job_name: kube-proxy
@@ -327,7 +309,6 @@ config:
       - __meta_kubernetes_pod_node_name
       target_label: node
 
-
   # Конфигурация для сбора метрик calico
   - job_name: calico
     scheme: http
@@ -356,7 +337,7 @@ config:
     - source_labels: [ __meta_kubernetes_service_name ]
       target_label: job
 
-   # Конфигурация для сбора метрик kube-state-metrics
+  # Конфигурация для сбора метрик kube-state-metrics
   - job_name: kube-state-metrics
     honor_labels: true
     kubernetes_sd_configs:
@@ -384,7 +365,7 @@ config:
     - source_labels: [ __meta_kubernetes_service_name ]
       target_label: job
 
-   # Конфигурация для сбора метрик node-exporte
+  # Конфигурация для сбора метрик node-exporte
   - job_name: node-exporter
     honor_labels: true
     kubernetes_sd_configs:

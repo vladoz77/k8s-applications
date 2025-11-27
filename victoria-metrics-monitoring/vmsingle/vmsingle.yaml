@@ -4,36 +4,42 @@ serviceAccount:
   create: false
 
 server:
+  mode: statefulSet
   fullnameOverride: vmsingle
+
+  retentionPeriod: 1
+
+  service:
+    annotations:
+      prometheus.io/scrape: "true"
+      prometheus.io/port: "8428"
+
   persistentVolume:
-    storageClass: longhorn-db
+    storageClassName: local-path
     size: 10Gi
-  extraArgs:
-    dedup.minScrapeInterval: 30s
-  
-  statefulSet:
-    service:
-      annotations:
-        prometheus.io/scrape: "true"
-        prometheus.io/port: "8428"
-  
-  resources:
-    limits:
-      cpu: 1000m
-      memory: 1024Mi
-    requests:
-      cpu: 500m
-      memory: 512Mi
+
+  # resources:
+  #   limits:
+  #     cpu: 1000m
+  #     memory: 1024Mi
+  #   requests:
+  #     cpu: 500m
+  #     memory: 512Mi
 
   ingress:
     enabled: true
-    annotations: 
+    annotations:
       cert-manager.io/cluster-issuer: ca-issuer
     hosts:
     - name: vmsingle.dev.local
       path: /
     tls:
-      - secretName: vmsingle-tls
-        hosts:
-          - vmsingle.dev.local
-    
+    - secretName: vmsingle-tls
+      hosts:
+      - vmsingle.dev.local
+
+  relabel:
+    enabled: false
+
+  scrape:
+    enabled: false

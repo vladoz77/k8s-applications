@@ -28,7 +28,7 @@ helm upgrade --install vmagent vm/victoria-metrics-agent  -f vmagent/vmagent.yam
 5. Install alertmanager and vmrules
 
 ```bash
-k apply -f vmalert-alertmanager/rules
+k apply -f vmrules/rules 
 helm upgrade --install vmrules vm/victoria-metrics-alert  -f vmrules/vmrules.yaml  -n monitoring --create-namespace
 kubectl apply -f alertmanager/manifests
 ```

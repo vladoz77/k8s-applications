@@ -14,21 +14,21 @@ adminPassword: password
 
 persistence:
   enabled: true
-  storageClassName: longhorn-data
+  storageClassName: local-path
   size: 1Gi
 
 ingress:
   enabled: true
-  annotations: 
+  annotations:
     cert-manager.io/cluster-issuer: ca-issuer
   path: /
   pathType: Prefix
   hosts:
-    - grafana.dev.local
+  - grafana.dev.local
   tls:
   - secretName: grafana-tls
     hosts:
-       - grafana.dev.local
+    - grafana.dev.local
 
 datasources:
   datasources.yaml:
@@ -36,7 +36,7 @@ datasources:
     datasources:
     - name: VictoriaMetrics
       type: prometheus
-      url:   http://vmselect.monitoring.svc.cluster.local:8481/select/0/prometheus/
+      url: http://vmsingle.monitoring.svc.cluster.local.:8428
       access: proxy
       isDefault: true
       editable: true
@@ -48,11 +48,11 @@ datasources:
       version: 1
       jsonData:
         derivedFields:
-            # NGINX traces integration
-          - datasourceUid: tempo
-            matcherRegex: '"trace_id": "(\w+)"'
-            name: TraceID
-            url: $${__value.raw}
+        # NGINX traces integration
+        - datasourceUid: tempo
+          matcherRegex: '"trace_id": "(\w+)"'
+          name: TraceID
+          url: $${__value.raw}
     - name: Tempo
       uid: tempo
       type: tempo
@@ -60,36 +60,35 @@ datasources:
       url: http://tempo-query-frontend.tempo.svc:3100
 
 dashboardProviders:
-    dashboardproviders.yaml:
-      apiVersion: 1
-      providers:
-      - name: 'grafana-dashboards-kubernetes'
-        orgId: 1
-        folder: 'Kubernetes'
-        type: file
-        disableDeletion: true
-        editable: true
-        options:
-          path: /var/lib/grafana/dashboards/grafana-dashboards-kubernetes
-
+  dashboardproviders.yaml:
+    apiVersion: 1
+    providers:
+    - name: 'grafana-dashboards-kubernetes'
+      orgId: 1
+      folder: 'Kubernetes'
+      type: file
+      disableDeletion: true
+      editable: true
+      options:
+        path: /var/lib/grafana/dashboards/grafana-dashboards-kubernetes
 
 dashboards:
-    grafana-dashboards-kubernetes:
-      k8s-system-api-server:
-        url: https://raw.githubusercontent.com/dotdc/grafana-dashboards-kubernetes/master/dashboards/k8s-system-api-server.json
-        token: ''
-      k8s-system-coredns:
-        url: https://raw.githubusercontent.com/dotdc/grafana-dashboards-kubernetes/master/dashboards/k8s-system-coredns.json
-        token: ''
-      k8s-views-global:
-        url: https://raw.githubusercontent.com/dotdc/grafana-dashboards-kubernetes/master/dashboards/k8s-views-global.json
-        token: ''
-      k8s-views-namespaces:
-        url: https://raw.githubusercontent.com/dotdc/grafana-dashboards-kubernetes/master/dashboards/k8s-views-namespaces.json
-        token: ''
-      k8s-views-nodes:
-        url: https://raw.githubusercontent.com/dotdc/grafana-dashboards-kubernetes/master/dashboards/k8s-views-nodes.json
-        token: ''
-      k8s-views-pods:
-        url: https://raw.githubusercontent.com/dotdc/grafana-dashboards-kubernetes/master/dashboards/k8s-views-pods.json
-        token: ''
+  grafana-dashboards-kubernetes:
+    k8s-system-api-server:
+      url: https://raw.githubusercontent.com/dotdc/grafana-dashboards-kubernetes/master/dashboards/k8s-system-api-server.json
+      token: ''
+    k8s-system-coredns:
+      url: https://raw.githubusercontent.com/dotdc/grafana-dashboards-kubernetes/master/dashboards/k8s-system-coredns.json
+      token: ''
+    k8s-views-global:
+      url: https://raw.githubusercontent.com/dotdc/grafana-dashboards-kubernetes/master/dashboards/k8s-views-global.json
+      token: ''
+    k8s-views-namespaces:
+      url: https://raw.githubusercontent.com/dotdc/grafana-dashboards-kubernetes/master/dashboards/k8s-views-namespaces.json
+      token: ''
+    k8s-views-nodes:
+      url: https://raw.githubusercontent.com/dotdc/grafana-dashboards-kubernetes/master/dashboards/k8s-views-nodes.json
+      token: ''
+    k8s-views-pods:
+      url: https://raw.githubusercontent.com/dotdc/grafana-dashboards-kubernetes/master/dashboards/k8s-views-pods.json
+      token: ''

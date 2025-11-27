@@ -1,72 +1,106 @@
+# README — VictoriaMetrics Single (vmsingle) Helm Chart
+
+Это пример `values.yaml` для установки **VictoriaMetrics Single Node** (vmsingle) через официальный Helm-чарт VictoriaMetrics (https://github.com/VictoriaMetrics/helm-charts/tree/master/charts/victoria-metrics-single).
+
+## Описание используемых значений
+
 ```yaml
-# === RBAC и ServiceAccount ===
 rbac:
-  create: false         # Отключает создание RBAC-ролей (если они уже есть в кластере)
+  create: false                  # RBAC и ServiceAccount создаём вручную (или через cluster-wide права)
+
 serviceAccount:
-  create: false         # Отключает создание ServiceAccount (используется существующий)
+  create: false                  # ServiceAccount тоже не создаём в чарте
+```
 
-# === Основная конфигурация vmsingle ===
+```yaml
 server:
-  fullnameOverride: vmsingle  # Переопределяет имя StatefulSet и других ресурсов на "vmsingle"
-  
-  # Настройки постоянного хранилища (PersistentVolume)
+  fullnameOverride: vmsingle     # Полное имя ресурсов будет vmsingle (а не vmsingle-victoria-metrics-single)
+
   persistentVolume:
-    storageClass: longhorn-db  # Использует StorageClass "longhorn-db" (распределенное хранилище)
-    size: 10Gi                 # Размер тома для хранения метрик (можно увеличить при росте данных)
+    storageClass: longhorn-db    # Используем Longhorn с классом longhorn-db
+    size: 10Gi                   # Объём диска под данные VM
 
-  # Дополнительные аргументы командной строки для vmsingle
   extraArgs:
-    dedup.minScrapeInterval: 30s  # Минимальный интервал дедупликации метрик (агрегирует дубли за 30 сек)
+    dedup.minScrapeInterval: 30s # Включаем дедупликацию скрейпов с минимальным интервалом 30 секунд
+                                 # Полезно, если несколько Prometheus-ов скрейпят один и тот же vmsingle
 
-  # Конфигурация StatefulSet (управление pod'ами)
   statefulSet:
     service:
       annotations:
-        prometheus.io/scrape: "true"  # Разрешает сбор метрик Prometheus
-        prometheus.io/port: "8428"    # Порт метрик vmsingle
+        prometheus.io/scrape: "true"   # Разрешаем Prometheus-у скрейпить сам vmsingle
+        prometheus.io/port: "8428"
 
-  # Лимиты и запросы ресурсов
   resources:
     limits:
-      cpu: 1000m       # Лимит: 1 ядро CPU
-      memory: 1024Mi   # Лимит: 1 GiB RAM
+      cpu: 1000m
+      memory: 1024Mi
     requests:
-      cpu: 500m        # Гарантировано: 0.5 ядра CPU
-      memory: 512Mi    # Гарантировано: 512 MiB RAM
-
-  # Настройки Ingress (доступ извне)
-  ingress:
-    enabled: true       # Включает Ingress
-    annotations: 
-      cert-manager.io/cluster-issuer: ca-issuer  # Автоматическая выдача TLS-сертификата через cert-manager
-    hosts:
-    - name: vmsingle.dev.local  # Домен для доступа к vmsingle
-      path: /
-    tls:
-      - secretName: vmsingle-tls  # Имя Secret с TLS-сертификатом
-        hosts:
-          - vmsingle.dev.local    # Домен для сертификата
+      cpu: 500m
+      memory: 512Mi
 ```
 
-### Разбор ключевых параметров:
+### Ingress (доступ по HTTPS через домен)
 
-1. **Режим работы**:  
-   Это конфигурация для **vmsingle** — standalone-режима VictoriaMetrics (все компоненты в одном pod). Подходит для небольших проектов или тестирования.
+```yaml
+  ingress:
+    enabled: true
+    annotations: 
+      cert-manager.io/cluster-issuer: ca-issuer   # Автоматически получаем сертификат от вашего ClusterIssuer
+    hosts:
+    - name: vmsingle.dev.local
+      path: /
+    tls:
+      - secretName: vmsingle-tls
+        hosts:
+          - vmsingle.dev.local
+```
 
-2. **Хранение данных**:  
-   - Используется `longhorn-db` (распределенное хранилище).  
-   - Размер тома `10Gi` — минимально для production, лучше мониторить `disk свободное место` (/metrics).  
+В результате будет доступно:
+- `https://vmsingle.dev.local` — веб-интерфейс VictoriaMetrics
+- `https://vmsingle.dev.local/select/...` — vmselect
+- `https://vmsingle.dev.loca/insert/...` — vminsert
+- `https://vmsingle.dev.loca/api/v1/...` — совместимость с Prometheus remote_write/read
 
-3. **Дедупликация**:  
-   `dedup.minScrapeInterval: 30s` — метрики с одинаковыми labels, пришедшие чаще чем раз в 30 сек, будут дедуплицированы.  
+## Как установить/обновить
 
-4. **Ресурсы**:  
-   - Лимиты: **1 CPU / 1Gi RAM** — хорошо для средней нагрузки.  
-   - Requests: **0.5 CPU / 512Mi RAM** — гарантированные ресурсы.  
+```bash
+# Добавляем репозиторий (если ещё не добавлен)
+helm repo add vm https://victoriametrics.github.io/helm-charts/
+helm repo update
 
-5. **Безопасность и доступ**:  
-   - Ingress с TLS через **cert-manager** (автопродление сертификатов).  
-   - Домен `vmsingle.dev.local` — нужно заменить на реальный в production.  
+# Установка (или upgrade)
+helm upgrade --install vmsingle vm/victoria-metrics-single \
+  -f values.yaml \
+  --namespace monitoring --create-namespace
+```
 
-6. **Мониторинг**:  
-   - Метрики доступны на порту `8428` (стандартный для vmsingle).  
+## Полезные проверялки после установки
+
+```bash
+# Проверка подов
+kubectl -n monitoring get pods -l app.kubernetes.io/name=vmsingle
+
+# Проверка PVC
+kubectl -n monitoring get pvc
+
+# Проверка Ingress
+kubectl -n monitoring get ingress
+
+# Проверка, что Prometheus может скрейпить vmsingle
+kubectl -n monitoring get svc vmsingle -o yaml | grep clusterIP
+curl -k https://vmsingle.dev.local/metrics
+```
+
+## Рекомендации по продакшену
+
+- Для серьёзных нагрузок лучше использовать `victoria-metrics-cluster` вместо single-node.
+- При росте объёма данных увеличьте `persistentVolume.size` и/или включите retention (по умолчанию — всё хранится вечно).
+- При необходимости добавить retention можно добавить в `extraArgs`:
+
+```yaml
+  extraArgs:
+    dedup.minScrapeInterval: 30s
+    retentionPeriod: 3y          # хранить данные 3 года
+    storageDataPath: /vm-data    # (по умолчанию и так)
+```
+
