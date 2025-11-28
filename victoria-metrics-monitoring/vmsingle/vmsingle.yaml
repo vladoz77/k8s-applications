@@ -7,7 +7,7 @@ server:
   mode: statefulSet
   fullnameOverride: vmsingle
 
-  retentionPeriod: 1
+  retentionPeriod: 3
 
   service:
     annotations:
