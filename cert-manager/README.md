@@ -2,7 +2,7 @@
 > 
 0. Install cert-manager
 ```bash
-kubectl apply -f manifests/
+kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/v1.19.2/cert-manager.yaml
 ```
 1. Create self-signed cluster issure
 ```yaml
