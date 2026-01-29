@@ -4,7 +4,7 @@ serviceAccount:
 server:
   nameOverride: vmrules
   fullnameOverride: vmrules
-  replicaCount: 2
+  replicaCount: 1
 
   # Настройки источника данных
   datasource:
@@ -13,7 +13,7 @@ server:
   # Настройки отправки метрик
   remote:
     write:
-      url: "http://vmsingle.monitoring.svc.cluster.local.:8428/api/v1/write"
+      url: "http://vmsingle.monitoring.svc.cluster.local.:8428"
 
   # Настройки Alertmanager
   notifier:

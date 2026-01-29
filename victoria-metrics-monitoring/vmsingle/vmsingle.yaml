@@ -7,7 +7,7 @@ server:
   mode: statefulSet
   fullnameOverride: vmsingle
 
-  retentionPeriod: 3
+  retentionPeriod: 1M
 
   service:
     annotations:
@@ -26,17 +26,15 @@ server:
   #     cpu: 500m
   #     memory: 512Mi
 
-  ingress:
+  route:
     enabled: true
-    annotations:
-      cert-manager.io/cluster-issuer: ca-issuer
-    hosts:
-    - name: vmsingle.dev.local
-      path: /
-    tls:
-    - secretName: vmsingle-tls
-      hosts:
-      - vmsingle.dev.local
+    parentRefs:
+    - name: tigera-default-gateway
+      namespace: tigera-gateway
+      sectionName: https
+      port: 443
+    hostnames:
+    - vmsingle.home.local
 
   relabel:
     enabled: false

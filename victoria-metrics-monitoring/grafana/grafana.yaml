@@ -26,18 +26,15 @@ securityContext:
 initChownData:
   enabled: false
 
-ingress:
+route:
   enabled: true
-  annotations:
-    cert-manager.io/cluster-issuer: ca-issuer
-  path: /
-  pathType: Prefix
-  hosts:
-  - grafana.dev.local
-  tls:
-  - secretName: grafana-tls
-    hosts:
-    - grafana.dev.local
+  hostnames:
+  - grafana.home.local
+  parentRefs:
+  - name: tigera-default-gateway
+    namespace: tigera-gateway
+    sectionName: https
+    port: 443
 
 datasources:
   datasources.yaml:

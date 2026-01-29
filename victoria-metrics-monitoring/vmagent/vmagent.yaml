@@ -20,6 +20,7 @@ extraArgs:
   loggerFormat: json
   httpListenAddr: :8429
   graphiteListenAddr: ":2003"
+  promscrape.dropOriginalLabels: false
   # promscrape.cluster.memberLabel: vmagent_instance
 
 resources:
@@ -52,18 +53,15 @@ service:
     prometheus.io/scrape: "true"
     prometheus.io/port: "8429"
 
-ingress:
+route:
   enabled: true
-  annotations:
-    cert-manager.io/cluster-issuer: ca-issuer
-  hosts:
-  - name: vmagent.dev.local
-    path: /
-    port: http
-  tls:
-  - secretName: vmagent-tls
-    hosts:
-    - vmagent.dev.local
+  parentRefs:
+  - name: tigera-default-gateway
+    namespace: tigera-gateway
+    sectionName: https
+    port: 443
+  hostnames:
+  - vmagent.home.local
 
 affinity:
   podAntiAffinity:
