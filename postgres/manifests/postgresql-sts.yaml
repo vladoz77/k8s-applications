@@ -9,7 +9,6 @@ spec:
   ports:
   - port: 5432
     targetPort: psql
-
 ---
 apiVersion: v1
 kind: Service
@@ -23,8 +22,16 @@ spec:
   - port: 5432
     targetPort: psql
     nodePort: 32543
-
-
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: postgresql-pdb
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: postgresql-app
 ---
 apiVersion: v1
 kind: Secret
@@ -34,13 +41,16 @@ type: Opaque
 stringData:
   username: "postgres"
   password: "secret"
-
 ---
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   name: postgresql-sts
 spec:
+  updateStrategy:
+    type: RollingUpdate
+    rollingUpdate:
+      partition: 0
   selector:
     matchLabels:
       app: postgresql-app
@@ -51,22 +61,23 @@ spec:
       labels:
         app: postgresql-app
     spec:
+
       containers:
       - name: postgresql
         image: postgres:16.2
         env:
-          - name: PGDATA
-            value: "/var/lib/postgresql/data/pgdata"
-          - name: POSTGRES_USER
-            valueFrom:
-              secretKeyRef:
-                name:  pg-secret
-                key:  username
-          - name: POSTGRES_PASSWORD 
-            valueFrom:
-              secretKeyRef:
-                name:  pg-secret
-                key:  password
+        - name: PGDATA
+          value: "/var/lib/postgresql/data/pgdata"
+        - name: POSTGRES_USER
+          valueFrom:
+            secretKeyRef:
+              name: pg-secret
+              key: username
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: pg-secret
+              key: password
         resources:
           requests:
             memory: "265Mi"
@@ -80,14 +91,29 @@ spec:
         volumeMounts:
         - name: db
           mountPath: /var/lib/postgresql/data
+        livenessProbe:
+          exec:
+            command:
+            - sh
+            - -c
+            - exec pg_isready -h localhost -p 5432 -U postgres
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+        readinessProbe:
+          exec:
+            command:
+            - sh
+            - -c
+            - exec pg_isready -h localhost -p 5432 -U postgres
+          initialDelaySeconds: 5
+          periodSeconds: 5
+          timeoutSeconds: 3
   volumeClaimTemplates:
   - metadata:
       name: db
     spec:
       accessModes: [ "ReadWriteOnce" ]
-      storageClassName: local-path
       resources:
         requests:
           storage: 5Gi
-
-

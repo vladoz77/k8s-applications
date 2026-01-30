@@ -42,7 +42,7 @@ alloy:
     content: |
       logging {
         level  = "info"
-        format = "logfmt"
+        format = "json"
       }
 
       loki.write "loki" {
@@ -57,21 +57,27 @@ alloy:
           relabel_rules = discovery.relabel.journal.rules
           forward_to    = [loki.write.loki.receiver]
           labels        = {
-            job = "systemd-journal",
+            component = string.format("%s-journal", constants.hostname),
           }
       }
 
       discovery.relabel "journal" {
-        targets = []
 
         rule {
-            source_labels = ["__journal__systemd_unit"]
-            target_label  = "unit"
+          source_labels = ["__journal__systemd_unit"]
+          target_label  = "unit"
         }
-
         rule {
-            source_labels = ["__journal__hostname"]
-            target_label  = "hostname"
+          source_labels = ["__journal__boot_id"]
+          target_label  = "boot_id"
+        }
+        rule {
+          source_labels = ["__journal__transport"]
+          target_label  = "transport"
+        }
+        rule {
+          source_labels = ["__journal_priority_keyword"]
+          target_label  = "level"
         }
       }
 

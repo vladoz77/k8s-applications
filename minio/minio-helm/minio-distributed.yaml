@@ -15,11 +15,11 @@ extraEnvVars:
   value: minio
 
 statefulset:
-  # statefulset.replicaCount Number of pods per zone (only for MinIO&reg; distributed mode). Should be even and `>= 4`
+  # Number of pods per zone (only for MinIO&reg; distributed mode). Should be even and `>= 4`
   replicaCount: 2
-  # statefulset.zones Number of zones (only for MinIO&reg; distributed mode)
+  # Number of zones (only for MinIO&reg; distributed mode)
   zones: 1
-  # statefulset.drivesPerNode Number of drives attached to every node (only for MinIO&reg; distributed mode)
+  # umber of drives attached to every node (only for MinIO&reg; distributed mode)
   drivesPerNode: 2
 
 service:

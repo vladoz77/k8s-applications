@@ -1,7 +1,7 @@
 namespaceOverride: ingress-nginx
 controller:
   allowSnippetAnnotations: true
-  replicaCount: 1
+  replicaCount: 2
   ingressClassResource:
     name: nginx
     enabled: true

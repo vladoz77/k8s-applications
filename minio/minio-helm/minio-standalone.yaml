@@ -2,38 +2,100 @@ nameOverride: minio
 fullnameOverride: minio
 
 mode: standalone
-auth:
-  rootUser: admin
-  rootPassword: password
 
-defaultBuckets: loki, tempo
+rootUser: admin
+rootPassword: "password"
 
-statefulset:
-  # statefulset.replicaCount Number of pods per zone (only for MinIO&reg; distributed mode). Should be even and `>= 4`
-  replicaCount: 1
-  # statefulset.zones Number of zones (only for MinIO&reg; distributed mode)
-  zones: 1
-  # statefulset.drivesPerNode Number of drives attached to every node (only for MinIO&reg; distributed mode)
-  drivesPerNode: 1
+minioAPIPort: "9000"
+minioConsolePort: "9001"
+
+# Number of drives attached to a node
+drivesPerNode: 1
+# Number of MinIO containers running
+replicas: 1
+# Number of expanded MinIO clusters
+pools: 1
+
+persistence:
+  enabled: true
+  storageClass: local-path
+  accessMode: ReadWriteOnce
+  size: 10Gi
+
+resources:
+  requests:
+    memory: 1Gi
 
 service:
+  type: ClusterIP
+  port: "9000"
   annotations:
     prometheus.io/port: '9000'
     prometheus.io/scrape: 'true'
-    prometheus.io/path: '/minio/v2/metrics/cluster'
+    prometheus.io/path: '/minio/metrics/v3/cluster'
 
 ingress:
   enabled: true
-  hostname: minio-console.dev.local
+  ingressClassName: nginx
+  hosts:
+  - minio.dev.local
   annotations:
     cert-manager.io/cluster-issuer: ca-issuer
-  extraTls:
-  - hosts:
-    - minio-console.dev.local
-    secretName: minio-tls
-apiIngress:
-  enabled: true
-  hostname: minio.dev.local
+  tls:
+  - secretName: minio-tls
+    hosts:
+    - minio.dev.local
 
-persistence:
-  storageClass: local-path
+consoleService:
+  type: ClusterIP
+  port: "9001"
+
+consoleIngress:
+  enabled: true
+  ingressClassName: nginx
+  annotations:
+    cert-manager.io/cluster-issuer: ca-issuer
+  hosts:
+  - minio-console.dev.local
+  tls:
+  - secretName: minio-console-tls
+    hosts:
+    - minio-console.dev.local
+
+policies:
+- name: loki
+  statements:
+  - resources:
+    - 'arn:aws:s3:::loki'
+    - 'arn:aws:s3:::loki/*'
+    actions:
+    - "s3:DeleteObject"
+    - "s3:GetObject"
+    - "s3:ListBucket"
+    - "s3:PutObject"
+- name: tempo
+  statements:
+  - resources:
+    - 'arn:aws:s3:::tempo'
+    - 'arn:aws:s3:::tempo/*'
+    actions:
+    - "s3:DeleteObject"
+    - "s3:GetObject"
+    - "s3:ListBucket"
+    - "s3:PutObject"
+    - "s3:GetObjectTagging"
+    - "s3:PutObjectTagging"
+
+users:
+- accessKey: loki
+  secretKey: password
+  policy: loki
+- accessKey: tempo
+  secretKey: password
+  policy: tempo
+
+buckets:
+- name: loki
+  policy: none
+- name: tempo
+  policy: none

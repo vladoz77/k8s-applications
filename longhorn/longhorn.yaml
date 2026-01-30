@@ -11,8 +11,13 @@ longhornManager:
     prometheus.io/scrape: 'true'
 
 persistence:
-  defaultClass: true
-  defaultClassReplicaCount: 1
+  defaultClassReplicaCount: 2
+  defaultDiskSelector:
+    enable: true
+    selector: "hdd"
+  defaultNodeSelector:
+    enable: true
+    selector: "data"
 
 longhornUI:
   replicas: 2
