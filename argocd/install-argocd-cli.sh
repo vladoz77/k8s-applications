@@ -1,17 +1,35 @@
-#!/bin/bash
-#check if run with sudo
-if (( $UID != 1000 )); then
-    echo "Please run as root"
-    exit
+#!/usr/bin/env bash
+
+set -e
+
+# Проверка запуска от root
+if [[ "$EUID" -ne 0 ]]; then
+  echo "Please run as root (use sudo)"
+  exit 1
 fi
-#check argocd cli if install
-argocd > /dev/null 2>&1
-if [ "${?}" != 0 ]
-    then 
-        echo 'installing argocd'
-        curl -sSL -o argocd-linux-amd64 https://github.com/argoproj/argo-cd/releases/latest/download/argocd-linux-amd64
-        sudo install -m 555 argocd-linux-amd64 /usr/local/bin/argocd
-    else
-        echo 'argocd already installed'
+
+# Проверка наличия curl
+if ! command -v curl >/dev/null 2>&1; then
+  echo "curl is not installed. Please install curl first."
+  exit 1
 fi
-    
+
+# Проверка установлен ли argocd
+if command -v argocd >/dev/null 2>&1; then
+  echo "argocd already installed: $(argocd version --client --short 2>/dev/null || echo 'version unknown')"
+  exit 0
+fi
+
+echo "Installing argocd..."
+
+TMP_FILE="/tmp/argocd-linux-amd64"
+
+curl -sSL -o "$TMP_FILE" \
+  https://github.com/argoproj/argo-cd/releases/latest/download/argocd-linux-amd64
+
+install -m 755 "$TMP_FILE" /usr/local/bin/argocd
+
+rm -f "$TMP_FILE"
+
+echo "argocd successfully installed."
+argocd version --client
