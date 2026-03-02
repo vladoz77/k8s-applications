@@ -1,0 +1,26 @@
+nameOverride: kite
+fullnameOverride: kite
+
+image:
+  repository: ghcr.io/zxh326/kite
+  tag: v0.7.8
+
+host: dashboard.home.local
+
+gateway:
+  enabled: true
+  create: false
+  className: envoy-gateway-class
+  name: default-gateway
+  namespace: envoy-gateway-system  
+  httpRoutes:
+  - name: kite-https
+    port: 443
+    protocol: HTTPS
+    hostnames: 
+    - dashboard.home.local
+    rules:
+    - matches:
+      - path:
+          type: PathPrefix
+          value: /

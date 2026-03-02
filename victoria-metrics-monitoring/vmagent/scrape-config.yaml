@@ -257,55 +257,6 @@ data:
       - source_labels: [ __meta_kubernetes_service_name ]
         target_label: job2
 
-  envoy-gateway-scrape-config.yaml: |
-    - job_name: envoy-gateway
-      scheme: http
-      kubernetes_sd_configs:
-      - role: pod
-        namespaces:
-          names: 
-          - tigera-gateway
-      relabel_configs:
-      - action: keep
-        source_labels: [ __meta_kubernetes_pod_label_control_plane ]
-        regex: envoy-gateway
-      - action: replace
-        source_labels: [__meta_kubernetes_pod_ip]
-        target_label: __address__
-        replacement: $1:19001
-      - source_labels: [ __meta_kubernetes_pod_name ]
-        target_label: pod
-      - source_labels: [ __meta_kubernetes_namespace ]
-        target_label: namespace
-      - source_labels: [ __meta_kubernetes_pod_node_name ]
-        target_label: node
-
-  envoy-proxy-config-scrape.yaml: |
-    - job_name: envoy-proxy
-      scheme: http
-      kubernetes_sd_configs:
-      - role: pod
-        namespaces:
-          names: 
-          - tigera-gateway
-      relabel_configs:
-      - action: keep
-        source_labels: [ __meta_kubernetes_pod_label_app_kubernetes_io_component ]
-        regex: proxy
-      - action: replace
-        target_label: __metrics_path__
-        replacement: /stats/prometheus
-      - action: replace
-        source_labels: [__meta_kubernetes_pod_ip]
-        target_label: __address__
-        replacement: $1:19001
-      - source_labels: [ __meta_kubernetes_pod_name ]
-        target_label: pod
-      - source_labels: [ __meta_kubernetes_namespace ]
-        target_label: namespace
-      - source_labels: [ __meta_kubernetes_pod_node_name ]
-        target_label: node
-
   kube-state-metrics-scrape-config.yaml: |
     # Конфигурация для сбора метрик kube-state-metrics
     - job_name: kube-state-metrics
@@ -364,37 +315,11 @@ data:
       - source_labels: [ __meta_kubernetes_endpoint_node_name ]
         target_label: node
 
-  minio-scrape-config.yaml: |
-    - job_name: minio-cluster
-      metrics_path: /minio/metrics/v3
-      kubernetes_sd_configs:
-      - role: endpoints
-        namespaces:
-          names:
-          - minio
-      relabel_configs:
-      - source_labels: [ __meta_kubernetes_service_name ]
-        regex: minio
-        action: keep
-      - source_labels: [ __meta_kubernetes_pod_container_port_number ]
-        regex: 9000
-        action: keep
-      - source_labels: [ __meta_kubernetes_pod_name ]
-        target_label: pod
-      - source_labels: [ __meta_kubernetes_pod_container_name ]
-        target_label: container
-      - source_labels: [ __meta_kubernetes_namespace ]
-        target_label: namespace
-      - source_labels: [ __meta_kubernetes_service_name ]
-        target_label: service
-      - source_labels: [ __meta_kubernetes_service_name ]
-        target_label: job
-      - source_labels: [ __meta_kubernetes_endpoint_node_name ]
-        target_label: node
-
   autodiscovery-scrape-config.yaml: |
     # Autodiscover endpoint with annotaions
     - job_name: kubernetes-endpoints
+      scrape_interval: 30s 
+      scrape_timeout: 20s 
       kubernetes_sd_configs:
       - role: endpoints
       relabel_configs:
@@ -434,6 +359,8 @@ data:
       
       # Autodiscover pod with annotaions
     - job_name: "kubernetes-pods"
+      scrape_interval: 30s 
+      scrape_timeout: 20s 
       kubernetes_sd_configs:
       - role: pod
       relabel_configs:

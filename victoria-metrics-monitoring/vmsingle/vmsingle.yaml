@@ -29,8 +29,8 @@ server:
   route:
     enabled: true
     parentRefs:
-    - name: tigera-default-gateway
-      namespace: tigera-gateway
+    - name: default-gateway
+      namespace: envoy-gateway-system
       sectionName: https
       port: 443
     hostnames:
