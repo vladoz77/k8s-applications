@@ -9,24 +9,11 @@ injector:
   logLevel: info
   logFormat: "json"
 csi:
-  enabled: true
-  metrics:
-    enabled: true
-  logLevel: info
-  logFormat: "json"
-  volumes:
-  - name: vault-ha-tls
-    secret:
-      defaultMode: 420
-      secretName: vault-tls
-  volumeMounts:
-  - mountPath: /etc/ssl/certs
-    name: vault-ha-tls
-    readOnly: true
+  enabled: false
 server:
   image:
     repository: "hashicorp/vault"
-    tag: "1.18.1"
+    tag: "1.21.2"
   logLevel: info
   logFormat: json
   resources:
@@ -71,6 +58,15 @@ server:
         prometheus_retention_time = "30s"
         disable_hostname = true
       }
+  readinessProbe:
+    enabled: true
+    path: /v1/sys/health?standbyok=true
+    port: 8200
+    failureThreshold: 2
+    nitialDelaySeconds: 5
+    periodSeconds: 5
+    successThreshold: 1
+    timeoutSeconds: 3
   ha:
     enabled: false
   affinity: ""
