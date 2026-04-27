@@ -1,10 +1,17 @@
 > Docs https://cert-manager.io/docs/
 > 
-0. Install cert-manager
+# Install cert-manager
 ```bash
-kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/v1.19.2/cert-manager.yaml
+helm upgrade --install cert-manager oci://quay.io/jetstack/charts/cert-manager \
+  --namespace cert-manager \
+  --create-namespace \
+  --version v1.20.2 \
+  --set crds.enabled=true \
+  --set config.enableGatewayAPI=true
 ```
-1. Create self-signed cluster issure
+
+Create self-signed cluster issure
+
 ```yaml
 apiVersion: cert-manager.io/v1
 kind: ClusterIssuer
@@ -14,7 +21,7 @@ spec:
   selfSigned: {}
 ```
 
-2. Create CA cert
+Create CA cert
 ```yaml
 apiVersion: cert-manager.io/v1
 kind: Certificate
@@ -34,7 +41,7 @@ spec:
     group: cert-manager.io
 ```
 
-3. Create CA Issure
+Create CA Issure
 ```yaml
 apiVersion: cert-manager.io/v1
 kind: Issuer
@@ -46,7 +53,7 @@ spec:
     secretName: root-secret
 ```
 
-4. Create cert
+Create cert
 ```yaml
 apiVersion: cert-manager.io/v1
 kind: Certificate
@@ -61,4 +68,40 @@ spec:
     name: [issuer-name]
     kind: Issuer
     group: cert-manager.io
+```
+
+# Install trust-manager
+
+>[!Note]
+>See the [installation guide](https://cert-manager.io/docs/trust/trust-manager/installation/) for instructions on how to install trust-manager.
+
+
+```bash
+helm repo add jetstack https://charts.jetstack.io --force-update
+```
+
+```bash
+helm upgrade trust-manager jetstack/trust-manager \
+  --install \
+  --namespace cert-manager \
+  --wait
+```
+
+## Create CA bundle with our CA
+
+```yaml
+apiVersion: trust.cert-manager.io/v1alpha1
+kind: Bundle
+metadata:
+  name: trust-ca
+  namespace: cert-manager
+spec:
+  sources:
+  - useDefaultCAs: true
+  - secret:
+      name: ca-secret
+      key: tls.crt
+  target:
+    configMap:
+      key: "trust-bundle.pem"
 ```
