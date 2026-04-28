@@ -4,6 +4,7 @@
 - базовая установка через Ingress: `argocd.yaml`
 - установка с SSO (Dex + OIDC): `argocd-sso.yaml`
 - установка через Gateway API (HTTPRoute): `argocd-gateway-api.yaml`
+- установка через Gateway API + External Secrets Operator + Vault: `argocd-gateway-api-eso.yaml`
 - установка Argo CD Image Updater: `argocd-image-updater.yaml`
 
 ## Что лежит в репозитории
@@ -11,6 +12,7 @@
 - `argocd.yaml` - основная конфигурация Argo CD для домена `argocd.dev.local`
 - `argocd-sso.yaml` - конфигурация с OIDC через Authentik
 - `argocd-gateway-api.yaml` - вариант с `server.httproute` вместо Ingress
+- `argocd-gateway-api-eso.yaml` - вариант с `ExternalSecret` для создания `argocd-secret` из Vault
 - `argocd-image-updater.yaml` - конфигурация image updater с приватными registry
 - `secret-writer.yaml` - Job, который копирует CA из `cert-manager` в secret `argocd/ca-certs`
 - `install-argocd-cli.sh` - установка CLI `argocd`
@@ -69,6 +71,16 @@ helm upgrade --install argocd argo/argo-cd -n argocd -f argocd-gateway-api.yaml 
 
 Перед установкой проверьте, что `parentRefs` в `argocd-gateway-api.yaml` соответствуют вашему Gateway.
 
+## Вариант с Gateway API + ESO + Vault
+
+Если хотите, чтобы `argocd-secret` создавался из Vault через External Secrets Operator, используйте:
+
+```bash
+helm upgrade --install argocd argo/argo-cd -n argocd -f argocd-gateway-api-eso.yaml --create-namespace
+```
+
+Подробная инструкция: [Readme-argocd-eso.md](https://github.com/vladoz77/k8s-applications/blob/main/argocd/Readme-argocd-eso.md)
+
 ## Argo CD Image Updater
 
 1. Создать pull-secrets для registry:
@@ -103,8 +115,6 @@ helm upgrade --install argocd-image-updater argo/argocd-image-updater -n argocd 
 ```bash
 sudo bash ./install-argocd-cli.sh
 ```
-
-
 
 
 

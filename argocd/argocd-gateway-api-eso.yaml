@@ -1,0 +1,139 @@
+nameOverride: argocd
+fullnameOverride: argocd
+
+crds:
+  keep: false
+
+global:
+  domain: argocd.home.local
+  logging:
+    format: json
+    level: info
+
+configs:
+  cm:
+    application.resourceTrackingMethod: annotation
+    controller.diff.server.side: "true"
+  secret:
+    createSecret: false
+
+extraObjects:
+  # The SecretStore and ExternalSecret resources are defined here to ensure they are created before the ArgoCD server starts, allowing it to fetch the necessary secrets from Vault.
+  - apiVersion: external-secrets.io/v1
+    kind: SecretStore
+    metadata:
+      name: argocd-vault-backend
+      namespace: argocd
+    spec:
+      provider:
+        vault:
+          server: "https://vault.vault.svc.cluster.local:8200"
+          path: infra
+          version: v2
+          caProvider:
+            type: ConfigMap
+            name: trust-ca
+            key: trust-bundle.pem
+          auth:
+            kubernetes:
+              mountPath: kubernetes
+              role: argocd-role
+              serviceAccountRef:
+                name: argocd-secrets-sa
+  # The ExternalSecret resource references the SecretStore and defines how to map secrets from Vault into Kubernetes Secrets that ArgoCD can use.
+  - apiVersion: external-secrets.io/v1
+    kind: ExternalSecret
+    metadata:
+      name: argocd-secret
+      namespace: argocd
+    spec:
+      refreshInterval: 1h
+      secretStoreRef:
+        name: argocd-vault-backend
+        kind: SecretStore
+      target:
+        name: argocd-secret
+        creationPolicy: Owner
+        template:
+          type: Opaque
+      data:
+      - secretKey: admin.password
+        remoteRef:
+          key: argocd
+          property: password
+      - secretKey: server.secretkey
+        remoteRef:
+          key: argocd
+          property: secretkey
+      - secretKey: admin.passwordMtime
+        remoteRef:
+          key: argocd
+          property: passwordMtime
+  # The ServiceAccount is created to allow the External Secrets operator to authenticate with Vault using Kubernetes auth method.        
+  - apiVersion: v1
+    kind: ServiceAccount
+    metadata:
+      name: argocd-secrets-sa
+      namespace: argocd
+  
+
+controller:
+  replicas: 1
+  metrics:
+    enabled: true
+    service:
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8082"
+
+server:
+  extraArgs:
+    - --insecure
+  httproute:
+    enabled: true
+    parentRefs:
+    - name: cloud-provider-kind
+      namespace: gateway-infra
+      sectionName: https
+      port: 443
+    hostnames:
+    - argocd.home.local
+  metrics:
+    enabled: true
+    service:
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8083"
+    
+
+repoServer:
+  metrics:
+    enabled: true
+    service:
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8084"
+
+dex:
+  enabled: false
+
+redis:
+  enabled: true
+
+notifications:
+  enabled: true
+  metrics:
+    enabled: true
+    service:
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "9001"
+
+
+applicationSet:
+  metrics:
+    enabled: true
+    service:
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8080"
