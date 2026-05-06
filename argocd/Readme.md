@@ -14,25 +14,31 @@
 - `argocd-gateway-api.yaml` - вариант с `server.httproute` вместо Ingress
 - `argocd-gateway-api-eso.yaml` - вариант с `ExternalSecret` для создания `argocd-secret` из Vault
 - `argocd-image-updater.yaml` - конфигурация image updater с приватными registry
-- `secret-writer.yaml` - Job, который копирует CA из `cert-manager` в secret `argocd/ca-certs`
+- `secret-writer.yaml` - legacy Job для старой схемы, где CA копировался в `Secret`
 - `install-argocd-cli.sh` - установка CLI `argocd`
 
 ## Требования
 
 - Kubernetes-кластер с доступом через `kubectl`
 - Helm 3
-- `jq` и `base64`
-- (опционально) cert-manager для выпуска сертификатов (`ClusterIssuer: ca-issuer`)
+- cert-manager
+- trust-manager
+- ConfigMap `trust-ca` с ключом `trust-bundle.pem` в namespace `argocd`
+- (опционально) `jq` и `base64`, если вы вручную диагностируете сертификаты
 
 ## Быстрый старт (базовая установка)
 
-1. Создать namespace и secret с корневым CA:
+1. Создать namespace и проверить trust bundle:
 
 ```bash
 kubectl create namespace argocd
-kubectl get secret -n cert-manager ca-secret -o json | jq -r '.data["ca.crt"]' | base64 -d > /tmp/ca.crt
-kubectl create secret generic -n argocd ca-certs --from-file=ca.pem=/tmp/ca.crt
+kubectl get configmap trust-ca -n argocd
+kubectl get configmap trust-ca -n argocd -o yaml
 ```
+
+Примечание:
+- `trust-ca` публикуется через `trust-manager`
+- chart'ы в этом репозитории монтируют CA именно из `ConfigMap`, а не из `Secret`
 
 2. Установить Argo CD из Helm chart:
 
@@ -44,11 +50,15 @@ helm upgrade --install argocd argo/argo-cd -n argocd -f argocd.yaml --create-nam
 
 ## Установка с SSO (Dex + Authentik)
 
-1. Подготовить CA для OIDC-провайдера:
+Подробная пошаговая инструкция: `Readme argocd-sso.md`
+
+Коротко:
+
+1. Убедиться, что `trust-manager` уже опубликовал `ConfigMap trust-ca` в namespace `argocd`:
 
 ```bash
-kubectl get secret -n auth authentik-tls -o json | jq -r '.data["ca.crt"]' | base64 -d > /tmp/auth-ca.crt
-kubectl create secret generic -n argocd auth-ca-certs --from-file=auth-ca.pem=/tmp/auth-ca.crt
+kubectl get configmap trust-ca -n argocd
+kubectl get configmap trust-ca -n argocd -o yaml
 ```
 
 2. Установить Argo CD с SSO-конфигом:
@@ -58,8 +68,11 @@ helm upgrade --install argocd argo/argo-cd -n argocd -f argocd-sso.yaml
 ```
 
 Примечание:
-- в `argocd-sso.yaml` заданы `clientID` и `clientSecret`; перед применением замените их на свои значения
+- в `argocd-sso.yaml` нужно заменить `clientID` и `clientSecret` на свои значения
+- локальный пользователь `admin` в SSO-схеме отключен через `admin.enabled: false`
 - для RBAC в OIDC провайдере нужны группы `ArgoCD Admins` и `ArgoCD Viewers`
+- для CLI используйте `argocd login argocd.dev.local --sso --grpc-web`
+- `dex` и `repoServer` берут доверенный CA из `ConfigMap trust-ca`
 
 ## Вариант с Gateway API
 
@@ -115,6 +128,3 @@ helm upgrade --install argocd-image-updater argo/argocd-image-updater -n argocd 
 ```bash
 sudo bash ./install-argocd-cli.sh
 ```
-
-
-

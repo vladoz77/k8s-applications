@@ -107,6 +107,15 @@ server:
     
 
 repoServer:
+  volumes:
+  - name: trust-ca
+    configMap:
+      name: trust-ca
+  volumeMounts:
+  - mountPath: /etc/ssl/certs/ca.pem
+    name: trust-ca
+    subPath: trust-bundle.pem
+    readOnly: true
   metrics:
     enabled: true
     service:
