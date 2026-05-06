@@ -1,9 +1,15 @@
 fullnameOverride: authentik
 
 global:
+  nameOverride: authentik
+  namespaceOverride: auth
+  addPrometheusAnnotations: true
   image:
     repository: ghcr.io/goauthentik/server
     tag: ""
+    pullPolicy: IfNotPresent
+    
+
 
 authentik:
   log_level: info
@@ -16,57 +22,30 @@ authentik:
     password: irjckbsajihmbpjq
     use_ssl: true
     from: authentik@gmail.com
-    
-  postgresql:
-    host: postgresql-svc.db.svc
-    name: authentik-db
-    user: authentik
-    password: password
 
+  postgresql:
+        password: "ThisIsNotASecurePassword"
+
+    
 server:
   replicas: 1
   
-  volumeMounts:
-    - name: media-volume
-      mountPath: /media
-
-  volumes: 
-    - name: media-volume
-      persistentVolumeClaim:
-        claimName: media-folder-pvc
-
   metrics:
     enabled: true
-    service:
-      annotations: {}
-  ingress:
-    enabled: true
-    annotations: 
-      cert-manager.io/cluster-issuer: ca-issuer
-    hosts:
-        - auth.dev.local
-    tls:
-      - secretName: authentik-tls
-        hosts:
-          - auth.dev.local
+  
+  route:
+    main:
+      enabled: true
+      https: true
+      hostnames: 
+      - auth.dev.local
+      parentRefs:
+        - name: envoy-gateway
+          namespace: envoy-gateway-system
+          sectionName: https
+          port: 443
 
 postgresql:
-  enabled: false
-
-redis:
-  enabled: true
-
-additionalObjects: 
-  - apiVersion: v1
-    kind: PersistentVolumeClaim
-    metadata:
-      name: media-folder-pvc
-      namespace: auth
-    spec:
-      accessModes:
-        - ReadWriteOnce
-      volumeMode: Filesystem
-      resources:
-        requests:
-          storage: 8Gi
-      storageClassName: local-path
+    enabled: true
+    auth:
+        password: "ThisIsNotASecurePassword"
