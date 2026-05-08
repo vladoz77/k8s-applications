@@ -17,26 +17,18 @@ configs:
     url: https://argocd.dev.local
     application.resourceTrackingMethod: annotation
     controller.diff.server.side: "true"
-    # Dex configuration
-    dex.config: |
-      connectors:
-      - config:
-          issuer: https://auth.dev.local/application/o/argocd/
-          clientID: EbuwrFxswwoAqmGctCjHelyzRZ8hbKAKEsMYYZyb
-          clientSecret: $dex.authentik.clientSecret
-          insecureEnableGroups: true
-          scopes:
-            - openid
-            - profile
-            - email
-        name: authentik
-        type: oidc
-        id: authentik
+    # OIDC configuration
+    oidc.config: |
+      name: authentik
+      issuer: https://auth.dev.local/application/o/argocd/
+      clientID: EbuwrFxswwoAqmGctCjHelyzRZ8hbKAKEsMYYZyb
+      requestedScopes: ["openid", "profile", "email", "groups"]
+      requestedIDTokenClaims: {"groups": {"essential": true}}
+      enablePKCEAuthentication: true
+      logoutURL: https://auth.dev.local/application/o/argocd/end-session/?id_token_hint={{token}}&post_logout_redirect_uri={{logoutRedirectURL}}
+
   params:
     server.insecure: true
-  secret:
-    extra:
-      dex.authentik.clientSecret: "BFZfElfGxO0lkARPIKlNhYvQ0RHYbnIDQHwM6XtgynR7breEHhcPnaxPa2qEGoLbUbnwxvhFdtt22mhffc3PtyztXgxtuMxZe5nBBexU6Ow2K2aJBWFcUuWNovXkoYlv"
   rbac:
     create: true
     # Need create groups ArgocdAdmins and ArgocdViewers in OIDC Provider
@@ -54,24 +46,18 @@ controller:
         prometheus.io/port: "8082"
 
 dex:
-  image:
-    tag: v2.45.1
+  enabled: false
+
+server:
   volumes:
   - name: trust-ca
     configMap:
       name: trust-ca
   volumeMounts:
-  - mountPath: /etc/ssl/certs/trust-bundle.pem
+  - mountPath: /etc/ssl/certs/ca.pem
     name: trust-ca
     subPath: trust-bundle.pem
     readOnly: true
-  livenessProbe:
-    enabled: true
-    httpPath: /api/dex/.well-known/openid-configuration
-    httpPort: 5556
-    httpScheme: HTTPS
-
-server:
   httproute:
     enabled: true
     parentRefs:
@@ -108,5 +94,6 @@ repoServer:
 
 redis:
   enabled: true
-  image: redis
-  tag: 8.2.3-alpine
+  image: 
+    repository: redis
+    tag: 8.2.3-alpine

@@ -1,0 +1,114 @@
+nameOverride: argocd
+fullnameOverride: argocd
+
+crds:
+  keep: true
+
+global:
+  domain: argocd.dev.local
+  logging:
+    format: json
+    level: info
+
+configs:
+  cm:
+    # Disable admin user and use OIDC groups for RBAC instead
+    admin.enabled: false
+    url: https://argocd.dev.local
+    application.resourceTrackingMethod: annotation
+    controller.diff.server.side: "true"
+    # Dex configuration
+    dex.config: |
+      connectors:
+      - config:
+          issuer: https://auth.dev.local/application/o/argocd/
+          clientID: EbuwrFxswwoAqmGctCjHelyzRZ8hbKAKEsMYYZyb
+          clientSecret: $dex.authentik.clientSecret
+          redirectURI: https://argocd.yourdomain.com/api/dex/callback
+          insecureEnableGroups: true
+          scopes:
+            - openid
+            - profile
+            - email
+        name: authentik
+        type: oidc
+        id: authentik
+  params:
+    server.insecure: true
+  secret:
+    extra:
+      dex.authentik.clientSecret: "BFZfElfGxO0lkARPIKlNhYvQ0RHYbnIDQHwM6XtgynR7breEHhcPnaxPa2qEGoLbUbnwxvhFdtt22mhffc3PtyztXgxtuMxZe5nBBexU6Ow2K2aJBWFcUuWNovXkoYlv"
+  rbac:
+    create: true
+    # Need create groups ArgocdAdmins and ArgocdViewers in OIDC Provider
+    policy.csv: |
+      g, ArgoCD Admins, role:admin
+      g, ArgoCD Viewers, role:readonly
+
+controller:
+  replicas: 1
+  metrics:
+    enabled: true
+    service:
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8082"
+
+dex:
+  image:
+    tag: v2.45.1
+  volumes:
+  - name: trust-ca
+    configMap:
+      name: trust-ca
+  volumeMounts:
+  - mountPath: /etc/ssl/certs/trust-bundle.pem
+    name: trust-ca
+    subPath: trust-bundle.pem
+    readOnly: true
+  livenessProbe:
+    enabled: true
+    httpPath: /api/dex/.well-known/openid-configuration
+    httpPort: 5556
+    httpScheme: HTTPS
+
+server:
+  httproute:
+    enabled: true
+    parentRefs:
+    - name: envoy-gateway
+      namespace: envoy-gateway-system
+      sectionName: https
+      port: 443
+    hostnames:
+    - argocd.dev.local
+  metrics:
+    enabled: true
+    service:
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8083"
+
+repoServer:
+  volumes:
+  - name: trust-ca
+    configMap:
+      name: trust-ca
+  volumeMounts:
+  - mountPath: /etc/ssl/certs/ca.pem
+    name: trust-ca
+    subPath: trust-bundle.pem
+    readOnly: true
+  metrics:
+    enabled: true
+    service:
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8084"
+
+
+redis:
+  enabled: true
+  image: 
+    repository: redis
+    tag: 8.2.3-alpine

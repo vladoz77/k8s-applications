@@ -1,12 +1,17 @@
 # Argo CD + authentik через Helm chart
 
-Инструкция описывает интеграцию `Argo CD` и `authentik` через `Dex`, если Argo CD устанавливается chart'ом `argo/argo-cd`.
+Инструкция описывает интеграцию `Argo CD` и `authentik`, если Argo CD устанавливается chart'ом `argo/argo-cd`.
 
-Почему здесь используется `Dex`, а не `oidc`:
+Основной вариант в этом документе использует `Dex`.
+
+Почему здесь может использоваться `Dex`, а не прямой `oidc`:
 - `Dex` позволяет входить и в Web UI, и через `argocd` CLI
 - при прямой `oidc` конфигурации CLI обычно не работает так удобно
 
-В этом репозитории для сценария SSO используется файл `argocd-sso.yaml`.
+В этом репозитории есть два values-файла для SSO:
+
+- `argocd-sso-dex.yaml` - схема `Argo CD -> Dex -> authentik`
+- `argocd-sso-oidc.yaml` - схема `Argo CD -> authentik` без `Dex`
 
 ## Что получится
 
@@ -121,7 +126,7 @@ http://localhost:8085/auth/callback
 - `Client ID`
 - `Client Secret`
 
-Они понадобятся в `argocd-sso.yaml`.
+Они понадобятся в `argocd-sso-dex.yaml`.
 
 ### Создать Application
 
@@ -202,7 +207,7 @@ spec:
 - RBAC назначается через группы `ArgoCD Admins` и `ArgoCD Viewers`
 - внешний доступ публикуется через `HTTPRoute`
 
-Пример содержимого `argocd-sso.yaml`:
+Пример содержимого `argocd-sso-dex.yaml`:
 
 ```yaml
 nameOverride: argocd
@@ -300,7 +305,7 @@ helm repo update
 helm upgrade --install argocd argo/argo-cd \
   -n argocd \
   --create-namespace \
-  -f argocd-sso.yaml
+  -f argocd-sso-dex.yaml
 ```
 
 ## 6. Проверка
@@ -351,3 +356,131 @@ kubectl logs -n argocd deploy/argocd-dex-server
 kubectl get cm argocd-cm -n argocd -o yaml
 kubectl get secret argocd-secret -n argocd -o yaml
 ```
+
+## 8. Альтернатива: прямой OIDC без Dex
+
+Если `Dex` не нужен, можно подключить `Argo CD` напрямую к `authentik` через `oidc.config`.
+
+Когда этот вариант удобен:
+
+- вы хотите убрать лишний промежуточный слой `Dex`
+- вам нужен корректный `logoutURL` для web login
+- вас устраивает один OIDC client для Web UI и CLI
+
+В этом репозитории для такой схемы используется файл `argocd-sso-oidc.yaml`.
+
+### Настройка authentik для direct OIDC
+
+Для `direct OIDC` с `authentik` рекомендуется использовать один OAuth2/OpenID Provider для Web UI и CLI одновременно.
+
+Проверенный рабочий вариант:
+
+- `Client Type`: `Public`
+- `Redirect URIs`:
+
+```text
+https://argocd.dev.local/auth/callback
+http://localhost:8085/auth/callback
+```
+
+- `Name`: `ArgoCD`
+
+Важно:
+
+- `public` client здесь допустим, потому что `argocd` CLI использует `authorization_code + PKCE`
+- для `public` client рекомендуется включить `PKCE`
+- scopes и mappings для групп настраиваются один раз, так как provider один
+- отдельный `clientSecret` в этой схеме не нужен
+
+После создания сохраните:
+
+- `Client ID`
+
+### Почему здесь не рекомендуются два отдельных provider
+
+На практике схема с двумя provider в `authentik` для `direct OIDC` с `Argo CD` неудобна:
+
+- у разных provider обычно разные `issuer`
+- `Argo CD` в `oidc.config` ожидает один `issuer`
+- даже если включить в `authentik` общий `issuer`, discovery endpoint остаётся provider-specific, из-за чего `Argo CD` может не найти OpenID configuration
+
+Если вам принципиально нужны разные клиенты:
+
+- `confidential` для Web UI
+- `public` для CLI
+
+то для такой схемы проще использовать `Dex`.
+
+### Настройка Argo CD для direct OIDC
+
+Пример содержимого `argocd-sso-oidc.yaml`:
+
+```yaml
+nameOverride: argocd
+fullnameOverride: argocd
+
+crds:
+  keep: true
+
+global:
+  domain: argocd.dev.local
+  logging:
+    format: json
+    level: info
+
+configs:
+  cm:
+    admin.enabled: false
+    url: https://argocd.dev.local
+    application.resourceTrackingMethod: annotation
+    controller.diff.server.side: "true"
+    oidc.config: |
+      name: authentik
+      issuer: https://auth.dev.local/application/o/argocd/
+      clientID: <client-id-from-authentik>
+      requestedScopes: ["openid", "profile", "email", "groups"]
+      requestedIDTokenClaims: {"groups": {"essential": true}}
+      enablePKCEAuthentication: true
+      logoutURL: https://auth.dev.local/application/o/argocd/end-session/?id_token_hint={{token}}&post_logout_redirect_uri={{logoutRedirectURL}}
+  params:
+    server.insecure: true
+  rbac:
+    create: true
+    policy.csv: |
+      g, ArgoCD Admins, role:admin
+      g, ArgoCD Viewers, role:readonly
+
+dex:
+  enabled: false
+```
+
+Что здесь важно:
+
+- `clientID` один и тот же для Web UI и CLI
+- `clientSecret` в этой схеме не используется
+- `enablePKCEAuthentication: true` нужен для безопасного login flow в CLI
+- `logoutURL` использует `end-session` в `authentik` и возвращает пользователя обратно в `Argo CD`
+- `issuer` должен совпадать со значением из OpenID discovery именно этого provider
+
+Установка:
+
+```bash
+helm upgrade --install argocd argo/argo-cd \
+  -n argocd \
+  --create-namespace \
+  -f argocd-sso-oidc.yaml
+```
+
+Проверка:
+
+```bash
+argocd login argocd.dev.local --sso --grpc-web
+```
+
+Если после login CLI вы видите ошибку вида `invalid session: failed to verify the token`, проверьте:
+
+- что используется один provider, а не отдельный provider для CLI
+- что `issuer` в `argocd-cm` совпадает с `issuer` из `/.well-known/openid-configuration`
+- что в provider добавлены оба redirect URI
+
+Если logout должен завершать не только сессию приложения, но и всю сессию пользователя в `authentik`, дополнительно проверьте `default-provider-invalidation-flow` в `authentik` и при необходимости добавьте в него `User Logout stage`.
