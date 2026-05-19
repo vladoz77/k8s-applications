@@ -1,26 +1,7 @@
 # Gateway API + Envoy Gateway
 
-## Шаг 1. Установить CRD Gateway API
 
-```bash
-kubectl apply --server-side=true -f \
-  https://github.com/kubernetes-sigs/gateway-api/releases/download/v1.5.0/standard-install.yaml
-```
-
-Проверка:
-
-```bash
-kubectl get crd | grep gateway.networking.k8s.io
-```
-
-## Шаг 2. Установить CRD Envoy Gateway
-
-```bash
-kubectl apply --server-side=true -f \
-  https://github.com/envoyproxy/gateway/releases/download/v1.7.2/envoy-gateway-crds.yaml
-```
-
-## Шаг 3. Установить Envoy Gateway
+## Установить Envoy Gateway
 
 ```bash
 helm install eg oci://docker.io/envoyproxy/gateway-helm \
@@ -36,7 +17,7 @@ helm install eg oci://docker.io/envoyproxy/gateway-helm \
 kubectl get pods -n envoy-gateway-system
 ```
 
-## Шаг 4. Создать GatewayClass
+## Создать GatewayClass
 
 ```bash
 kubectl apply -f - <<'EOF'
@@ -53,7 +34,7 @@ kubectl get gatewayclass
 
 Ожидаемый класс из этого репозитория: `envoy-gateway-class`.
 
-## Шаг 5. Создать Gateway
+## Создать Gateway
 
 ### Вариант A. Только HTTP
 
@@ -104,8 +85,7 @@ helm upgrade --install cert-manager oci://quay.io/jetstack/charts/cert-manager \
 helm repo add jetstack https://charts.jetstack.io --force-update
 helm upgrade trust-manager jetstack/trust-manager \
   --install \
-  --namespace cert-manager \
-  --wait
+  --namespace cert-manager 
 ```
 
 Установим self-signed CA и ClusterIssuer:

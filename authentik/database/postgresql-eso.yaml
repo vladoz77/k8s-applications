@@ -1,7 +1,14 @@
 apiVersion: v1
+kind: Namespace
+metadata:
+  name: db
+
+---
+apiVersion: v1
 kind: Service
 metadata:
   name: postgresql-svc-headless
+  namespace: db
 spec:
   clusterIP: None
   selector:
@@ -9,11 +16,13 @@ spec:
   ports:
   - port: 5432
     targetPort: psql
+
 ---
 apiVersion: v1
 kind: Service
 metadata:
   name: postgresql-svc
+  namespace: db
 spec:
   type: NodePort
   selector:
@@ -22,31 +31,13 @@ spec:
   - port: 5432
     targetPort: psql
     nodePort: 32543
----
-apiVersion: policy/v1
-kind: PodDisruptionBudget
-metadata:
-  name: postgresql-pdb
-spec:
-  minAvailable: 1
-  selector:
-    matchLabels:
-      app: postgresql-app
----
-apiVersion: v1
-kind: Secret
-metadata:
-  name: pg-secret
-type: Opaque
-stringData:
-  username: "postgres"
-  password: "secret"
-  database: "database"
+
 ---
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   name: postgresql-sts
+  namespace: db
 spec:
   updateStrategy:
     type: RollingUpdate
@@ -78,11 +69,6 @@ spec:
             secretKeyRef:
               name: pg-secret
               key: password
-        - name: POSTGRES_DB
-          valueFrom:
-            secretKeyRef:
-              name: pg-secret
-              key: database
         securityContext:
           runAsNonRoot: true
           runAsUser: 999
@@ -126,3 +112,27 @@ spec:
       resources:
         requests:
           storage: 5Gi
+
+---
+apiVersion: external-secrets.io/v1
+kind: ExternalSecret
+metadata:
+  name: pg-external-secret
+  namespace: db
+spec:
+  refreshInterval: 15m
+  secretStoreRef:
+    name: infra-vault-backend
+    kind: ClusterSecretStore
+  target:
+    name: pg-secret
+    creationPolicy: Owner
+  data:
+  - secretKey: username
+    remoteRef:
+      key: infra/postgres
+      property: username
+  - secretKey: password
+    remoteRef:
+      key: infra/postgres
+      property: password

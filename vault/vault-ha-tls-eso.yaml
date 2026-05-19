@@ -99,7 +99,7 @@ server:
     enabled: true
     size: 10Gi
     mountPath: "/vault/data"
-    storageClass: local-path
+    storageClass: standard
     accessMode: ReadWriteOnce
   ingress:
     enabled: false
