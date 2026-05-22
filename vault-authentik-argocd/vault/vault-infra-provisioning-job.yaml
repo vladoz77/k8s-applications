@@ -1,0 +1,103 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: vault-infra-provisioning
+  namespace: vault
+spec:
+  backoffLimit: 3
+  ttlSecondsAfterFinished: 300
+  template:
+    spec:
+      restartPolicy: OnFailure
+      containers:
+      - name: vault-bootstrap
+        image: hashicorp/vault:1.21.2
+        imagePullPolicy: IfNotPresent
+        env:
+        - name: VAULT_ADDR
+          value: https://vault.vault.svc.cluster.local:8200
+        - name: VAULT_CACERT
+          value: /vault/tls/ca.crt
+        - name: VAULT_TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: vault-root
+              key: token
+        command:
+        - /bin/sh
+        - -ec
+        - |
+          set -e
+
+          echo "Waiting for Vault to be reachable at ${VAULT_ADDR}..."
+          until vault status > /dev/null 2>&1; do
+            sleep 2
+          done
+
+          if ! vault secrets list | grep -q "^infra/"; then
+            echo "Enabling kv-v2 secrets engine at 'infra'..."
+            vault secrets enable -path=infra kv-v2
+          fi
+
+          if ! vault auth list | grep -q "^kubernetes/"; then
+            echo "Enabling kubernetes auth..."
+            vault auth enable kubernetes
+          fi
+
+          echo "Configuring kubernetes auth connection (Local SA mode)..."
+          vault write auth/kubernetes/config \
+            kubernetes_host="https://kubernetes.default.svc:443"
+
+          gen_password() {
+            tr -dc 'a-zA-Z0-9' < /dev/urandom | head -c "$1"
+          }
+
+          if ! vault kv get infra/postgres >/dev/null 2>&1; then
+            vault kv put infra/postgres username=postgres password=$(gen_password 16)
+          fi
+
+          if ! vault kv get infra/authentik/database >/dev/null 2>&1; then
+            vault kv put infra/authentik/database username=authentik password=$(gen_password 16) database=authentik
+          fi
+
+          if ! vault kv get infra/authentik/secret_key >/dev/null 2>&1; then
+            vault kv put infra/authentik/secret_key authentik_secret_key=$(gen_password 60)
+          fi
+
+          if ! vault kv get infra/authentik/bootstrap_password >/dev/null 2>&1; then
+            vault kv put infra/authentik/bootstrap_password authentik_bootstrap_password=$(gen_password 16)
+          fi
+
+          if ! vault kv get infra/authentik/bootstrap_token >/dev/null 2>&1; then
+            vault kv put infra/authentik/bootstrap_token authentik_bootstrap_token=$(gen_password 32)
+          fi
+
+          echo "Writing infra-policy..."
+          vault policy write infra-policy - <<'EOF'
+          path "infra/data/*" { capabilities = ["read"] }
+          path "infra/metadata/*" { capabilities = ["list", "read"] }
+          EOF
+
+          echo "Writing auth role for external-secrets..."
+          vault write auth/kubernetes/role/infra-role \
+            bound_service_account_names=external-secrets \
+            bound_service_account_namespaces=external-secrets \
+            policies=infra-policy \
+            ttl=1h
+
+          echo "Vault provisioning completed successfully!"
+        resources:
+          requests:
+            cpu: 50m
+            memory: 64Mi
+          limits:
+            cpu: 100m
+            memory: 128Mi
+        volumeMounts:
+        - name: vault-tls
+          mountPath: /vault/tls
+          readOnly: true
+      volumes:
+      - name: vault-tls
+        secret:
+          secretName: vault-tls

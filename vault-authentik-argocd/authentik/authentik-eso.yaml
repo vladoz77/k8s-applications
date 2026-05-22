@@ -1,0 +1,91 @@
+fullnameOverride: authentik
+
+global:
+  nameOverride: authentik
+  namespaceOverride: auth
+  addPrometheusAnnotations: true
+  image:
+    repository: ghcr.io/goauthentik/server
+    tag: ""
+    pullPolicy: IfNotPresent
+
+authentik:
+  log_level: info
+  
+  email:
+    host: smtp.gmail.com
+    port: 465
+    username: vladozz23@gmail.com
+    password: irjckbsajihmbpjq
+    use_ssl: true
+    from: authentik@gmail.com
+  postgresql:
+    host:  "postgresql-svc.db.svc.cluster.local"
+    port: 5432
+
+server:
+  replicas: 1
+  envFrom:
+    - secretRef:
+        name: authentik-secrets
+  metrics:
+    enabled: true
+  route:
+    main:
+      enabled: true
+      https: true
+      hostnames: 
+      - auth.dev.local
+      parentRefs:
+        - name: envoy-gateway
+          namespace: envoy-gateway-system
+          sectionName: https
+          port: 443
+
+worker:
+  replicas: 1
+  envFrom:
+    - secretRef:
+        name: authentik-secrets
+
+postgresql:
+    enabled: false
+
+additionalObjects:
+- apiVersion: external-secrets.io/v1
+  kind: ExternalSecret
+  metadata:
+    name: authentik-secrets
+    namespace: auth
+  spec:
+    refreshInterval: 15m
+    secretStoreRef:
+      name: infra-vault-backend
+      kind: ClusterSecretStore
+    target:
+      name: authentik-secrets
+    data:
+      - secretKey: AUTHENTIK_POSTGRESQL__USER
+        remoteRef:
+          key: authentik/database
+          property: username
+      - secretKey: AUTHENTIK_POSTGRESQL__PASSWORD
+        remoteRef:
+          key: authentik/database
+          property: password
+      - secretKey: AUTHENTIK_POSTGRESQL__NAME
+        remoteRef:
+          key: authentik/database
+          property: database
+      - secretKey: AUTHENTIK_SECRET_KEY
+        remoteRef:
+          key: authentik/secret_key
+          property: authentik_secret_key
+      - secretKey: AUTHENTIK_BOOTSTRAP_PASSWORD
+        remoteRef:
+          key: authentik/bootstrap_password
+          property: authentik_bootstrap_password
+      - secretKey: AUTHENTIK_BOOTSTRAP_TOKEN
+        remoteRef:
+          key: authentik/bootstrap_token
+          property: authentik_bootstrap_token

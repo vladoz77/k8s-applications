@@ -1,0 +1,109 @@
+apiVersion: external-secrets.io/v1
+kind: ExternalSecret
+metadata:
+  name: authentik-db-secret
+  namespace: db
+spec:
+  refreshInterval: 15m
+  secretStoreRef:
+    name: infra-vault-backend
+    kind: ClusterSecretStore
+  target:
+    name: authentik-db-secret
+  data:
+  - secretKey: username
+    remoteRef:
+      key: authentik/database
+      property: username
+  - secretKey: password
+    remoteRef:
+      key: authentik/database
+      property: password
+  - secretKey: database
+    remoteRef:
+      key: authentik/database
+      property: database
+
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: pg-authentik-init
+  namespace: db
+spec:
+  template:
+    spec:
+      restartPolicy: OnFailure
+      containers:
+      - name: init-db
+        image: postgres:18.4
+        env:
+        # admin postgres creds
+        - name: PGUSER
+          valueFrom:
+            secretKeyRef:
+              name: pg-secret
+              key: username
+        - name: PGPASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: pg-secret
+              key: password
+        - name: PGDATABASE
+          value: "postgres"
+        - name: PGHOST
+          value: "postgresql-svc.db.svc.cluster.local"
+        # authentik creds
+        - name: AUTHENTIK_DB_USER
+          valueFrom:
+            secretKeyRef:
+              name: authentik-db-secret
+              key: username
+        - name: AUTHENTIK_DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: authentik-db-secret
+              key: password
+        - name: AUTHENTIK_DB_NAME
+          valueFrom:
+            secretKeyRef:
+              name: authentik-db-secret
+              key: database
+        command:
+        - sh
+        - -c
+        - |
+          set -e
+
+          echo "Checking role..."
+
+          ROLE_EXISTS=$(PGPASSWORD="${PGPASSWORD}" \
+          psql -h "${PGHOST}" -U "${PGUSER}" -d "${PGDATABASE}" -tAc \
+          "SELECT 1 FROM pg_roles WHERE rolname='${AUTHENTIK_DB_USER}'")
+
+          if [ "$ROLE_EXISTS" != "1" ]; then
+            echo "Creating role ${AUTHENTIK_DB_USER}"
+
+            PGPASSWORD="${PGPASSWORD}" \
+            psql -h "${PGHOST}" -U "${PGUSER}" -d "${PGDATABASE}" -c \
+            "CREATE ROLE ${AUTHENTIK_DB_USER} LOGIN PASSWORD '${AUTHENTIK_DB_PASSWORD}' CREATEDB;"
+          else
+            echo "Role already exists"
+          fi
+
+
+          echo "Checking database..."
+
+          DB_EXISTS=$(PGPASSWORD="${PGPASSWORD}" \
+          psql -h "${PGHOST}" -U "${PGUSER}" -d "${PGDATABASE}" -tAc \
+          "SELECT 1 FROM pg_database WHERE datname='${AUTHENTIK_DB_NAME}'")
+
+          if [ "$DB_EXISTS" != "1" ]; then
+            echo "Creating database ${AUTHENTIK_DB_NAME}"
+
+            PGPASSWORD="${PGPASSWORD}" \
+            psql -h "${PGHOST}" -U "${PGUSER}" -d "${PGDATABASE}" -c \
+            "CREATE DATABASE ${AUTHENTIK_DB_NAME} OWNER ${AUTHENTIK_DB_USER};"
+          else
+            echo "Database already exists"
+          fi
