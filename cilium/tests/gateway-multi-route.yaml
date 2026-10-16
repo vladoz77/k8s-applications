@@ -1,0 +1,35 @@
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: app1-route
+spec:
+  parentRefs:
+    - name: cilium-gateway
+  hostnames:
+    - "app1.test.local"
+  rules:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /
+      backendRefs:
+        - name: app1-svc
+          port: 80
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: app2-route
+spec:
+  parentRefs:
+    - name: cilium-gateway
+  hostnames:
+    - "app2.test.local"
+  rules:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /
+      backendRefs:
+        - name: app2-svc
+          port: 80

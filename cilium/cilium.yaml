@@ -1,0 +1,45 @@
+# cilium-values.yaml
+namespaceOverride: "cilium-system"  
+
+# IPAM configuration
+ipam:
+  mode: "kubernetes"              
+
+# KubeProxy replacement
+kubeProxyReplacement: true
+
+# Kubernetes API server address (required when kubeProxyReplacement is true)
+k8sServiceHost: "172.10.10.11"        
+k8sServicePort: "6443"
+
+# Operator configuration
+operator:
+  replicas: 2                       
+
+# Configure L2 announcements
+l2announcements:
+  enabled: true
+
+# Enable Gateway API support
+gatewayAPI:
+  enabled: true
+  gatewayClass:
+    create: true
+
+# Resource limits for Cilium agent DaemonSet
+resources:
+  requests:
+    cpu: 100m
+    memory: 512Mi
+  limits:
+    cpu: 500m
+    memory: 1Gi
+
+# Enable Prometheus metrics endpoint
+prometheus:
+  enabled: true
+  serviceMonitor:
+    enabled: false
+
+hubble:
+  enabled: false

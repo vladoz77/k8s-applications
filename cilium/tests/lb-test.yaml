@@ -1,0 +1,40 @@
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: lb-test
+  labels:
+    app.kubernetes.io/name: &name lb-test
+    app.kubernetes.io/version: &version "1.27.5"
+spec:
+  containers:
+    - name: nginx
+      image: nginx:1.27.5
+      ports:
+        - containerPort: 80
+          name: http
+          protocol: TCP
+      resources:
+        requests:
+          cpu: "100m"
+          memory: "64Mi"
+        limits:
+          cpu: "200m"
+          memory: "128Mi"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: lb-test-svc
+  labels:
+    app.kubernetes.io/name: &name lb-test
+    app.kubernetes.io/version: &version "1.27.5"
+spec:
+  type: LoadBalancer
+  selector:
+    app.kubernetes.io/name: *name
+  ports:
+    - port: 80
+      targetPort: http
+      name: http
+      protocol: TCP

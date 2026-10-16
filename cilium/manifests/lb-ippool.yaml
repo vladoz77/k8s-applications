@@ -1,0 +1,8 @@
+apiVersion: cilium.io/v2
+kind: CiliumLoadBalancerIPPool
+metadata:
+  name: main-pool
+spec:
+  blocks:
+    - start: 172.10.10.200
+      stop: 172.10.10.250

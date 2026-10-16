@@ -1,0 +1,118 @@
+---
+# Приложение 1
+apiVersion: v1
+kind: Pod
+metadata:
+  name: app1
+  labels:
+    app.kubernetes.io/name: &name1 app1
+    app.kubernetes.io/version: &version "1.27.5"
+spec:
+  initContainers:
+    - name: init
+      image: busybox:1.37
+      command: ['sh', '-c', 'echo "<h1>App1</h1>" > /html/index.html']
+      volumeMounts:
+        - name: html
+          mountPath: /html
+      resources:
+        requests:
+          cpu: "50m"
+          memory: "32Mi"
+        limits:
+          cpu: "100m"
+          memory: "64Mi"
+  containers:
+    - name: nginx
+      image: nginx:1.27.5
+      ports:
+        - containerPort: 80
+          name: http
+          protocol: TCP
+      volumeMounts:
+        - name: html
+          mountPath: /usr/share/nginx/html
+      resources:
+        requests:
+          cpu: "100m"
+          memory: "64Mi"
+        limits:
+          cpu: "200m"
+          memory: "128Mi"
+  volumes:
+    - name: html
+      emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: app1-svc
+  labels:
+    app.kubernetes.io/name: &name1 app1
+spec:
+  selector:
+    app.kubernetes.io/name: *name1
+  ports:
+    - port: 80
+      targetPort: http
+      name: http
+      protocol: TCP
+---
+# Приложение 2
+apiVersion: v1
+kind: Pod
+metadata:
+  name: app2
+  labels:
+    app.kubernetes.io/name: &name2 app2
+    app.kubernetes.io/version: &version "1.27.5"
+spec:
+  initContainers:
+    - name: init
+      image: busybox:1.37
+      command: ['sh', '-c', 'echo "<h1>App2</h1>" > /html/index.html']
+      volumeMounts:
+        - name: html
+          mountPath: /html
+      resources:
+        requests:
+          cpu: "50m"
+          memory: "32Mi"
+        limits:
+          cpu: "100m"
+          memory: "64Mi"
+  containers:
+    - name: nginx
+      image: nginx:1.27.5
+      ports:
+        - containerPort: 80
+          name: http
+          protocol: TCP
+      volumeMounts:
+        - name: html
+          mountPath: /usr/share/nginx/html
+      resources:
+        requests:
+          cpu: "100m"
+          memory: "64Mi"
+        limits:
+          cpu: "200m"
+          memory: "128Mi"
+  volumes:
+    - name: html
+      emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: app2-svc
+  labels:
+    app.kubernetes.io/name: &name2 app2
+spec:
+  selector:
+    app.kubernetes.io/name: *name2
+  ports:
+    - port: 80
+      targetPort: http
+      name: http
+      protocol: TCP
