@@ -10,6 +10,7 @@
 ## Что лежит в репозитории
 
 - `argocd.yaml` - основная конфигурация Argo CD для домена `argocd.dev.local`
+- `argocd-bootstrap.yaml` - минимальная конфигурация для первоначального запуска Argo CD через `NodePort` `30080`, без Ingress и TLS-сертификата
 - `argocd-sso.yaml` - конфигурация с OIDC через Authentik
 - `argocd-gateway-api.yaml` - вариант с `server.httproute` вместо Ingress
 - `argocd-gateway-api-eso.yaml` - вариант с `ExternalSecret` для создания `argocd-secret` из Vault
@@ -47,6 +48,16 @@ helm repo add argo https://argoproj.github.io/argo-helm
 helm repo update
 helm upgrade --install argocd argo/argo-cd -n argocd -f argocd.yaml --create-namespace
 ```
+
+### Первоначальный запуск через NodePort
+
+Для первоначального запуска Argo CD без Ingress можно использовать `argocd-bootstrap.yaml`. В этой конфигурации сервер доступен через `NodePort` `30080` и запускается с `--insecure`; TLS-сертификат и Ingress не настраиваются.
+
+```bash
+helm upgrade --install argocd argo/argo-cd -n argocd -f argocd-bootstrap.yaml --create-namespace
+```
+
+Используйте этот вариант, если хотите временно получить доступ к Argo CD через `http://<адрес-ноды>:30080`. Для установки с Ingress и TLS используйте основную конфигурацию `argocd.yaml`.
 
 ## Установка с SSO (Dex + Authentik)
 
